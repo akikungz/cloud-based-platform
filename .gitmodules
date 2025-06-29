@@ -1,0 +1,14 @@
+# Backend Submodules Configuration
+[submodule "services/momoi"]
+	path = services/momoi
+	url = git@github.com:akikungz/momoi.git
+
+# Frontend Submodules Configuration
+[submodule "services/midori"]
+	path = services/midori
+	url = git@github.com:akikungz/midori.git
+
+# Consumer Submodules Configuration
+[submodule "services/yuzu"]
+	path = services/yuzu
+	url = git@github.com:akikungz/yuzu.git
