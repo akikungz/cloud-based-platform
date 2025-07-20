@@ -1,0 +1,52 @@
+services:
+  database:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  
+  # memory:
+  #   image: docker.dragonflydb.io/dragonfly/dragonfly:latest
+  #   ulimits:
+  #     memlock: -1
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - memory_data:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  
+  # tracing:
+  #   image: jaegertracing/jaeger:2.8.0
+  #   environment:
+  #     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+  #   ports:
+  #     - "16686:16686"
+  #     - "4317:4317"
+  #     - "4318:4318"
+  #     - "5778:5778"
+  #   volumes:
+  #     - tracing_data:/tmp/jaeger
+  #     - ./config/monitoring/jaeger.yml:/etc/jaeger/config.yaml
+  #   command: ["--config-file=/etc/jaeger/config.yaml"]
+
+volumes:
+  db_data:
+  memory_data:
+  rabbitmq_data:
+  tracing_data:
