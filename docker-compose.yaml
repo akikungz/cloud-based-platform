@@ -9,6 +9,13 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    logging:
+      driver: "loki"
+      options:
+        loki-url: "http://logging:3100/loki/api/v1/push"
+        labels: "service=database,env=${NODE_ENV:-development}"
+    depends_on:
+      - logging
   
   # memory:
   #   image: docker.dragonflydb.io/dragonfly/dragonfly:latest
@@ -30,23 +37,106 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    logging:
+      driver: "loki"
+      options:
+        loki-url: "http://logging:3100/loki/api/v1/push"
+        labels: "service=rabbitmq,env=${NODE_ENV:-development}"
+    depends_on:
+      - logging
   
-  # tracing:
-  #   image: jaegertracing/jaeger:2.8.0
-  #   environment:
-  #     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-  #   ports:
-  #     - "16686:16686"
-  #     - "4317:4317"
-  #     - "4318:4318"
-  #     - "5778:5778"
-  #   volumes:
-  #     - tracing_data:/tmp/jaeger
-  #     - ./config/monitoring/jaeger.yml:/etc/jaeger/config.yaml
-  #   command: ["--config-file=/etc/jaeger/config.yaml"]
+  tracing:
+    image: jaegertracing/jaeger:2.8.0
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+      - "5778:5778"
+    volumes:
+      - ./config/monitoring/jaeger/jaeger.yml:/etc/jaeger/config.yaml
+    logging:
+      driver: "loki"
+      options:
+        loki-url: "http://logging:3100/loki/api/v1/push"
+        labels: "service=tracing,env=${NODE_ENV:-development}"
+    depends_on:
+      - trace_storage
+      - logging
+
+  trace_storage:
+    image: elasticsearch:7.17.28
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - http.host=0.0.0.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - tracing_data:/usr/share/elasticsearch/data
+    logging:
+      driver: "loki"
+      options:
+        loki-url: "http://logging:3100/loki/api/v1/push"
+        labels: "service=trace_storage,env=${NODE_ENV:-development}"
+    depends_on:
+      - logging
+
+  logging:
+    image: grafana/loki:2.8.0
+    environment:
+      - LOKI_PORT=3100
+      - LOKI_HTTP_PORT=3101
+    ports:
+      - "3100:3100"
+      - "3101:3101"
+    volumes:
+      - logging_data:/var/loki
+    logging:
+      driver: "loki"
+      options:
+        loki-url: "http://logging:3100/loki/api/v1/push"
+        labels: "service=logging,env=${NODE_ENV:-development}"
+  
+  metrics:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/monitoring/prometheus/rules:/etc/prometheus/rules
+      - ./config/monitoring/prometheus/alerts:/etc/prometheus/alerts
+      - metrics_data:/prometheus
+    logging:
+      driver: "loki"
+      options:
+        loki-url: "http://logging:3100/loki/api/v1/push"
+        labels: "service=metrics,env=${NODE_ENV:-development}"
+  
+  monitoring:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    ports:
+      - "8080:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    logging:
+      driver: "loki"
+      options:
+        loki-url: "http://logging:3100/loki/api/v1/push"
+        labels: "service=monitoring,env=${NODE_ENV:-development}"
+    depends_on:
+      - logging
+      - tracing
 
 volumes:
   db_data:
   memory_data:
   rabbitmq_data:
   tracing_data:
+  logging_data:
+  metrics_data:
+  grafana_data:

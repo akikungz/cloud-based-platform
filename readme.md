@@ -1,11 +1,13 @@
 # Cluster-Based Platform for Supporting Teaching and Academic Activities in the Department of Information Technology
 
 ## Table of Content
-- Introduction
-- The purpose of the Special Project
-- Scope of the Special Project
-- Tools
-- Expected results
+- [Cluster-Based Platform for Supporting Teaching and Academic Activities in the Department of Information Technology](#cluster-based-platform-for-supporting-teaching-and-academic-activities-in-the-department-of-information-technology)
+  - [Table of Content](#table-of-content)
+  - [Introduction](#introduction)
+  - [The purpose of the Special Project](#the-purpose-of-the-special-project)
+  - [Scope of the Special Project](#scope-of-the-special-project)
+  - [Tools](#tools)
+  - [Expected results](#expected-results)
 
 ## Introduction
 This project is a cluster-based platform designed to support teaching and academic activities in the Department of Information Technology. It aims to provide a robust infrastructure for managing virtual machines, facilitating educational activities, and enhancing the learning experience for students.
@@ -17,7 +19,7 @@ And this project is a part of the Special Project course in the 4th year of the 
 - To develop a Role-Based Access Control (RBAC) web application considering ease of use, system stability and access security
 - To improve the efficiency of using server resources available within the department through the development of a centralized cluster 
 
-# Scope of the Special Project
+## Scope of the Special Project
 - Server Management: The platform will manage virtual machines, allowing users to create, modify, and delete instances as needed.
 - Web Application: A web application will be developed to provide a user-friendly interface for managing virtual machines and accessing educational resources.
 - Reverse Proxy: The platform will include a reverse proxy to manage traffic and enhance security.
@@ -27,7 +29,7 @@ And this project is a part of the Special Project course in the 4th year of the 
 ## Tools
 - Hypervisor: [Proxmox VE](https://www.proxmox.com/en/proxmox-ve)
 - Backend: [Bun](https://bun.sh/) with [ElysiaJS](https://elysiajs.com/)
-- Frontend: [React](https://reactjs.org/) with [Tailwind CSS](https://tailwindcss.com/) and [Material UI](https://mui.com/)
+- Frontend: [ReactJS](https://reactjs.org/) with [Tailwind CSS](https://tailwindcss.com/) and [Material UI](https://mui.com/)
 - Database: [PostgreSQL](https://www.postgresql.org/)
 - Memory Cache: [Dragonfly](https://www.dragonflydb.io/)
 - Message Broker: [RabbitMQ](https://www.rabbitmq.com/)
@@ -42,6 +44,7 @@ And this project is a part of the Special Project course in the 4th year of the 
   - [Drizzle ORM](https://orm.drizzle.team/) for database interactions
   - [Axios](https://axios-http.com/) for HTTP requests
   - [BetterAuth](https://www.better-auth.com/) for authentication (in this case, Google OAuth2)
+  - [NextJS](https://nextjs.org/) for react framework
 
 ## Expected results
 - A practical cluster platform system within the Department of Information Technology
