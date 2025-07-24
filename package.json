@@ -1,0 +1,38 @@
+{
+	"name": "cloud-based-mono",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"devDependencies": {
+		"@biomejs/biome": "2.1.2",
+		"@types/bun": "latest",
+		"@typescript/native-preview": "^7.0.0-dev.20250724.1",
+		"commitizen": "^4.3.1",
+		"commitlint": "^19.8.1",
+		"commitlint-config-gitmoji": "^2.3.1",
+		"cz-customizable": "^7.4.0",
+		"husky": "^9.1.7"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"biome:check": "biome check --write",
+		"biome:format": "biome format --write",
+		"biome:lint": "biome lint --write",
+		"prepare": "bun .husky/install.mjs",
+    "commit": "biome lint && cz"
+	},
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    },
+    "cz-customizable": {
+      "config": "./cz.config.cjs"
+    }
+  }
+}
