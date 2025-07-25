@@ -32,7 +32,6 @@ const envSchema = z.object({
 	}),
 	// RabbitMQ configuration
 	RABBITMQ_URI: z
-		.string()
 		.url({
 			message: "RABBITMQ_URI must be a valid URL",
 		})
