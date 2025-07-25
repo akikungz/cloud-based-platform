@@ -4,9 +4,23 @@
 	"type": "module",
 	"private": true,
 	"devDependencies": {
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"@types/pg": "^8.15.4",
+		"drizzle-kit": "^0.31.4",
+		"tsx": "^4.20.3"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
+	},
+	"dependencies": {
+		"dotenv": "^17.2.0",
+		"drizzle-orm": "^0.44.3",
+		"pg": "^8.16.3"
+	},
+	"scripts": {
+		"db:push": "drizzle-kit push",
+		"db:reset": "drizzle-kit reset",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate"
 	}
 }

@@ -1,5 +1,5 @@
 {
-	"name": "env",
+	"name": "utils",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,

@@ -6,7 +6,6 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",
 		"@types/bun": "latest",
-		"@typescript/native-preview": "^7.0.0-dev.20250724.1",
 		"commitizen": "^4.3.1",
 		"commitlint": "^19.8.1",
 		"commitlint-config-gitmoji": "^2.3.1",
@@ -21,18 +20,27 @@
 		"packages/*"
 	],
 	"scripts": {
-		"biome:check": "biome check --write",
-		"biome:format": "biome format --write",
-		"biome:lint": "biome lint --write",
+		"biome:check": "biome check",
+		"biome:check:w": "biome check --write",
+		"biome:format": "biome format",
+		"biome:format:w": "biome format --write",
+		"biome:lint": "biome lint",
+		"biome:lint:w": "biome lint --write",
 		"prepare": "bun .husky/install.mjs",
-    "commit": "biome lint && cz"
+		"commit": "biome lint && cz"
 	},
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-customizable"
-    },
-    "cz-customizable": {
-      "config": "./cz.config.cjs"
-    }
-  }
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-customizable"
+		},
+		"cz-customizable": {
+			"config": "./cz.config.cjs"
+		}
+	},
+	"dependencies": {
+		"@emotion/react": "^11.14.0",
+		"@emotion/styled": "^11.14.1",
+		"@mui/icons-material": "^7.2.0",
+		"@mui/material": "^7.2.0"
+	}
 }

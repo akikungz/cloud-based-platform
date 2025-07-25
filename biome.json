@@ -6,7 +6,11 @@
 		"useIgnoreFile": false
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": false,
+		"includes": [
+			"./apps/**/src/**/*.{ts,tsx,js,jsx}",
+			"./packages/**/src/**/*.{ts,tsx,js,jsx}"
+		]
 	},
 	"formatter": {
 		"enabled": true,

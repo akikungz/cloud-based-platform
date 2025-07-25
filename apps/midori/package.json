@@ -6,19 +6,24 @@
 		"dev": "next dev --turbopack",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+    "dts": "sh -c '(echo \"/** biome-ignore-all lint/complexity/noBannedTypes: type definition file requires complex types */\" && echo \"/** biome-ignore-all lint/style/useImportType: type definition file requires runtime imports */\" && curl -s \"$API_URL/server.d.ts\") > ./src/types/server.d.ts'"
 	},
 	"dependencies": {
+		"@elysiajs/eden": "^1.3.2",
+		"motion": "^12.23.6",
+		"next": "15.4.3",
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
-		"next": "15.4.3"
+		"zod": "^4.0.8"
 	},
 	"devDependencies": {
-		"typescript": "^5",
+		"@tailwindcss/postcss": "^4",
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
-		"@tailwindcss/postcss": "^4",
-		"tailwindcss": "^4"
+		"elysia": "^1.3.5",
+		"tailwindcss": "^4",
+		"typescript": "^5"
 	}
 }
