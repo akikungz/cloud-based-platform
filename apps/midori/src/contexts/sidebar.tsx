@@ -14,8 +14,11 @@ export const SidebarContext = createContext<ISidebarContext>({
 export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const [isOpen, setIsOpen] = useState<boolean>(false);
-	const toggleSidebar = () => setIsOpen((prev) => !prev);
+	const [isOpen, setIsOpen] = useState(false);
+
+	const toggleSidebar = () => {
+		setIsOpen((prev) => !prev);
+	};
 
 	return (
 		<SidebarContext.Provider value={{ isOpen, toggleSidebar }}>
@@ -23,3 +26,5 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
 		</SidebarContext.Provider>
 	);
 };
+
+export default SidebarProvider;

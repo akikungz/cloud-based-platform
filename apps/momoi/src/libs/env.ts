@@ -13,7 +13,6 @@ const envSchema = z.object({
 		.default("info"),
 	// OpenTelemetry Collector URL
 	OTEL_COLLECTOR_URL: z
-		.string()
 		.url({
 			message: "OTEL_COLLECTOR_URL must be a valid URL",
 		})
@@ -68,9 +67,9 @@ const envSchema = z.object({
 	}, z.number().int().positive().default(3000)),
 
 	// Base URL for the backend and frontend
-	BACKEND_API_URL: z
+	API_URL: z
 		.url({
-			message: "BACKEND_API_URL must be a valid URL",
+			message: "API_URL must be a valid URL",
 		})
 		.default("http://localhost:3000"),
 	FRONTEND_BASE_URL: z

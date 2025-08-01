@@ -1,25 +1,31 @@
 "use client";
 
 import { AnimatedGridPattern } from "@midori/components/magicui/animated-grid-pattern";
-import { auth } from "@midori/libs/auth";
-import { env } from "@midori/libs/env";
+import { authClient } from "@midori/libs/auth";
+// import { env } from "@midori/libs/env";
 import { cn } from "@midori/utils/format";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function SignIn() {
-	const handleSignIn = () => {
-		auth.signIn.social({
+	const handleSignIn = async () => {
+		const signin = await authClient.signIn.social({
 			provider: "google",
-			callbackURL: env.FRONTEND_BASE_URL,
+			callbackURL: "/dashboard",
 		});
-	};
 
+		console.log("Sign-in response:", signin);
+
+		if (signin.error) {
+			console.error("Sign-in error:", signin.error);
+			return;
+		}
+	};
 	return (
-		<div className="w-full h-full flex items-center justify-center relative p-4">
+		<div className="w-full min-h-dvh flex items-center justify-center relative p-4">
 			<AnimatedGridPattern className="bg-black/10 absolute w-full h-full -z-10" />
 
-			<div className="bg-fitm-200/80 p-8 rounded-lg shadow-lg max-w-lg w-full">
+			<div className="bg-vm-blue-400/60 p-8 rounded-lg shadow-lg max-w-lg w-full">
 				<Image
 					src="/icon.png"
 					alt="Midori Logo"
@@ -33,7 +39,7 @@ export default function SignIn() {
 					className={cn(
 						"w-full px-4 py-2 bg-white text-black border-2 border-white transition-all",
 						"flex items-center justify-between rounded-full cursor-pointer",
-						"hover:border-kmutnb-500 focus:outline-none focus:ring-2 focus:ring-kmutnb-500",
+						"hover:border-kmutnb-500 focus:outline-none",
 					)}
 					onClick={handleSignIn}
 				>
@@ -46,7 +52,8 @@ export default function SignIn() {
 						className="mr-2"
 					/>
 					<span className="font-semibold">
-						Sign In with Google (@email.kmutnb.ac.th)
+						Sign In with Google
+						<span className="hidden sm:inline"> (@email.kmutnb.ac.th)</span>
 					</span>
 					<div />
 				</button>

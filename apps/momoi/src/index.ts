@@ -1,5 +1,6 @@
+import { cors } from "@elysiajs/cors";
 import { opentelemetry } from "@elysiajs/opentelemetry";
-import swagger from "@elysiajs/swagger";
+import { swagger } from "@elysiajs/swagger";
 import { api } from "@momoi/api";
 import { env } from "@momoi/libs/env";
 import { OpenAPI } from "@momoi/modules/auth";
@@ -29,12 +30,21 @@ export const app = new Elysia()
 			path: "/docs",
 		}),
 	)
-	.use(dts("./src/index.ts"))
+	.use(
+		cors({
+			origin: env.TRUSTED_ORIGINS,
+			methods: ["GET", "POST", "PUT", "DELETE"],
+			credentials: true,
+			allowedHeaders: ["Content-Type", "Authorization"],
+		}),
+	)
 	.get("/", () => redirect(env.FRONTEND_BASE_URL), {
 		detail: {
 			description: "Redirect to frontend base URL",
 		},
 	})
 	.use(api);
+
+env.NODE_ENV === "development" && app.use(dts("./src/index.ts"));
 
 export type App = typeof app;

@@ -1,5 +1,12 @@
-"use server";
-import { env } from "@midori/libs/env";
-import { authClient } from "auth";
+"use client";
+// import { env } from "@midori/libs/env";
+import { customSession } from "auth/client";
+import { createAuthClient } from "better-auth/react";
 
-export const auth = authClient(`${env.API_URL}/api/auth`);
+export const authClient = createAuthClient({
+	// baseURL: `${env.API_URL}/api/auth`,
+	// baseURL: "http://localhost:3000/api/auth",
+	plugins: [customSession],
+});
+
+export const { useSession } = authClient;

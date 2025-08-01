@@ -1,0 +1,63 @@
+FROM oven/bun:1 AS base
+WORKDIR /app
+
+# Copy package files for dependency resolution
+COPY package.json bun.lock ./
+COPY apps/momoi/package.json ./apps/momoi/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/db/package.json ./packages/db/
+COPY packages/utils/package.json ./packages/utils/
+
+# Copy source code
+COPY . .
+
+# Install dependencies
+RUN bun install --frozen-lockfile
+
+# Build the app
+RUN cd apps/momoi && bun run build:exec
+
+# Production stage
+FROM gcr.io/distroless/static-debian12 AS production
+WORKDIR /app
+
+# Copy built application
+COPY --from=base /app/apps/momoi/build ./build
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV LOG_LEVEL=info
+ENV BACKEND_PORT=3000
+
+ARG OTEL_COLLECTOR_URL
+ENV OTEL_COLLECTOR_URL=${OTEL_COLLECTOR_URL}
+
+ENV OTEL_BACKEND_SERVICE_NAME=momoi
+
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
+ARG RABBITMQ_URI
+ENV RABBITMQ_URI=${RABBITMQ_URI}
+
+ARG RABBITMQ_QUEUE_NAME
+ENV RABBITMQ_QUEUE_NAME=${RABBITMQ_QUEUE_NAME}
+
+ARG TRUSTED_ORIGINS
+ENV TRUSTED_ORIGINS=${TRUSTED_ORIGINS}
+
+ARG GOOGLE_CLIENT_ID
+ENV GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+
+ARG GOOGLE_CLIENT_SECRET
+ENV GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+
+ARG FRONTEND_BASE_URL
+ENV FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+
+ARG API_URL
+ENV API_URL=${API_URL}
+
+EXPOSE 3000
+
+ENTRYPOINT ["./build/runner"]

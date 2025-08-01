@@ -2,10 +2,19 @@ import { record } from "@elysiajs/opentelemetry";
 import { env } from "@momoi/libs/env";
 import { auth as Auth } from "auth";
 import { Elysia } from "elysia";
+import { pick } from "utils";
 
 export const auth = Auth({
-	...env,
-	baseURL: env.BACKEND_API_URL,
+	...pick(env, [
+		"TRUSTED_ORIGINS",
+		"API_URL",
+		"FRONTEND_BASE_URL",
+		"GOOGLE_CLIENT_ID",
+		"GOOGLE_CLIENT_SECRET",
+		"LOG_LEVEL",
+		"DATABASE_URL",
+	]),
+	baseURL: env.API_URL,
 	basePath: "/auth",
 });
 
@@ -17,10 +26,7 @@ export const authModule = new Elysia({ name: "Auth Module" }).macro({
 			);
 
 			if (!session) return status(401, { message: "Unauthorized" });
-
-			return {
-				user: session.user,
-			};
+			return { user: session.user };
 		},
 	},
 });
@@ -51,4 +57,4 @@ export const OpenAPI = {
 		}) as Promise<any>,
 	// biome-ignore lint/suspicious/noExplicitAny: <any>
 	components: getSchema().then(({ components }) => components) as Promise<any>,
-} as const;
+};

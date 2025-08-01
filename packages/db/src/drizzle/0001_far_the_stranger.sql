@@ -1,0 +1,4 @@
+ALTER TABLE "instance_course" ALTER COLUMN "course_staff" DROP NOT NULL;--> statement-breakpoint
+ALTER TABLE "instance" ADD CONSTRAINT "instance_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "instance_course" ADD CONSTRAINT "instance_course_course_staff_staff_list_id_fk" FOREIGN KEY ("course_staff") REFERENCES "public"."staff_list"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "instance_request" ADD CONSTRAINT "instance_request_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;

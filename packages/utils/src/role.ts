@@ -1,11 +1,15 @@
-export type Role = "admin" | "student" | "external";
+export enum Role {
+	Staff = "Staff",
+	Student = "Student",
+	External = "External",
+}
 
 export const getRoleFromEmail = (email: string): Role => {
 	if (email.match(/^[\w-.]+@(itm|fitm).kmutnb\.ac\.th$/)) {
-		return "admin";
+		return Role.Staff;
 	} else if (email.match(/^s\d{2}0602\d{7}@email\.kmutnb\.ac\.th$/)) {
-		return "student";
+		return Role.Student;
 	} else {
-		return "external";
+		return Role.External;
 	}
 };

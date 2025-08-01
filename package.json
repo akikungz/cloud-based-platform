@@ -27,7 +27,9 @@
 		"biome:lint": "biome lint",
 		"biome:lint:w": "biome lint --write",
 		"prepare": "bun .husky/install.mjs",
-		"commit": "biome lint && cz"
+		"commit": "biome lint && cz",
+    "docker:build:momoi": "docker build -t cloud-based-mono:momoi -f ./docker/Dockerfile.momoi .",
+    "docker:build:midori": "docker build -t cloud-based-mono:midori -f ./docker/Dockerfile.midori ."
 	},
 	"config": {
 		"commitizen": {
@@ -36,11 +38,5 @@
 		"cz-customizable": {
 			"config": "./cz.config.cjs"
 		}
-	},
-	"dependencies": {
-		"@emotion/react": "^11.14.0",
-		"@emotion/styled": "^11.14.1",
-		"@mui/icons-material": "^7.2.0",
-		"@mui/material": "^7.2.0"
 	}
 }
