@@ -18,6 +18,7 @@ export const ThemeProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [isDarkMode, setIsDarkMode] = useState(false);
 	const toggleDarkMode = () => {
 		setIsDarkMode((prev) => !prev);
+		document.getElementById("root")?.classList.toggle("dark", !isDarkMode);
 	};
 
 	return (

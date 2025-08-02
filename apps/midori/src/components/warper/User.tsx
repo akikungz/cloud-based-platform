@@ -1,7 +1,7 @@
 "use client";
 import { SidebarProvider } from "@midori/contexts/sidebar";
 import { UserContext, UserProvider } from "@midori/contexts/user";
-import { useSession } from "@midori/libs/auth";
+import { authClient, useSession } from "@midori/libs/auth";
 import type { PropsWithChildren } from "@midori/types/props";
 import { redirect } from "next/navigation";
 import { useContext, useEffect } from "react";
@@ -24,6 +24,13 @@ const UserQuery: React.FC<PropsWithChildren> = ({ children }) => {
 	const { data: session, isPending, error } = useSession();
 
 	useEffect(() => {
+		const handleSignIn = () => {
+			authClient.signIn.social({
+				provider: "google",
+				callbackURL: "/dashboard",
+			});
+		};
+
 		if (isPending) {
 			console.log("Loading session...");
 			userContext.setIsPending(true);
@@ -35,12 +42,12 @@ const UserQuery: React.FC<PropsWithChildren> = ({ children }) => {
 				alert(
 					"An error occurred while fetching session. Please try again later.",
 				);
-				redirect("/sign-in");
+				return redirect("/sign-in");
 			}
 
 			if (!session) {
 				console.warn("No session found, redirecting to sign-in page.");
-				redirect("/sign-in");
+				return redirect("/sign-in");
 			}
 
 			if (session && !userContext.user) {
@@ -48,7 +55,8 @@ const UserQuery: React.FC<PropsWithChildren> = ({ children }) => {
 					alert(
 						"You are not authorized to access this platform. Please contact support.",
 					);
-					redirect("/sign-in");
+					authClient.signOut();
+					return redirect("/sign-in");
 				}
 
 				userContext.setUser(session.user);

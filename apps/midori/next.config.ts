@@ -6,10 +6,15 @@ const nextConfig: NextConfig = {
   output: "standalone",
   rewrites: async () => [
     {
+      source: "/docs/:path*",
+      destination: `${env.BACKEND_URL}/docs/:path*`,
+    },
+    {
       source: "/api/:path*",
-      destination: `${env.API_URL}/api/:path*`
-    }
-  ]
+      destination: `${env.BACKEND_URL}/api/:path*`
+    },
+  ],
+  // allowedDevOrigins: [env.API_URL, env.FRONTEND_BASE_URL],
 };
 
 export default nextConfig;

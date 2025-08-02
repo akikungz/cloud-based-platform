@@ -1,10 +1,15 @@
+"use client";
+import { UserContext } from "@midori/contexts/user";
+import StaffDashboard from "@midori/pages/staff/Dashboard";
+import StudentDashboard from "@midori/pages/student/Dashboard";
+import { useContext } from "react";
+
 export const Dashboard: React.FC = () => {
-	return (
-		<div className="p-4">
-			<h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-			<p>Welcome to the dashboard!</p>
-		</div>
-	);
+	const { user } = useContext(UserContext);
+
+	if (!user) return null;
+
+	return user.role === "Staff" ? <StaffDashboard /> : <StudentDashboard />;
 };
 
 export default Dashboard;

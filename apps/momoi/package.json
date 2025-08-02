@@ -4,9 +4,9 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "bun run --watch src/runner.ts",
-    "build": "bun build src/runner.ts --outdir=build --target=bun --splitting",
-    "build:exec": "bun build src/runner.ts --compile --target=bun-linux-x64-modern --outfile=build/runner",
-    "start": "bun run build/runner.js"
+		"build": "bun build src/runner.ts --outdir=build --target=bun --splitting",
+		"build:exec": "bun build src/runner.ts --compile --target=bun-linux-x64-modern --outfile=build/runner",
+		"start": "bun run build/runner.js"
 	},
 	"dependencies": {
 		"@elysiajs/cors": "^1.3.3",
@@ -14,7 +14,7 @@
 		"@elysiajs/swagger": "^1.3.1",
 		"elysia": "latest",
 		"elysia-remote-dts": "^1.0.3",
-		"zod": "^4.0.8"
+		"zod": "^4.0.14"
 	},
 	"devDependencies": {
 		"@elysiajs/eden": "^1.3.2",

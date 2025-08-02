@@ -114,6 +114,14 @@ export const auth = (env: AuthEnv) =>
         return data;
 			}),
 		],
+		onAPIError: {
+			throw: true,
+			onError: (error) => {
+				console.error("API Error:", error);
+				throw error;
+			},
+			errorURL: `${env.FRONTEND_BASE_URL}/sign-in?error=true`,
+		},
 	});
 
 export type Auth = ReturnType<typeof auth>;

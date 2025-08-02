@@ -6,8 +6,12 @@ import { authClient } from "@midori/libs/auth";
 import { cn } from "@midori/utils/format";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function SignIn() {
+	const searchParams = useSearchParams();
+
 	const handleSignIn = async () => {
 		const signin = await authClient.signIn.social({
 			provider: "google",
@@ -21,6 +25,16 @@ export default function SignIn() {
 			return;
 		}
 	};
+
+	useEffect(() => {
+		if (searchParams) {
+			const error = searchParams.get("error");
+			if (error) {
+				alert("An error occurred during sign-in. Please try again.");
+			}
+		}
+	}, [searchParams]);
+
 	return (
 		<div className="w-full min-h-dvh flex items-center justify-center relative p-4">
 			<AnimatedGridPattern className="bg-black/10 absolute w-full h-full -z-10" />

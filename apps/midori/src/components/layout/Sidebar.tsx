@@ -1,16 +1,19 @@
 "use client";
 import { SidebarContext } from "@midori/contexts/sidebar";
 import { UserContext } from "@midori/contexts/user";
+import { authClient } from "@midori/libs/auth";
 import { cn } from "@midori/utils/format";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import BookIcon from "@mui/icons-material/Book";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
+import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import StorageIcon from "@mui/icons-material/Storage";
 import { Server } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useContext } from "react";
 import { Role } from "utils";
 
@@ -79,16 +82,9 @@ const ClientMenu: Record<
 export const Sidebar: React.FC = () => {
 	const { isOpen } = useContext(SidebarContext);
 	const { user, isPending } = useContext(UserContext);
-	const router = useRouter();
-
-	const handleNavigation = (path: string) => {
-		router.push(path);
-	};
 
 	if (isPending) return null;
-	if (!user) {
-		redirect("/sign-in");
-	}
+	if (!user) return redirect("/sign-in");
 
 	return (
 		<aside
@@ -122,7 +118,7 @@ export const Sidebar: React.FC = () => {
 			</div>
 
 			{/* Menu Items */}
-			<nav className="my-4 flex-1 px-2 space-y-2 overflow-y-auto">
+			<nav className="my-4 flex-1 px-2 overflow-y-auto flex flex-col gap-1">
 				{Object.entries(ClientMenu)
 					.filter(([role]) => user.role === role)
 					.flatMap(([, items]) => items)
@@ -132,14 +128,31 @@ export const Sidebar: React.FC = () => {
 							href={item.href}
 							label={item.label}
 							icon={item.icon}
-							handleClick={handleNavigation}
 						/>
 					))}
 			</nav>
 
 			{/* Footer */}
-			<div className="p-4 border-t border-vm-blue-200">
-				<p className="text-xs text-vm-blue-600">
+			<div className="p-2 border-t border-vm-blue-200 flex flex-col gap-2">
+				<button
+					type="button"
+					className={
+						cn(
+							"w-full flex items-center gap-4 px-4 py-2.5",
+							"text-left transition-colors duration-200 cursor-pointer",
+							"hover:bg-vm-orange-100 hover:text-vm-orange-900",
+							"text-vm-blue-700 rounded-lg",
+						)
+					}
+					onClick={() => {
+						authClient.signOut();
+						redirect("/");
+					}}
+				>
+					<LogoutIcon className="w-5 h-5" />
+					<span>Sign Out</span>
+				</button>
+				<p className="text-xs text-vm-blue-600 p-2">
 					This platform is for educational purposes only. Unauthorized use is
 					prohibited.
 				</p>
@@ -153,37 +166,32 @@ interface MenuItemProps {
 	label: string;
 	icon?: React.ReactNode;
 	disabled?: boolean;
-	handleClick?: (path: string) => void;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
 	href,
 	label,
 	icon,
-	handleClick,
 	disabled,
 }) => {
 	const active = href === window.location.pathname;
 
 	return (
-		<button
-			type="button"
-			className={cn(
-				"w-full flex items-center space-x-4 px-4 py-2.5 rounded-lg text-left transition-all duration-200 cursor-pointer",
-				active
-					? "bg-gradient-primary text-white shadow-medium"
-					: "text-vm-blue-700 hover:bg-vm-blue-100 hover:text-vm-blue-900",
-			)}
-			onClick={() => {
-				if (handleClick) {
-					handleClick(href);
-				}
-			}}
-			disabled={disabled}
-		>
-			{icon && <>{icon}</>}
-			<span className="text-sm font-medium">{label}</span>
-		</button>
+		<Link href={href} passHref>
+			<button
+				type="button"
+				className={cn(
+					"w-full flex items-center space-x-4 px-4 py-2.5 rounded-lg text-left transition-all duration-200 cursor-pointer",
+					active
+						? "bg-gradient-primary text-white shadow-medium"
+						: "text-vm-blue-700 hover:bg-vm-blue-100 hover:text-vm-blue-900",
+				)}
+				disabled={disabled}
+			>
+				{icon && <>{icon}</>}
+				<span className="text-sm font-medium">{label}</span>
+			</button>
+		</Link>
 	);
 };
 

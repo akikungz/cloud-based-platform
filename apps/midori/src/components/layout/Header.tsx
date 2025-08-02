@@ -23,9 +23,7 @@ export const Header: React.FC = () => {
 	};
 
 	if (isPending) return null;
-	if (!user) {
-		redirect("/sign-in");
-	}
+	if (!user) return redirect("/sign-in");
 
 	return (
 		<header className="h-16 bg-white border-b border-vm-blue-200 flex items-center justify-between px-4 shadow-soft sticky top-0 z-30">
@@ -41,30 +39,6 @@ export const Header: React.FC = () => {
 			</div>
 
 			<div className="flex items-center space-x-2">
-				{user.role === Role.Staff && (
-					<Link href="/vm/create" passHref>
-						<button
-							type="button"
-							className="p-2 bg-gradient-secondary text-white rounded-full shadow-md hover:bg-gradient-secondary-dark transition-colors flex items-center sm:space-x-2 hover:cursor-pointer"
-						>
-							<AddIcon className="w-5 h-5" />
-							<span className="hidden sm:inline mr-1">Create VM</span>
-						</button>
-					</Link>
-				)}
-
-				{user.role === Role.Student && (
-					<Link href="/vm/request" passHref>
-						<button
-							type="button"
-							className="p-2 bg-gradient-primary text-white rounded-full shadow-md hover:bg-gradient-primary-dark transition-colors flex items-center sm:space-x-2 hover:cursor-pointer"
-						>
-							<AddIcon className="w-5 h-5" />
-							<span className="hidden sm:inline mr-1">Request VM</span>
-						</button>
-					</Link>
-				)}
-
 				<button
 					type="button"
 					className="p-2 rounded hover:bg-vm-blue-100 transition-colors"

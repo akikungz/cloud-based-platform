@@ -1,12 +1,12 @@
 "use client";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Button, Chip } from "@mui/material";
-import { Server, Shield, Users } from "lucide-react";
+import { GraduationCap, Server, Shield, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
 	return (
-		<div className="min-h-screen bg-gradient-accent">
+		<div className="min-h-screen bg-gradient-accent flex flex-col">
 			{/* Hero Section */}
 			<div className="relative overflow-hidden">
 				<div className="absolute inset-0 bg-gradient-primary opacity-5"></div>
@@ -25,7 +25,7 @@ export default function Home() {
 							</p>
 						</div>
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 max-w-xl lg:max-w-2xl">
+						<div className="grid grid-cols-1 gap-2 mb-4 max-w-xl lg:max-w-2xl">
 							<a
 								href="https://www.kmutnb.ac.th"
 								target="_blank"
@@ -132,8 +132,39 @@ export default function Home() {
 				</div>
 			</div>
 
+			{/* Services Section */}
+			<div className="py-8 bg-vm-blue-50/50">
+				<div className="max-w-7xl mx-auto px-6">
+					<h2 className="text-3xl font-bold text-vm-blue-900 text-center mb-12">
+						Our Services
+					</h2>
+					<div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+						<div className="text-center">
+							<GraduationCap className="w-12 h-12 text-vm-blue-600 mx-auto mb-4" />
+							<h3 className="text-lg font-semibold text-vm-blue-900 mb-2">
+								Educational Support
+							</h3>
+							<p className="text-vm-blue-600">
+								Providing virtual machines for academic projects and research
+							</p>
+						</div>
+						<div className="text-center">
+							<Server className="w-12 h-12 text-vm-blue-600 mx-auto mb-4" />
+							<h3 className="text-lg font-semibold text-vm-blue-900 mb-2">
+								Resource Management
+							</h3>
+							<p className="text-vm-blue-600">
+								Efficient management of virtual resources for students and teachers
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div className="flex-1" />
+
 			{/* Footer */}
-			<footer className="py-6 bg-vm-blue-50/50">
+			<footer className="py-6 bg-vm-blue-50/50 w-full">
 				<div className="max-w-7xl mx-auto px-6">
 					<p className="text-center text-sm text-gray-600">
 						This platform is for educational purposes only. Unauthorized use is

@@ -8,7 +8,7 @@ import { cn } from "@midori/utils/format";
 export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<UserWarper>
-			<div className="min-h-dvh bg-gradient-accent">
+			<div className="min-h-dvh bg-gradient-accent dark:bg-gradient-accent-dark transition-all duration-300">
 				{/* Sidebar */}
 				<Sidebar />
 
