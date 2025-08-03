@@ -74,7 +74,10 @@ export type InstanceCourse = {
   id: string;
   course_id: string;
   course_title: string;
-  course_staff: Staff["id"];
+  main_staff: Staff["id"];
+  assistant_staff_1: Staff["id"] | null;
+  assistant_staff_2: Staff["id"] | null;
+  assistant_staff_3: Staff["id"] | null;
   created_at: Date;
   updated_at: Date;
 }
