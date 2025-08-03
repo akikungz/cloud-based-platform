@@ -1,6 +1,6 @@
 {
-  "id": "2cb6054d-26eb-45b0-8c52-86d57b01991b",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "9e6dc956-04c9-4595-8f6a-bbcf959faaae",
+  "prevId": "1af76cca-b7d6-42a7-8164-db35f9329d52",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -670,6 +670,18 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -728,7 +740,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "instance_id": {
           "name": "instance_id",
@@ -761,6 +774,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},

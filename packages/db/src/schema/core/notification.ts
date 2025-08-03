@@ -1,4 +1,12 @@
-import { boolean, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import {
+	boolean,
+	pgEnum,
+	pgTable,
+	text,
+	timestamp,
+	uuid,
+} from "drizzle-orm/pg-core";
 import { user } from "../auth/better_auth";
 
 export const notification_type = pgEnum("notification_type", [
@@ -8,7 +16,7 @@ export const notification_type = pgEnum("notification_type", [
 ]);
 
 export const notification = pgTable("notification", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	user_id: text("user_id")
 		.references(() => user.id, { onDelete: "cascade" })
 		.notNull(),
@@ -16,11 +24,7 @@ export const notification = pgTable("notification", {
 	message: text("message").notNull(),
 	type: notification_type("type").notNull(),
 	readed: boolean("readed").notNull(),
-	read_at: timestamp("read_at"),
-	created_at: timestamp("created_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
-		.notNull(),
-	updated_at: timestamp("updated_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
-		.notNull(),
+	created_at: timestamp("created_at").default(sql`now()`).notNull(),
+	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
+	deleted_at: timestamp("deleted_at"),
 });

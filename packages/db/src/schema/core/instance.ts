@@ -1,4 +1,12 @@
-import { integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import {
+	integer,
+	pgEnum,
+	pgTable,
+	text,
+	timestamp,
+	uuid,
+} from "drizzle-orm/pg-core";
 import { staff_list } from "../auth";
 import { user } from "../auth/better_auth";
 import { samester } from "./samester";
@@ -37,55 +45,57 @@ export const node_status = pgEnum("node_status", [
 ]);
 
 export const pve_node = pgTable("pve_node", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	name: text("name").notNull(),
 	status: node_status("status").notNull(),
-	created_at: timestamp("created_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
-		.notNull(),
-	updated_at: timestamp("updated_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
-		.notNull(),
+	created_at: timestamp("created_at").default(sql`now()`).notNull(),
+	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
+	deleted_at: timestamp("deleted_at"),
 });
 
 export const instance_template = pgTable("instance_template", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	os_name: text("os_name").notNull(),
 	vm_template_id: text("vm_template_id").notNull(),
-	vm_template_host: text("vm_template_host").notNull(),
+	vm_template_host: text("vm_template_host")
+		.references(() => pve_node.name, { onDelete: "cascade" })
+		.notNull(),
 	vm_type: vm_type("vm_type").notNull(),
-	created_at: timestamp("created_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
-		.notNull(),
-	updated_at: timestamp("updated_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
-		.notNull(),
+	created_at: timestamp("created_at").default(sql`now()`).notNull(),
+	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
+	deleted_at: timestamp("deleted_at"),
 });
 
 export const instance_course = pgTable("instance_course", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	course_id: text("course_id").notNull(),
 	course_title: text("course_title").notNull(),
-	course_staff: text("course_staff").references(() => staff_list.id, {
-		onDelete: "cascade",
-	}),
+	course_staff: uuid("course_staff")
+		.references(() => staff_list.id, {
+			onDelete: "cascade",
+		})
+		.notNull(),
+	created_at: timestamp("created_at").default(sql`now()`).notNull(),
+	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
+	deleted_at: timestamp("deleted_at"),
 });
 
 export const instance_request = pgTable("instance_request", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	// User fields
-	user_id: text("user_id")
+	user: text("user")
 		.references(() => user.id, { onDelete: "cascade" })
 		.notNull(),
 	// Basic fields
 	title: text("title").notNull(),
+	hostname: text("hostname").notNull(),
 	description: text("description").notNull(),
 	type: instance_request_type("type").notNull(),
-	course: text("course")
+	course: uuid("course")
 		.references(() => instance_course.id, { onDelete: "cascade" })
 		.notNull(),
 	// Instance fields
-	template: text("template")
+	template: uuid("template")
 		.references(() => instance_template.id, { onDelete: "cascade" })
 		.notNull(),
 	cpus: integer("cpus").notNull(),
@@ -94,26 +104,32 @@ export const instance_request = pgTable("instance_request", {
 	// Request fields
 	state: request_state("state").notNull().default("pending"),
 	reason: text("reason"),
+	// Timestamps
+	created_at: timestamp("created_at").default(sql`now()`).notNull(),
+	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
 });
 
 export const instance = pgTable("instance", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	// User fields
-	user_id: text("user_id")
+	user: text("user")
 		.references(() => user.id, { onDelete: "cascade" })
 		.notNull(),
 	// Basic fields
 	title: text("title").notNull(),
+	hostname: text("hostname").notNull(),
 	description: text("description").notNull(),
 	type: instance_request_type("type").notNull(),
-	course: text("course")
+	course: uuid("course")
 		.references(() => instance_course.id, { onDelete: "cascade" })
 		.notNull(),
-	samester: text("samester").references(() => samester.id, {
-		onDelete: "cascade",
-	}),
+	samester: uuid("samester")
+		.references(() => samester.id, {
+			onDelete: "cascade",
+		})
+		.notNull(),
 	// Instance fields
-	template: text("template")
+	template: uuid("template")
 		.references(() => instance_template.id, { onDelete: "cascade" })
 		.notNull(),
 	cpus: integer("cpus").notNull(),
@@ -121,22 +137,21 @@ export const instance = pgTable("instance", {
 	disk: integer("disk").notNull(),
 	state: instance_state("state").notNull().default("active"),
 	status: instance_status("status").notNull().default("pending"),
-	pve_node_id: text("pve_node_id").references(() => pve_node.id, {
-		onDelete: "set null",
-	}),
-	vm_id: text("vm_id"),
-	created_at: timestamp("created_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
+	pve_node: uuid("pve_node")
+		.references(() => pve_node.id, {
+			onDelete: "cascade",
+		})
 		.notNull(),
-	updated_at: timestamp("updated_at")
-		.$defaultFn(() => /* @__PURE__ */ new Date())
-		.notNull(),
+	vm_id: text("vm_id").notNull(),
+	created_at: timestamp("created_at").default(sql`now()`).notNull(),
+	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
+	deleted_at: timestamp("deleted_at"),
 });
 
 export const instance_request_extends = pgTable("instance_request_extends", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	// instance fields
-	instance_id: text("instance_id")
+	instance: uuid("instance")
 		.references(() => instance.id, { onDelete: "cascade" })
 		.notNull(),
 	// Basic fields
@@ -145,4 +160,13 @@ export const instance_request_extends = pgTable("instance_request_extends", {
 	// Request fields
 	state: request_state("state").notNull().default("pending"),
 	reason: text("reason"),
+	// Timestamps
+	created_at: timestamp("created_at")
+		// .$defaultFn(() => /* @__PURE__ */ new Date())
+		.default(sql`now()`)
+		.notNull(),
+	updated_at: timestamp("updated_at")
+		// .$defaultFn(() => /* @__PURE__ */ new Date())
+		.default(sql`now()`)
+		.notNull(),
 });

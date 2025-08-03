@@ -4,6 +4,7 @@ CREATE TYPE "public"."instance_status" AS ENUM('pending', 'running', 'stopped');
 CREATE TYPE "public"."node_status" AS ENUM('online', 'offline', 'maintenance', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."request_state" AS ENUM('pending', 'approved', 'rejected', 'cancelled');--> statement-breakpoint
 CREATE TYPE "public"."vm_type" AS ENUM('qemu', 'lxc');--> statement-breakpoint
+CREATE TYPE "public"."notification_type" AS ENUM('info', 'warning', 'error');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -53,47 +54,47 @@ CREATE TABLE "verification" (
 );
 --> statement-breakpoint
 CREATE TABLE "staff_list" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"auth_id" text NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "instance" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"title" text NOT NULL,
 	"description" text NOT NULL,
 	"type" "instance_request_type" NOT NULL,
-	"course" text NOT NULL,
-	"samester" text,
-	"template" text NOT NULL,
+	"course" uuid NOT NULL,
+	"samester" uuid,
+	"template" uuid NOT NULL,
 	"cpus" integer NOT NULL,
 	"memory" integer NOT NULL,
 	"disk" integer NOT NULL,
 	"state" "instance_state" DEFAULT 'active' NOT NULL,
 	"status" "instance_status" DEFAULT 'pending' NOT NULL,
-	"pve_node_id" text,
+	"pve_node_id" uuid,
 	"vm_id" text,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "instance_course" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"course_id" text NOT NULL,
 	"course_title" text NOT NULL,
-	"course_staff" text NOT NULL
+	"course_staff" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "instance_request" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"title" text NOT NULL,
 	"description" text NOT NULL,
 	"type" "instance_request_type" NOT NULL,
-	"course" text NOT NULL,
-	"template" text NOT NULL,
+	"course" uuid NOT NULL,
+	"template" uuid NOT NULL,
 	"cpus" integer NOT NULL,
 	"memory" integer NOT NULL,
 	"disk" integer NOT NULL,
@@ -102,8 +103,8 @@ CREATE TABLE "instance_request" (
 );
 --> statement-breakpoint
 CREATE TABLE "instance_request_extends" (
-	"id" text PRIMARY KEY NOT NULL,
-	"instance_id" text NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
+	"instance_id" uuid NOT NULL,
 	"title" text NOT NULL,
 	"description" text NOT NULL,
 	"state" "request_state" DEFAULT 'pending' NOT NULL,
@@ -111,7 +112,7 @@ CREATE TABLE "instance_request_extends" (
 );
 --> statement-breakpoint
 CREATE TABLE "instance_template" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"os_name" text NOT NULL,
 	"vm_template_id" text NOT NULL,
 	"vm_template_host" text NOT NULL,
@@ -121,29 +122,46 @@ CREATE TABLE "instance_template" (
 );
 --> statement-breakpoint
 CREATE TABLE "pve_node" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"status" "node_status" NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "notification" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"title" text NOT NULL,
+	"message" text NOT NULL,
+	"type" "notification_type" NOT NULL,
+	"readed" boolean NOT NULL,
+	"read_at" timestamp,
+	"created_at" timestamp NOT NULL,
+	"updated_at" timestamp NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "samester" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"start_at" timestamp NOT NULL,
 	"end_at" timestamp NOT NULL,
 	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"updated_at" timestamp NOT NULL,
+	CONSTRAINT "samester_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "staff_list" ADD CONSTRAINT "staff_list_auth_id_user_id_fk" FOREIGN KEY ("auth_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "instance" ADD CONSTRAINT "instance_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instance" ADD CONSTRAINT "instance_course_instance_course_id_fk" FOREIGN KEY ("course") REFERENCES "public"."instance_course"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instance" ADD CONSTRAINT "instance_samester_samester_id_fk" FOREIGN KEY ("samester") REFERENCES "public"."samester"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instance" ADD CONSTRAINT "instance_template_instance_template_id_fk" FOREIGN KEY ("template") REFERENCES "public"."instance_template"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instance" ADD CONSTRAINT "instance_pve_node_id_pve_node_id_fk" FOREIGN KEY ("pve_node_id") REFERENCES "public"."pve_node"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "instance_course" ADD CONSTRAINT "instance_course_course_staff_staff_list_id_fk" FOREIGN KEY ("course_staff") REFERENCES "public"."staff_list"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "instance_request" ADD CONSTRAINT "instance_request_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instance_request" ADD CONSTRAINT "instance_request_course_instance_course_id_fk" FOREIGN KEY ("course") REFERENCES "public"."instance_course"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "instance_request" ADD CONSTRAINT "instance_request_template_instance_template_id_fk" FOREIGN KEY ("template") REFERENCES "public"."instance_template"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "instance_request_extends" ADD CONSTRAINT "instance_request_extends_instance_id_instance_id_fk" FOREIGN KEY ("instance_id") REFERENCES "public"."instance"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "instance_request_extends" ADD CONSTRAINT "instance_request_extends_instance_id_instance_id_fk" FOREIGN KEY ("instance_id") REFERENCES "public"."instance"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "notification" ADD CONSTRAINT "notification_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
