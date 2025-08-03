@@ -3,15 +3,12 @@ import { SidebarContext } from "@midori/contexts/sidebar";
 import { UserContext } from "@midori/contexts/user";
 import { authClient } from "@midori/libs/auth";
 import { format_name } from "@midori/utils/format";
-import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Avatar, Tooltip } from "@mui/material";
 import { BellIcon, LogOut } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useContext } from "react";
-import { Role } from "utils";
 
 export const Header: React.FC = () => {
 	const { user, isPending } = useContext(UserContext);

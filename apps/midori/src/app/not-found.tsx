@@ -1,5 +1,5 @@
 "use client";
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import HomeIcon from "@mui/icons-material/Home";
 import { Button, Stack } from "@mui/material";
 import Image from "next/image";
@@ -42,11 +42,7 @@ export const NotFound: React.FC = () => {
 				</Button>
 
 				<Link href="/" passHref>
-					<Button
-						variant="contained"
-						color="primary"
-						startIcon={<HomeIcon />}
-					>
+					<Button variant="contained" color="primary" startIcon={<HomeIcon />}>
 						Home
 					</Button>
 				</Link>

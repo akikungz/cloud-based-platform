@@ -154,7 +154,8 @@ export default function Home() {
 								Resource Management
 							</h3>
 							<p className="text-vm-blue-600">
-								Efficient management of virtual resources for students and teachers
+								Efficient management of virtual resources for students and
+								teachers
 							</p>
 						</div>
 					</div>

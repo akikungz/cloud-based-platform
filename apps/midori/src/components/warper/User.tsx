@@ -24,7 +24,7 @@ const UserQuery: React.FC<PropsWithChildren> = ({ children }) => {
 	const { data: session, isPending, error } = useSession();
 
 	useEffect(() => {
-		const handleSignIn = () => {
+		const _handleSignIn = () => {
 			authClient.signIn.social({
 				provider: "google",
 				callbackURL: "/dashboard",

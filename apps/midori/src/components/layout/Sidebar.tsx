@@ -7,7 +7,7 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import BookIcon from "@mui/icons-material/Book";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import StorageIcon from "@mui/icons-material/Storage";
@@ -136,14 +136,12 @@ export const Sidebar: React.FC = () => {
 			<div className="p-2 border-t border-vm-blue-200 flex flex-col gap-2">
 				<button
 					type="button"
-					className={
-						cn(
-							"w-full flex items-center gap-4 px-4 py-2.5",
-							"text-left transition-colors duration-200 cursor-pointer",
-							"hover:bg-vm-orange-100 hover:text-vm-orange-900",
-							"text-vm-blue-700 rounded-lg",
-						)
-					}
+					className={cn(
+						"w-full flex items-center gap-4 px-4 py-2.5",
+						"text-left transition-colors duration-200 cursor-pointer",
+						"hover:bg-vm-orange-100 hover:text-vm-orange-900",
+						"text-vm-blue-700 rounded-lg",
+					)}
 					onClick={() => {
 						authClient.signOut();
 						redirect("/");
@@ -168,12 +166,7 @@ interface MenuItemProps {
 	disabled?: boolean;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({
-	href,
-	label,
-	icon,
-	disabled,
-}) => {
+const MenuItem: React.FC<MenuItemProps> = ({ href, label, icon, disabled }) => {
 	const active = href === window.location.pathname;
 
 	return (
