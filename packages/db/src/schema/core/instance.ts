@@ -46,7 +46,7 @@ export const node_status = pgEnum("node_status", [
 
 export const pve_node = pgTable("pve_node", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-	name: text("name").notNull(),
+	name: text("name").notNull().unique(),
 	status: node_status("status").notNull(),
 	created_at: timestamp("created_at").default(sql`now()`).notNull(),
 	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
@@ -137,8 +137,8 @@ export const instance = pgTable("instance", {
 	disk: integer("disk").notNull(),
 	state: instance_state("state").notNull().default("active"),
 	status: instance_status("status").notNull().default("pending"),
-	pve_node: uuid("pve_node")
-		.references(() => pve_node.id, {
+	pve_node: text("pve_node")
+		.references(() => pve_node.name, {
 			onDelete: "cascade",
 		})
 		.notNull(),
