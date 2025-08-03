@@ -2,7 +2,7 @@ import { record } from "@elysiajs/opentelemetry";
 import { env } from "@momoi/libs/env";
 import { auth as Auth } from "auth";
 import { Elysia } from "elysia";
-import { pick } from "utils";
+import { pick, Role } from "utils";
 
 export const auth = Auth({
 	...pick(env, [
@@ -26,7 +26,7 @@ export const authModule = new Elysia({ name: "Auth Module" }).macro({
 			);
 
 			if (!session) return status(401, { message: "Unauthorized" });
-			return { user: session.user };
+			return { user: session.user, isStaff: session.user.role === Role.Staff };
 		},
 	},
 });
