@@ -31,7 +31,7 @@ export const Header: React.FC = () => {
 					aria-label="Toggle sidebar"
 					onClick={toggleSidebar}
 				>
-					{isOpen ? <ArrowBackIosIcon /> : <MenuIcon />}
+					{isOpen ? <ArrowBackIosIcon className="pl-2" /> : <MenuIcon />}
 				</button>
 			</div>
 

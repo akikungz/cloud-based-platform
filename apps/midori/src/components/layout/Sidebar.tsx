@@ -80,7 +80,7 @@ const ClientMenu: Record<
 };
 
 export const Sidebar: React.FC = () => {
-	const { isOpen } = useContext(SidebarContext);
+	const { isOpen, toggleSidebar } = useContext(SidebarContext);
 	const { user, isPending } = useContext(UserContext);
 
 	if (isPending) return null;
@@ -128,6 +128,7 @@ export const Sidebar: React.FC = () => {
 							href={item.href}
 							label={item.label}
 							icon={item.icon}
+							toggleSidebar={toggleSidebar}
 						/>
 					))}
 			</nav>
@@ -164,9 +165,10 @@ interface MenuItemProps {
 	label: string;
 	icon?: React.ReactNode;
 	disabled?: boolean;
+	toggleSidebar?: () => void;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ href, label, icon, disabled }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ href, label, icon, disabled, toggleSidebar }) => {
 	const active = href === window.location.pathname;
 
 	return (
@@ -180,6 +182,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ href, label, icon, disabled }) => {
 						: "text-vm-blue-700 hover:bg-vm-blue-100 hover:text-vm-blue-900",
 				)}
 				disabled={disabled}
+				onClick={toggleSidebar && toggleSidebar}
 			>
 				{icon && <>{icon}</>}
 				<span className="text-sm font-medium">{label}</span>
