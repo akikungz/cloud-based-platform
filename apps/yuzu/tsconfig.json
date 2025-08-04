@@ -9,7 +9,7 @@
 		"types": ["bun-types"],
 		"forceConsistentCasingInFileNames": true,
 		"paths": {
-			"@momoi/*": ["./src/*"]
+			"@yuzu/*": ["./src/*"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.tsx"],
