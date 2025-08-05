@@ -89,7 +89,7 @@ export const Header: React.FC = () => {
 					<button
 						type="button"
 						onClick={handleSignOut}
-						className="p-2 rounded hover:bg-vm-blue-100 hover:cursor-pointer transition-colors"
+						className="p-2 rounded hover:bg-vm-orange-100 hover:cursor-pointer transition-colors"
 						aria-label="Sign out"
 					>
 						<LogOut />
