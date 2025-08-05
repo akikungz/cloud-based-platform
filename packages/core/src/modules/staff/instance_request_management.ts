@@ -1,5 +1,5 @@
 import { DrizzleAdapter } from "@core/adapters/drizzle";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 
 export class InstanceRequestManagement extends DrizzleAdapter {
   public async getInstanceRequestsByStaffId(staff_id: string, limit: number = 10, offset: number = 0) {
@@ -32,7 +32,12 @@ export class InstanceRequestManagement extends DrizzleAdapter {
       )
       .where(
         and(
-          eq(this.instance_course.course_staff, staff_id),
+          or(
+            eq(this.instance_course.main_staff, staff_id),
+            eq(this.instance_course.assistant_staff_1, staff_id),
+            eq(this.instance_course.assistant_staff_2, staff_id),
+            eq(this.instance_course.assistant_staff_3, staff_id)
+          ),
           eq(this.instance_request.state, "pending")
         )
       )
