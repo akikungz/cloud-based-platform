@@ -1,5 +1,4 @@
 "use client";
-import { SidebarProvider } from "@midori/contexts/sidebar";
 import { UserContext, UserProvider } from "@midori/contexts/user";
 import { authClient, useSession } from "@midori/libs/auth";
 import type { PropsWithChildren } from "@midori/types/props";
@@ -12,9 +11,7 @@ import { FullScreenLoading } from "./Loading";
 export const UserWarper: React.FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<UserProvider>
-			<SidebarProvider>
-				<UserQuery>{children}</UserQuery>
-			</SidebarProvider>
+			<UserQuery>{children}</UserQuery>
 		</UserProvider>
 	);
 };

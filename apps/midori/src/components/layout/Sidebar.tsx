@@ -7,20 +7,24 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import BookIcon from "@mui/icons-material/Book";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
-import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import StorageIcon from "@mui/icons-material/Storage";
-import { Server } from "lucide-react";
+import { Tooltip } from "@mui/material";
+import { LogOut, Server } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useContext } from "react";
 import { Role } from "utils";
 
-const ClientMenu: Record<
-	keyof typeof Role,
-	Omit<MenuItemProps, "handleClick">[]
-> = {
+interface ClientMenuItem {
+	href: string;
+	label: string;
+	icon: React.ReactNode;
+	disabled?: boolean;
+}
+
+const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
 	[Role.Staff]: [
 		{
 			href: "/dashboard",
@@ -80,7 +84,7 @@ const ClientMenu: Record<
 };
 
 export const Sidebar: React.FC = () => {
-	const { isOpen, toggleSidebar } = useContext(SidebarContext);
+	const { isOpen, isCollapsed } = useContext(SidebarContext);
 	const { user, isPending } = useContext(UserContext);
 
 	if (isPending) return null;
@@ -88,16 +92,17 @@ export const Sidebar: React.FC = () => {
 
 	return (
 		<aside
-			className={cn(
-				"fixed top-0 left-0 h-full w-64 bg-white border-r border-vm-blue-200 md:border-none shadow-soft transition-transform",
-				isOpen ? "translate-x-0" : "-translate-x-full",
-				"md:translate-x-0 z-20",
-				"pt-16 md:pt-0 flex flex-col",
-			)}
+			className={
+				cn(
+					"fixed top-0 left-0 h-full bg-white shadow-lg transition-transform duration-300 z-20",
+					isOpen ? "translate-x-0" : "-translate-x-full",
+					isCollapsed ? "w-16" : "w-64",
+					"pt-16 md:pt-0 flex flex-col",
+				)
+			}
 		>
-			{/* Heading */}
-			<div className="flex items-center justify-between px-4 border-b border-vm-blue-200 h-16">
-				<div className="flex items-center space-x-3">
+			<div className="hidden md:flex items-center justify-between px-4 border-b border-vm-blue-200 h-16">
+				<Link href="/dashboard" className="flex items-center space-x-3">
 					<div
 						className={cn(
 							"w-8 h-8 rounded-lg flex items-center justify-center",
@@ -108,33 +113,52 @@ export const Sidebar: React.FC = () => {
 					>
 						<Server className="w-5 h-5 text-white" />
 					</div>
-					<div>
+					<div className={cn(isCollapsed ? "hidden" : "block")}>
 						<h2 className="text-lg font-semibold text-vm-blue-900">
 							VM Platform
 						</h2>
 						<p className="text-xs text-vm-blue-600 capitalize">{user.role}</p>
 					</div>
-				</div>
+				</Link>
 			</div>
 
-			{/* Menu Items */}
-			<nav className="my-4 flex-1 px-2 overflow-y-auto flex flex-col gap-1">
-				{Object.entries(ClientMenu)
-					.filter(([role]) => user.role === role)
-					.flatMap(([, items]) => items)
-					.map((item) => (
-						<MenuItem
-							key={item.href}
-							href={item.href}
-							label={item.label}
-							icon={item.icon}
-							toggleSidebar={toggleSidebar}
-						/>
-					))}
-			</nav>
+			<div className="flex flex-col flex-1 items-center gap-1 p-2">
+				{
+					ClientMenu[user.role].map((item) => {
+						return (
+							<Tooltip title={item.label} placement="right" key={item.label}>
+								<Link 
+									href={!item.disabled ? item.href : "#"}
+									className={cn(
+										"w-full flex items-center gap-4 py-2.5 text-left transition-colors duration-200 cursor-pointer",
+										"hover:bg-vm-orange-100 hover:text-vm-orange-900",
+										"text-vm-blue-700 rounded-lg",
+										item.disabled ? "cursor-not-allowed opacity-50" : "",
+										isCollapsed ? "px-3" : "px-4",
+									)}
+								>
+									{item.icon}
+									<span
+										className={cn(
+											"text-sm font-medium",
+											isCollapsed ? "hidden" : "block",
+										)}
+									>
+										{item.label}
+									</span>
+								</Link>
+							</Tooltip>
+						)
+					})
+				}
+			</div>
 
-			{/* Footer */}
-			<div className="p-2 border-t border-vm-blue-200 flex flex-col gap-2">
+			<div className={
+				cn(
+					"p-2 border-t border-vm-blue-200 flex-col gap-1",
+					isCollapsed ? "hidden" : "flex"
+				)
+			}>
 				<button
 					type="button"
 					className={cn(
@@ -148,47 +172,14 @@ export const Sidebar: React.FC = () => {
 						redirect("/");
 					}}
 				>
-					<LogoutIcon className="w-5 h-5" />
-					<span>Sign Out</span>
+					<LogOut className="w-5 h-5" />
+					<span className="text-sm font-medium">Sign Out</span>
 				</button>
-				<p className="text-xs text-vm-blue-600 p-2">
+				<p className="text-xs text-vm-blue-600 px-2 py-1">
 					This platform is for educational purposes only. Unauthorized use is
 					prohibited.
 				</p>
 			</div>
 		</aside>
-	);
-};
-
-interface MenuItemProps {
-	href: string;
-	label: string;
-	icon?: React.ReactNode;
-	disabled?: boolean;
-	toggleSidebar?: () => void;
+	)
 }
-
-const MenuItem: React.FC<MenuItemProps> = ({ href, label, icon, disabled, toggleSidebar }) => {
-	const active = href === window.location.pathname;
-
-	return (
-		<Link href={href} passHref>
-			<button
-				type="button"
-				className={cn(
-					"w-full flex items-center space-x-4 px-4 py-2.5 rounded-lg text-left transition-all duration-200 cursor-pointer",
-					active
-						? "bg-gradient-primary text-white shadow-medium"
-						: "text-vm-blue-700 hover:bg-vm-blue-100 hover:text-vm-blue-900",
-				)}
-				disabled={disabled}
-				onClick={toggleSidebar && toggleSidebar}
-			>
-				{icon && <>{icon}</>}
-				<span className="text-sm font-medium">{label}</span>
-			</button>
-		</Link>
-	);
-};
-
-export default Sidebar;
