@@ -1,8 +1,7 @@
 "use client";
-
 import { AnimatedGridPattern } from "@midori/components/magicui/animated-grid-pattern";
 import { authClient } from "@midori/libs/auth";
-// import { env } from "@midori/libs/env";
+import { env } from "@midori/libs/env";
 import { cn } from "@midori/utils/format";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +14,7 @@ export default function SignIn() {
 	const handleSignIn = async () => {
 		const signin = await authClient.signIn.social({
 			provider: "google",
-			callbackURL: "/dashboard",
+			callbackURL: `${env.FRONTEND_BASE_URL}/dashboard`,
 		});
 
 		console.log("Sign-in response:", signin);
