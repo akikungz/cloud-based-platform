@@ -13,3 +13,11 @@ export const getRoleFromEmail = (email: string): Role => {
 		return Role.External;
 	}
 };
+
+export const studentValidationFromId = (studentId: string): boolean => {
+	if (studentId.startsWith("s")) {
+		studentId = studentId.slice(1); // Remove leading 's'
+	}
+	const regex = /\d{2}0602\d{7}$/;
+	return regex.test(studentId);
+};
