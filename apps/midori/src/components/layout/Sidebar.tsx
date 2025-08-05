@@ -8,6 +8,7 @@ import BookIcon from "@mui/icons-material/Book";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import PersonIcon from "@mui/icons-material/Person";
+import SchoolIcon from '@mui/icons-material/School';
 import SettingsIcon from "@mui/icons-material/Settings";
 import StorageIcon from "@mui/icons-material/Storage";
 import { Tooltip } from "@mui/material";
@@ -33,7 +34,7 @@ const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
 		},
 		{
 			href: "/approval",
-			label: "Approval Queue",
+			label: "Pending Approvals",
 			icon: <AssignmentIcon />,
 		},
 		{
@@ -46,6 +47,11 @@ const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
 			label: "Storage",
 			icon: <FolderIcon />,
 			disabled: true, // Placeholder for future feature
+		},
+		{
+			href: "/samester",
+			label: "Samesters",
+			icon: <SchoolIcon />,
 		},
 		{
 			href: "/course",
@@ -126,12 +132,17 @@ export const Sidebar: React.FC = () => {
 				{
 					ClientMenu[user.role].map((item) => {
 						return (
-							<Tooltip title={item.label} placement="right" key={item.label}>
+							<Tooltip 
+								key={item.label}
+								title={item.label} 
+								placement="right"
+								arrow
+							>
 								<Link 
 									href={!item.disabled ? item.href : "#"}
 									className={cn(
 										"w-full flex items-center gap-4 py-2.5 text-left transition-colors duration-200 cursor-pointer",
-										"hover:bg-vm-orange-100 hover:text-vm-orange-900",
+										"hover:bg-vm-blue-100 hover:text-vm-blue-900",
 										"text-vm-blue-700 rounded-lg",
 										item.disabled ? "cursor-not-allowed opacity-50" : "",
 										isCollapsed ? "px-3" : "px-4",
