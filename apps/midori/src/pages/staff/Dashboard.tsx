@@ -18,8 +18,6 @@ export const Dashboard: React.FC = () => {
 
 			{/* Pending Requests */}
 			<PendingRequest limit={3} />
-
-			<span>lorem*100</span>
 		</div>
 	);
 };

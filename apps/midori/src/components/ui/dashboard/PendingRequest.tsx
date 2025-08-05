@@ -1,11 +1,9 @@
 "use client";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CheckIcon from "@mui/icons-material/Check";
-import InfoIcon from "@mui/icons-material/Info";
-import { Button, Chip, Stack } from "@mui/material";
+import { Button } from "@mui/material";
 import { ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import PendingRequestItem, { type PendingRequestItemProps } from "./PendingRequestItem";
 
 interface PendingRequestProps {
 	limit?: number;
@@ -14,6 +12,7 @@ interface PendingRequestProps {
 
 export const PendingRequest: React.FC<PendingRequestProps> = ({
 	limit = 10,
+	searchQuery = "",
 }) => {
 	const [requests, setRequests] = useState<PendingRequestItemProps[]>([]);
 
@@ -33,12 +32,12 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 					},
 					course: {
 						name: `Course ${index + 1}`,
-						code: `C${index + 1}`,
+						code: `06023310${index + 1}`,
 					},
 					spec: {
 						os: "Ubuntu 20.04 (LXC)",
-						cpu: 2,
-						memory: 4096,
+						cpu: 2 ** index, // Increment CPU for each request
+						memory: 1024 * (2 ** index), // Increment memory for each request
 						storage: 20,
 					},
 				}),
@@ -65,153 +64,21 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 			</div>
 
 			<div className="flex flex-col space-y-2">
-				<PendingRequestItem
-					id="test-request"
-					title="Test VM Creation"
-					description="Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aliquid, molestiae doloremque qui nam eum iste accusamus delectus id soluta repellat, possimus eaque. Voluptatem quasi reprehenderit ullam iure fugiat nam asperiores."
-					requestedBy={{
-						name: "Thitipong Tapianthong",
-						email: "s6506022620036@email.kmutnb.ac.th",
-					}}
-					course={{
-						name: "Network Programming",
-						code: "060233303",
-					}}
-					spec={{
-						os: "Ubuntu 20.04 (QEMU)",
-						cpu: 2,
-						memory: 4096,
-						storage: 20,
-					}}
-				/>
-
-				{requests.map((request) => (
-					<PendingRequestItem key={request.id} {...request} />
-				))}
+				{
+					requests
+						.filter((request) => {
+							const query = searchQuery.toLowerCase();
+							return (
+								request.title.toLowerCase().includes(query) ||
+								request.description.toLowerCase().includes(query) ||
+								request.requestedBy.name.toLowerCase().includes(query) ||
+								request.course.name.toLowerCase().includes(query) ||
+								request.course.code.toLowerCase().includes(query)
+							);
+						})
+						.map((request) => <PendingRequestItem key={request.id} {...request} />)
+				}
 			</div>
-		</div>
-	);
-};
-
-export interface PendingRequestItemProps {
-	id: string; // Optional ID for the request
-	title: string;
-	description: string;
-	requestedBy: {
-		name: string;
-		email: string;
-	};
-	course: {
-		name: string;
-		code: string;
-	};
-	spec: {
-		os: string;
-		cpu: number;
-		memory: number;
-		storage: number;
-	};
-}
-
-export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
-	title,
-	description,
-	requestedBy,
-	course,
-	spec,
-}) => {
-	return (
-		<div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50">
-			<div className="flex flex-col space-y-2 w-full">
-				<div className="flex flex-wrap items-center gap-2">
-					<div className="flex items-center space-x-2">
-						<ClipboardList className="text-vm-blue-600" />
-						<span className="text-sm font-medium">{title}</span>
-					</div>
-					<Stack
-						direction="row"
-						spacing={1}
-						useFlexGap
-						justifyContent="flex-start"
-						className="flex-wrap"
-					>
-						<Chip
-							label={requestedBy.name}
-							color="primary"
-							variant="outlined"
-							size="small"
-						/>
-						<Chip
-							label={`${course.code} - ${course.name}`}
-							color="secondary"
-							variant="outlined"
-							size="small"
-						/>
-					</Stack>
-				</div>
-
-				<span className="text-sm text-gray-500 text-ellipsis overflow-hidden line-clamp-3 pr-4">
-					{description}
-				</span>
-
-				<Stack direction="row" spacing={1} useFlexGap className="flex-wrap">
-					<Chip
-						label={`OS: ${spec.os}`}
-						color="info"
-						variant="outlined"
-						size="small"
-					/>
-					<Chip
-						label={`CPU: ${spec.cpu} vCPUs`}
-						color="info"
-						variant="outlined"
-						size="small"
-					/>
-					<Chip
-						label={`Memory: ${spec.memory.toLocaleString()} MB`}
-						color="info"
-						variant="outlined"
-						size="small"
-					/>
-					<Chip
-						label={`Storage: ${spec.storage} GB`}
-						color="info"
-						variant="outlined"
-						size="small"
-					/>
-				</Stack>
-			</div>
-
-			{/* Action Buttons */}
-			<Stack direction="column" spacing={1} className="flex-shrink-0">
-				<Button
-					variant="outlined"
-					color="info"
-					size="small"
-					style={{ justifyContent: "flex-end" }}
-					endIcon={<InfoIcon />}
-				>
-					Details
-				</Button>
-				<Button
-					variant="outlined"
-					color="primary"
-					size="small"
-					style={{ justifyContent: "flex-end" }}
-					endIcon={<CheckIcon />}
-				>
-					Approve
-				</Button>
-				<Button
-					variant="outlined"
-					color="error"
-					size="small"
-					style={{ justifyContent: "flex-end" }}
-					endIcon={<CancelIcon />}
-				>
-					Reject
-				</Button>
-			</Stack>
 		</div>
 	);
 };
