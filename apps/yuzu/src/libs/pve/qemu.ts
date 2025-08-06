@@ -5,7 +5,7 @@ import type {
 	PVE_Network_Config,
 } from "./types";
 
-export interface CloneVMArgs {
+export interface CloneQEMUProps {
 	node: string;
 	vmid: number;
 	target: string;
@@ -29,7 +29,7 @@ export const clone = async ({
 	target,
 	newid,
 	name,
-}: CloneVMArgs) => {
+}: CloneQEMUProps) => {
 	const task = await instance({
 		path: "/nodes/:node/qemu/:vmid/clone",
 		method: "POST",
@@ -44,7 +44,7 @@ export const clone = async ({
 	return task.data;
 };
 
-export interface ResizeVMArgs {
+export interface ResizeQEMUProps {
 	node: string;
 	vmid: number;
 	size: PVE_Disk_Resize;
@@ -58,7 +58,7 @@ export interface ResizeVMArgs {
  * @return A promise that resolves with the task details of the resize operation.
  * @throws An error if the resize operation fails.
  */
-export const resize = async ({ node, vmid, size }: ResizeVMArgs) => {
+export const resize = async ({ node, vmid, size }: ResizeQEMUProps) => {
 	const task = await instance({
 		path: "/nodes/:node/qemu/:vmid/resize",
 		method: "PUT",
@@ -73,7 +73,7 @@ export const resize = async ({ node, vmid, size }: ResizeVMArgs) => {
 	return task.data;
 };
 
-export interface ConfigQEMUArgs {
+export interface ConfigQEMUProps {
 	// Params
 	node: string;
 	vmid: number;
@@ -101,7 +101,7 @@ export interface ConfigQEMUArgs {
  * @return A promise that resolves with the task details of the configuration operation.
  * @throws An error if the configuration operation fails.
  */
-export const config = async (spec: ConfigQEMUArgs) => {
+export const config = async (spec: ConfigQEMUProps) => {
 	const { node, vmid, ...body } = spec;
 
 	const task = await instance({
@@ -117,6 +117,32 @@ export const config = async (spec: ConfigQEMUArgs) => {
 
 	if (task.status !== 200) {
 		throw new Error(`Failed to configure QEMU: ${task.status}`);
+	}
+
+	return task.data;
+};
+
+export interface DeleteQEMUProps {
+	node: string;
+	vmid: number;
+}
+
+/**
+ * Deletes a QEMU in Proxmox VE.
+ * @param node The node where the QEMU is located.
+ * @param vmid The ID of the QEMU to delete.
+ * @return A promise that resolves with the task details of the delete operation.
+ * @throws An error if the delete operation fails.
+ */
+export const deleteQEMU = async (params: DeleteQEMUProps) => {
+	const task = await instance({
+		path: "/nodes/:node/qemu/:vmid",
+		method: "DELETE",
+		params,
+	});
+
+	if (task.status !== 200) {
+		throw new Error(`Failed to delete QEMU: ${task.status}`);
 	}
 
 	return task.data;
