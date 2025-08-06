@@ -71,11 +71,11 @@ const cssColors = {
 export const theme = createTheme({
 	breakpoints: {
 		values: {
-			xs: 0,      // Tailwind: none (default)
-			sm: 640,    // Tailwind: sm
-			md: 768,    // Tailwind: md
-			lg: 1024,   // Tailwind: lg
-			xl: 1280,   // Tailwind: xl
+			xs: 0, // Tailwind: none (default)
+			sm: 640, // Tailwind: sm
+			md: 768, // Tailwind: md
+			lg: 1024, // Tailwind: lg
+			xl: 1280, // Tailwind: xl
 		},
 	},
 	palette: {
@@ -240,11 +240,11 @@ export const theme = createTheme({
 export const darkTheme = createTheme({
 	breakpoints: {
 		values: {
-			xs: 0,      // Tailwind: none (default)
-			sm: 640,    // Tailwind: sm
-			md: 768,    // Tailwind: md
-			lg: 1024,   // Tailwind: lg
-			xl: 1280,   // Tailwind: xl
+			xs: 0, // Tailwind: none (default)
+			sm: 640, // Tailwind: sm
+			md: 768, // Tailwind: md
+			lg: 1024, // Tailwind: lg
+			xl: 1280, // Tailwind: xl
 		},
 	},
 	palette: {

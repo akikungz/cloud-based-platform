@@ -18,19 +18,18 @@ export const auth = Auth({
 	basePath: "/auth",
 });
 
-export const authModule = new Elysia({ name: "Auth Module" })
-	.macro({
-		auth: {
-			resolve: async ({ status, request: { headers } }) => {
-				const session = await record("auth.resolve", () =>
-					auth.api.getSession({ headers }),
-				);
+export const authModule = new Elysia({ name: "Auth Module" }).macro({
+	auth: {
+		resolve: async ({ status, request: { headers } }) => {
+			const session = await record("auth.resolve", () =>
+				auth.api.getSession({ headers }),
+			);
 
-				if (!session) return status(401, { message: "Unauthorized" });
-				return { user: session.user, isStaff: session.user.role === Role.Staff };
-			},
-		}
-	});
+			if (!session) return status(401, { message: "Unauthorized" });
+			return { user: session.user, isStaff: session.user.role === Role.Staff };
+		},
+	},
+});
 
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>;
 // biome-ignore lint/suspicious/noAssignInExpressions: lazy initialization pattern for caching schema

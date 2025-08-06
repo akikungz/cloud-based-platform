@@ -58,7 +58,9 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
 	}, []);
 
 	return (
-		<SidebarContext.Provider value={{ isOpen, toggleSidebar, isCollapsed, toggleCollapse }}>
+		<SidebarContext.Provider
+			value={{ isOpen, toggleSidebar, isCollapsed, toggleCollapse }}
+		>
 			{children}
 		</SidebarContext.Provider>
 	);

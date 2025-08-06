@@ -13,7 +13,7 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			// Close sidebar on Escape key
-			if (event.key === 'Escape' && sidebarContext.isOpen) {
+			if (event.key === "Escape" && sidebarContext.isOpen) {
 				sidebarContext.toggleSidebar();
 			}
 		};
@@ -33,7 +33,7 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
 					className="fixed inset-0 bg-black/0 z-10 md:hidden cursor-default"
 					onClick={sidebarContext.toggleSidebar}
 					onKeyDown={(e) => {
-						if (e.key === 'Escape') {
+						if (e.key === "Escape") {
 							sidebarContext.toggleSidebar();
 						}
 					}}

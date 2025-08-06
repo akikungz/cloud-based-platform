@@ -4,7 +4,14 @@ import { UserContext } from "@midori/contexts/user";
 import { authClient } from "@midori/libs/auth";
 import { cn, format_name } from "@midori/utils/format";
 import { Avatar, Tooltip } from "@mui/material";
-import { BellIcon, ChevronLeft, ChevronRight, LogOut, Menu, Server } from "lucide-react";
+import {
+	BellIcon,
+	ChevronLeft,
+	ChevronRight,
+	LogOut,
+	Menu,
+	Server,
+} from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useContext } from "react";
@@ -12,7 +19,8 @@ import { Role } from "utils";
 
 export const Header: React.FC = () => {
 	const { user, isPending } = useContext(UserContext);
-	const { isOpen, toggleSidebar, isCollapsed, toggleCollapse } = useContext(SidebarContext);
+	const { isOpen, toggleSidebar, isCollapsed, toggleCollapse } =
+		useContext(SidebarContext);
 
 	const handleSignOut = async () => {
 		await authClient.signOut();
@@ -34,8 +42,8 @@ export const Header: React.FC = () => {
 				>
 					{isOpen ? <ChevronLeft /> : <Menu />}
 				</button>
-				<Link 
-					href="/dashboard" 
+				<Link
+					href="/dashboard"
 					className={cn(
 						"w-8 h-8 rounded-lg md:hidden flex items-center justify-center bg-gradient-primary",
 						user.role === Role.Staff
@@ -49,12 +57,10 @@ export const Header: React.FC = () => {
 				{/* Collapse button */}
 				<button
 					type="button"
-					className={
-						cn(
-							"py-2 rounded hover:bg-vm-blue-100 transition-colors hidden md:block absolute z-30",
-							isCollapsed ? "-left-3 px-1" : "-left-12 px-2",
-						)
-					}
+					className={cn(
+						"py-2 rounded hover:bg-vm-blue-100 transition-colors hidden md:block absolute z-30",
+						isCollapsed ? "-left-3 px-1" : "-left-12 px-2",
+					)}
 					aria-label="Collapse sidebar"
 					onClick={toggleCollapse}
 				>

@@ -3,7 +3,9 @@ import { Button } from "@mui/material";
 import { ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import PendingRequestItem, { type PendingRequestItemProps } from "./PendingRequestItem";
+import PendingRequestItem, {
+	type PendingRequestItemProps,
+} from "./PendingRequestItem";
 
 interface PendingRequestProps {
 	limit?: number;
@@ -37,7 +39,7 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 					spec: {
 						os: "Ubuntu 20.04 (LXC)",
 						cpu: 2 ** index, // Increment CPU for each request
-						memory: 1024 * (2 ** index), // Increment memory for each request
+						memory: 1024 * 2 ** index, // Increment memory for each request
 						storage: 20,
 					},
 				}),
@@ -64,20 +66,20 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 			</div>
 
 			<div className="flex flex-col space-y-2">
-				{
-					requests
-						.filter((request) => {
-							const query = searchQuery.toLowerCase();
-							return (
-								request.title.toLowerCase().includes(query) ||
-								request.description.toLowerCase().includes(query) ||
-								request.requestedBy.name.toLowerCase().includes(query) ||
-								request.course.name.toLowerCase().includes(query) ||
-								request.course.code.toLowerCase().includes(query)
-							);
-						})
-						.map((request) => <PendingRequestItem key={request.id} {...request} />)
-				}
+				{requests
+					.filter((request) => {
+						const query = searchQuery.toLowerCase();
+						return (
+							request.title.toLowerCase().includes(query) ||
+							request.description.toLowerCase().includes(query) ||
+							request.requestedBy.name.toLowerCase().includes(query) ||
+							request.course.name.toLowerCase().includes(query) ||
+							request.course.code.toLowerCase().includes(query)
+						);
+					})
+					.map((request) => (
+						<PendingRequestItem key={request.id} {...request} />
+					))}
 			</div>
 		</div>
 	);

@@ -2,9 +2,15 @@
 import { authClient } from "@midori/libs/auth";
 import { env } from "@midori/libs/env";
 import { cn } from "@midori/utils/format";
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import { Button, Dialog, DialogContent, DialogTitle, Snackbar, TextField } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	Snackbar,
+	TextField,
+} from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -58,10 +64,7 @@ export default function SignIn() {
 				/>
 			)}
 
-			<Dialog
-				open={isModalOpen}
-				onClose={handleCloseModal}
-			>
+			<Dialog open={isModalOpen} onClose={handleCloseModal}>
 				<DialogTitle className="text-center text-lg font-semibold">
 					Authorized Users Only
 				</DialogTitle>
@@ -70,16 +73,27 @@ export default function SignIn() {
 						<div className="p-4 bg-vm-orange-100 flex flex-col gap-2 rounded-lg">
 							<h2 className="font-bold text-vm-orange-600 text-left">Staff</h2>
 							<p className="text-sm text-gray-700">
-								Staff member from the Department of Information Technology, Faculty of Industrial Technology and Management, King Mongkut's University of Technology North Bangkok.
+								Staff member from the Department of Information Technology,
+								Faculty of Industrial Technology and Management, King Mongkut's
+								University of Technology North Bangkok.
 							</p>
-							<a href="http://202.44.47.45/fitm/personnel?board_id=3" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline">Staff members</a>
+							<a
+								href="http://202.44.47.45/fitm/personnel?board_id=3"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-sm text-blue-500 hover:underline"
+							>
+								Staff members
+							</a>
 						</div>
 
 						<div className="p-4 bg-vm-blue-100 flex flex-col gap-2 rounded-lg">
 							<h2 className="font-bold text-vm-blue-600 text-left">Students</h2>
 
 							<p className="text-sm text-gray-700">
-								Students from the Department of Information Technology, Faculty of Industrial Technology and Management, King Mongkut's University of Technology North Bangkok.
+								Students from the Department of Information Technology, Faculty
+								of Industrial Technology and Management, King Mongkut's
+								University of Technology North Bangkok.
 							</p>
 
 							<div className="bg-white p-2 rounded-xl shadow-sm">
@@ -91,10 +105,12 @@ export default function SignIn() {
 									size="small"
 									slotProps={{
 										input: {
-											startAdornment: (
-												isStudentIdValid ? <CheckIcon className="text-green-500 mr-1" /> : <CloseIcon className="text-red-500 mr-1" />
+											startAdornment: isStudentIdValid ? (
+												<CheckIcon className="text-green-500 mr-1" />
+											) : (
+												<CloseIcon className="text-red-500 mr-1" />
 											),
-										}
+										},
 									}}
 									onChange={(e) => setStudentId(e.target.value)}
 									value={studentId}
@@ -111,7 +127,8 @@ export default function SignIn() {
 				</h1>
 
 				<p className="text-center mb-4">
-					Sign in to your account to access the dashboard and manage your instance of virtual machines.
+					Sign in to your account to access the dashboard and manage your
+					instance of virtual machines.
 				</p>
 
 				<button
@@ -140,15 +157,15 @@ export default function SignIn() {
 
 				<div className="mt-4 text-center text-sm text-gray-500 flex flex-col items-center justify-center gap-1 flex-wrap">
 					<p>
-						Access to this application is restricted to {" "}
+						Access to this application is restricted to{" "}
 						<button
-							type="button" 
+							type="button"
 							className="text-blue-500 hover:underline hover:cursor-pointer"
 							onClick={handleOpenModal}
 						>
 							authorized users
-						</button>
-						{" "} only.
+						</button>{" "}
+						only.
 					</p>
 					<p>
 						By signing in, you agree to the{" "}

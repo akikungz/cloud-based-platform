@@ -95,7 +95,11 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 			</div>
 
 			{/* Action Buttons */}
-			<Stack direction={{ xs: "row", sm: "column" }} spacing={1} className="flex-shrink-0">
+			<Stack
+				direction={{ xs: "row", sm: "column" }}
+				spacing={1}
+				className="flex-shrink-0"
+			>
 				<Button
 					variant="outlined"
 					color="info"

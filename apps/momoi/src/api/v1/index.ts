@@ -34,7 +34,7 @@ export const v1 = new Elysia({ prefix: "/v1" })
 				500: {
 					description: "Internal server error",
 				},
-			}
-		}
+			},
+		},
 	})
 	.use(staff_api);

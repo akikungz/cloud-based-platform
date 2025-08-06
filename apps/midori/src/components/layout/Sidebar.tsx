@@ -8,7 +8,7 @@ import BookIcon from "@mui/icons-material/Book";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
 import PersonIcon from "@mui/icons-material/Person";
-import SchoolIcon from '@mui/icons-material/School';
+import SchoolIcon from "@mui/icons-material/School";
 import SettingsIcon from "@mui/icons-material/Settings";
 import StorageIcon from "@mui/icons-material/Storage";
 import { Tooltip } from "@mui/material";
@@ -98,14 +98,12 @@ export const Sidebar: React.FC = () => {
 
 	return (
 		<aside
-			className={
-				cn(
-					"fixed top-0 left-0 h-full bg-white shadow-lg transition-transform duration-300 z-20",
-					isOpen ? "translate-x-0" : "-translate-x-full",
-					isCollapsed ? "w-16" : "w-64",
-					"pt-16 md:pt-0 flex flex-col",
-				)
-			}
+			className={cn(
+				"fixed top-0 left-0 h-full bg-white shadow-lg transition-transform duration-300 z-20",
+				isOpen ? "translate-x-0" : "-translate-x-full",
+				isCollapsed ? "w-16" : "w-64",
+				"pt-16 md:pt-0 flex flex-col",
+			)}
 		>
 			<div className="hidden md:flex items-center justify-between px-4 border-b border-vm-blue-200 h-16">
 				<Link href="/dashboard" className="flex items-center space-x-3">
@@ -129,47 +127,45 @@ export const Sidebar: React.FC = () => {
 			</div>
 
 			<div className="flex flex-col flex-1 items-center gap-1 p-2">
-				{
-					ClientMenu[user.role].map((item) => {
-						return (
-							<Tooltip 
-								key={item.label}
-								title={item.label} 
-								placement="right"
-								arrow
+				{ClientMenu[user.role].map((item) => {
+					return (
+						<Tooltip
+							key={item.label}
+							title={item.label}
+							placement="right"
+							arrow
+						>
+							<Link
+								href={!item.disabled ? item.href : "#"}
+								className={cn(
+									"w-full flex items-center gap-4 py-2.5 text-left transition-colors duration-200 cursor-pointer",
+									"hover:bg-vm-blue-100 hover:text-vm-blue-900",
+									"text-vm-blue-700 rounded-lg",
+									item.disabled ? "cursor-not-allowed opacity-50" : "",
+									isCollapsed ? "px-3" : "px-4",
+								)}
 							>
-								<Link 
-									href={!item.disabled ? item.href : "#"}
+								{item.icon}
+								<span
 									className={cn(
-										"w-full flex items-center gap-4 py-2.5 text-left transition-colors duration-200 cursor-pointer",
-										"hover:bg-vm-blue-100 hover:text-vm-blue-900",
-										"text-vm-blue-700 rounded-lg",
-										item.disabled ? "cursor-not-allowed opacity-50" : "",
-										isCollapsed ? "px-3" : "px-4",
+										"text-sm font-medium",
+										isCollapsed ? "hidden" : "block",
 									)}
 								>
-									{item.icon}
-									<span
-										className={cn(
-											"text-sm font-medium",
-											isCollapsed ? "hidden" : "block",
-										)}
-									>
-										{item.label}
-									</span>
-								</Link>
-							</Tooltip>
-						)
-					})
-				}
+									{item.label}
+								</span>
+							</Link>
+						</Tooltip>
+					);
+				})}
 			</div>
 
-			<div className={
-				cn(
+			<div
+				className={cn(
 					"p-2 border-t border-vm-blue-200 flex-col gap-1",
-					isCollapsed ? "hidden" : "flex"
-				)
-			}>
+					isCollapsed ? "hidden" : "flex",
+				)}
+			>
 				<button
 					type="button"
 					className={cn(
@@ -192,5 +188,5 @@ export const Sidebar: React.FC = () => {
 				</p>
 			</div>
 		</aside>
-	)
-}
+	);
+};

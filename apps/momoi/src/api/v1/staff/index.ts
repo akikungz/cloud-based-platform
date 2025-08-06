@@ -6,8 +6,8 @@ export const staff_api = new Elysia({
 	detail: {
 		description: "Staff management API",
 		operationId: "staffApi",
-		tags: ["Staff"]
-	}
+		tags: ["Staff"],
+	},
 })
 	.use(authModule)
-	.guard({ auth: true })
+	.guard({ auth: true });

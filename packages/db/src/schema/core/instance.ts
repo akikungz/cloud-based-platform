@@ -88,18 +88,15 @@ export const instance_course = pgTable("instance_course", {
 			onDelete: "cascade",
 		})
 		.notNull(),
-	assistant_staff_1: uuid("assistant_staff_1")
-		.references(() => staff_list.id, {
-			onDelete: "cascade",
-		}),
-	assistant_staff_2: uuid("assistant_staff_2")
-		.references(() => staff_list.id, {
-			onDelete: "cascade",
-		}),
-	assistant_staff_3: uuid("assistant_staff_3")
-		.references(() => staff_list.id, {
-			onDelete: "cascade",
-		}),
+	assistant_staff_1: uuid("assistant_staff_1").references(() => staff_list.id, {
+		onDelete: "cascade",
+	}),
+	assistant_staff_2: uuid("assistant_staff_2").references(() => staff_list.id, {
+		onDelete: "cascade",
+	}),
+	assistant_staff_3: uuid("assistant_staff_3").references(() => staff_list.id, {
+		onDelete: "cascade",
+	}),
 	// Timestamps
 	created_at: timestamp("created_at").default(sql`now()`).notNull(),
 	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
