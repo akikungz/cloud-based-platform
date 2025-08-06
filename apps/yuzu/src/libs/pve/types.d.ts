@@ -47,7 +47,7 @@ export type PVE_Task = {
 	node: string;
 	status: "running" | "stopped";
 	exitstatus?: "OK" | string;
-}
+};
 
 export type PVE_PATH =
 	// Node related endpoints
@@ -73,7 +73,7 @@ export type PVE_PATH =
 	| "/nodes/:node/tasks/:upid/status";
 
 export type PVE_Network_Config = `ip=${string}/${number},gw=${string}`;
-export type PVE_Interface_Config = `bridge=${string}`
+export type PVE_Interface_Config = `bridge=${string}`;
 
 export type PVE_Disk_Resize = `+${number}G` | `+${number}M` | `+${number}K`;
 
@@ -326,7 +326,7 @@ export interface PVE_API_Template extends PVE_API_Structure {
 			Record<string, never>,
 			PVE_Task
 		>;
-	}
+	};
 }
 
 export type PVE_API<Path extends keyof PVE_API_Template> =

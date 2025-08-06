@@ -14,7 +14,7 @@ export const replace_params = <
 	Params extends ExtractParams<Path>,
 >(
 	path: Path,
-	params: Params
+	params: Params,
 ): string => {
 	let replacedPath: string = path;
 	Object.entries(params).forEach(([key, value]) => {

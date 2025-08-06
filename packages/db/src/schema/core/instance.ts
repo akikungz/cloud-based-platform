@@ -140,7 +140,7 @@ export const instance_request = pgTable("instance_request", {
 
 /**
  * Instance schema.
- * 
+ *
  * This schema defines the structure for managing instances in the PVE.
  * It includes fields for user information, instance details, and PVE-specific configurations.
  */
@@ -158,10 +158,9 @@ export const instance = pgTable("instance", {
 	course: uuid("course")
 		.references(() => instance_course.id, { onDelete: "cascade" })
 		.notNull(),
-	samester: uuid("samester")
-		.references(() => samester.id, {
-			onDelete: "cascade",
-		}),
+	samester: uuid("samester").references(() => samester.id, {
+		onDelete: "cascade",
+	}),
 	// Instance fields
 	template: uuid("template")
 		.references(() => instance_template.id, { onDelete: "cascade" })

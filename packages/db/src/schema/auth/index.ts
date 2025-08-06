@@ -18,7 +18,7 @@ export const staff_list = pgTable("staff_list", {
 
 /**
  * Table for storing SSH public keys.
- * 
+ *
  * Each key is associated with a user and has a comment for identification.
  */
 export const ssh_public_keys = pgTable("ssh_public_keys", {
