@@ -235,6 +235,18 @@ export interface PVE_API_Template extends PVE_API_Structure {
 			Record<string, never>,
 			PVE_LXC
 		>;
+		DELETE: RequestOptions<
+			"/nodes/:node/lxc/:vmid",
+			{
+				node: string;
+				vmid: number;
+			},
+			{
+				"destroy-unreferenced-disks"?: boolean;
+				purge?: boolean;
+			},
+			PVE_Empty_Response
+		>;
 	};
 	"/nodes/:node/lxc/:vmid/status/current": {
 		GET: RequestOptions<
