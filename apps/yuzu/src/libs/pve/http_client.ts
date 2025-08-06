@@ -26,7 +26,9 @@ pve_instance.interceptors.response.use(
 					url: response.config.url,
 					method: response.config.method,
 					status: response.status,
-					bytes: response.headers["content-length"] || -1,
+					bytes: response.headers["content-length"]
+						? parseInt(response.headers["content-length"])
+						: -1,
 				},
 			}),
 		);
