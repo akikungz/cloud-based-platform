@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { Role } from "utils";
 import { user } from "./better_auth";
 
 /**
@@ -10,9 +11,9 @@ import { user } from "./better_auth";
  * - Staff: General staff access.
  */
 export const staff_role = pgEnum("staff_role", [
-	"Administrator",
-	"Teacher",
-	"Staff",
+	Role.Administrator,
+	Role.Teacher,
+	Role.Staff,
 ]);
 
 /**
@@ -24,7 +25,7 @@ export const staff_list = pgTable("staff_list", {
 	auth_id: text("auth_id")
 		.references(() => user.id, { onDelete: "cascade" })
 		.notNull(),
-	role: staff_role("role").default("Staff").notNull(),
+	role: staff_role("role").default(Role.Staff).notNull(),
 	createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 	updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 	deleted_at: timestamp("deleted_at"),
