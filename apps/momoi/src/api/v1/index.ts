@@ -20,5 +20,21 @@ export const v1 = new Elysia({ prefix: "/v1" })
 				message: t.String(),
 			}),
 		},
+		detail: {
+			description: "Get current authenticated user",
+			operationId: "getCurrentUser",
+			tags: ["User"],
+			responses: {
+				200: {
+					description: "Current user data",
+				},
+				401: {
+					description: "Unauthorized access",
+				},
+				500: {
+					description: "Internal server error",
+				},
+			}
+		}
 	})
 	.use(staff_api);

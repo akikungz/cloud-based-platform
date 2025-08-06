@@ -1,8 +1,13 @@
 import { authModule } from "@momoi/modules/auth";
 import { Elysia } from "elysia";
-import { test_api } from "./test";
 
-export const staff_api = new Elysia({ prefix: "/staff" })
+export const staff_api = new Elysia({
+	prefix: "/staff",
+	detail: {
+		description: "Staff management API",
+		operationId: "staffApi",
+		tags: ["Staff"]
+	}
+})
 	.use(authModule)
 	.guard({ auth: true })
-	.use(test_api)

@@ -1,5 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import { opentelemetry } from "@elysiajs/opentelemetry";
+import { serverTiming } from "@elysiajs/server-timing";
 import { swagger } from "@elysiajs/swagger";
 import { api } from "@momoi/api";
 import { env } from "@momoi/libs/env";
@@ -38,6 +39,7 @@ export const app = new Elysia()
 			allowedHeaders: ["Content-Type", "Authorization"],
 		}),
 	)
+	.use(serverTiming())
 	.get("/", () => redirect(env.FRONTEND_BASE_URL), {
 		detail: {
 			description: "Redirect to frontend base URL",

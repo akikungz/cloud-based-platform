@@ -9,8 +9,10 @@
 		"start": "bun run build/runner.js"
 	},
 	"dependencies": {
+		"@eajr/elylog": "^1.0.1",
 		"@elysiajs/cors": "^1.3.3",
 		"@elysiajs/opentelemetry": "^1.3.1",
+		"@elysiajs/server-timing": "^1.3.0",
 		"@elysiajs/swagger": "^1.3.1",
 		"elysia": "latest",
 		"elysia-remote-dts": "^1.0.3",
