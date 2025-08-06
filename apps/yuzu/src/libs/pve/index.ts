@@ -1,61 +1,35 @@
-import { env } from "@yuzu/libs/env";
-import { http_instance } from "@yuzu/libs/http";
-import type {
-	PVE_API,
-	PVE_PATH,
-	PVE_RequestBody,
-	PVE_RequestParams,
-	PVE_RequestResponse,
-} from "@yuzu/libs/pve/types";
+import { instance } from "./http_client";
 
-export const pve_instance = http_instance.create({
-	baseURL: env.PVE_API_URL,
-	headers: {
-		Authorization: `PVEAPIToken=${env.PVE_API_TOKEN_USER}!${env.PVE_API_TOKEN_NAME}=${env.PVE_API_TOKEN}`,
-	},
-});
+/**
+ * Waits for a PVE task to complete and returns its exit status.
+ * @param node The node where the task is running.
+ * @param upid The unique process ID of the task.
+ * @returns A promise that resolves with the exit status of the task.
+ * @throws An error if the task fails with a non-OK exit status.
+ */
+export const task_status = async (node: string, upid: string) =>
+	new Promise<string>((resolve, reject) => {
+		const interval = setInterval(async () => {
+			const task = await instance({
+				path: "/nodes/:node/tasks/:upid/status",
+				method: "GET",
+				params: { node, upid },
+			});
 
-pve_instance.interceptors.response.use(
-	(response) => response.data,
-	(error) => {
-		console.error("PVE API error:", error);
-		return Promise.reject(error);
-	},
-);
-
-export const requestPVE = async <
-	Path extends PVE_PATH,
-	Method extends keyof PVE_API<Path>,
-	Params extends PVE_RequestParams<Path, Method> = PVE_RequestParams<
-		Path,
-		Method
-	>,
-	Body extends PVE_RequestBody<Path, Method> = PVE_RequestBody<Path, Method>,
-	Response extends PVE_RequestResponse<Path, Method> = PVE_RequestResponse<
-		Path,
-		Method
-	>,
->({
-	path,
-	method,
-	params,
-	body,
-}: {
-	path: Path;
-	method: Method;
-	params?: Params;
-	body?: Body;
-}): Promise<Response> => {
-	const request = await pve_instance.request<Response>({
-		url: path,
-		method: method as string,
-		params,
-		data: body,
+			if (task.data.status === "stopped") {
+				if (task.data.exitstatus) {
+					if (task.data.exitstatus !== "OK") {
+						reject(
+							new Error(
+								`Task failed with exit status: ${task.data.exitstatus}`,
+							),
+						);
+					}
+					resolve(task.data.exitstatus);
+					clearInterval(interval);
+				}
+			}
+		}, 1000);
 	});
 
-	if (request.status !== 200) {
-		throw new Error(`PVE API request failed with status ${request.status}`);
-	}
-
-	return request.data;
-};
+export * as qemu from "./qemu";
