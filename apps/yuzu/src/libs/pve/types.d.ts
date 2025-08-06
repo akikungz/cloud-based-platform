@@ -39,7 +39,15 @@ export type PVE_LXC = {
 	maxdisk: number;
 };
 
-export type PVE_Empty_Response = Record<string, never>;
+export type PVE_Empty_Response = string;
+
+export type PVE_Task = {
+	id: string;
+	upid: string;
+	node: string;
+	status: "running" | "stopped";
+	exitstatus?: "OK" | string;
+}
 
 export type PVE_PATH =
 	// Node related endpoints
@@ -47,6 +55,7 @@ export type PVE_PATH =
 	| "/nodes/:node/status"
 	// QEMU related endpoints
 	| "/nodes/:node/qemu"
+	| "/nodes/:node/qemu/:vmid"
 	| "/nodes/:node/qemu/:vmid/status/current"
 	| "/nodes/:node/qemu/:vmid/status/:state"
 	| "/nodes/:node/qemu/:vmid/clone"
@@ -54,13 +63,17 @@ export type PVE_PATH =
 	| "/nodes/:node/qemu/:vmid/resize"
 	// LXC related endpoints
 	| "/nodes/:node/lxc"
+	| "/nodes/:node/lxc/:vmid"
 	| "/nodes/:node/lxc/:vmid/status/current"
 	| "/nodes/:node/lxc/:vmid/status/:state"
 	| "/nodes/:node/lxc/:vmid/clone"
 	| "/nodes/:node/lxc/:vmid/config"
-	| "/nodes/:node/lxc/:vmid/resize";
+	| "/nodes/:node/lxc/:vmid/resize"
+	// Get node tasks
+	| "/nodes/:node/tasks/:upid/status";
 
 export type PVE_Network_Config = `ip=${string}/${number},gw=${string}`;
+export type PVE_Interface_Config = `bridge=${string}`
 
 export type PVE_Disk_Resize = `+${number}G` | `+${number}M` | `+${number}K`;
 
@@ -173,6 +186,7 @@ export interface PVE_API_Template extends PVE_API_Structure {
 			{
 				// Network configuration
 				ipconfig0?: PVE_Network_Config;
+				net0?: PVE_Interface_Config;
 				// Cloud-init configuration
 				cicustom?: string;
 				ciuser?: string;
@@ -301,6 +315,18 @@ export interface PVE_API_Template extends PVE_API_Structure {
 			PVE_Empty_Response
 		>;
 	};
+	// Get node tasks
+	"/nodes/:node/tasks/:upid/status": {
+		GET: RequestOptions<
+			"/nodes/:node/tasks/:upid/status",
+			{
+				node: string;
+				upid: string;
+			},
+			Record<string, never>,
+			PVE_Task
+		>;
+	}
 }
 
 export type PVE_API<Path extends keyof PVE_API_Template> =

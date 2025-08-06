@@ -8,7 +8,7 @@ export type RequestOptions<
 	Path extends string,
 	Params extends ExtractParams<Path> = ExtractParams<Path>,
 	Body extends Record<string, any> = {},
-	Response extends Record<string, any> = {},
+	Response extends Record<string, any> | string = string,
 > = {
 	method: HttpMethod;
 	params?: ExtractParams<Path>;
@@ -22,18 +22,3 @@ export type ExtractParams<T extends string> =
 		: T extends `${infer PartA}/:${infer Param}`
 			? Record<Param, any>
 			: {};
-
-const test: RequestOptions<
-	"/users/:id/posts/:postId",
-	{
-		id: string;
-		postId: string;
-	},
-	{ title: string },
-	{ id: string; title: string }
-> = {
-	method: "GET",
-	params: { id: "123", postId: "456" },
-	body: { title: "Hello World" },
-	response: { id: "123", title: "Hello World" },
-};

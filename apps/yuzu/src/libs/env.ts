@@ -29,8 +29,10 @@ export const envSchema = z
 				message: "PVE_NODES must be a non-empty array of strings",
 			}),
 		),
-	})
-	.strict();
+		DATABASE_URL: z.url({
+			message: "DATABASE_URL must be a valid URL."
+		})
+	});
 
 export type Env = z.infer<typeof envSchema>;
 
