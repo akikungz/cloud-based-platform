@@ -26,7 +26,7 @@ interface ClientMenuItem {
 }
 
 const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
-	[Role.Staff]: [
+	[Role.Administrator]: [
 		{
 			href: "/dashboard",
 			label: "Dashboard",
@@ -62,6 +62,72 @@ const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
 			href: "/staff",
 			label: "Staff",
 			icon: <PersonIcon />,
+		},
+		{
+			href: "/settings",
+			label: "Settings",
+			icon: <SettingsIcon />,
+		},
+	],
+	[Role.Teacher]: [
+		{
+			href: "/dashboard",
+			label: "Dashboard",
+			icon: <DashboardIcon />,
+		},
+		{
+			href: "/approval",
+			label: "Pending Approvals",
+			icon: <AssignmentIcon />,
+		},
+		{
+			href: "/instance",
+			label: "Manage Instances",
+			icon: <StorageIcon />,
+		},
+		{
+			href: "/storage",
+			label: "Storage",
+			icon: <FolderIcon />,
+			disabled: true, // Placeholder for future feature
+		},
+		{
+			href: "/course",
+			label: "Courses",
+			icon: <BookIcon />,
+		},
+		{
+			href: "/settings",
+			label: "Settings",
+			icon: <SettingsIcon />,
+		},
+	],
+	[Role.Staff]: [
+		{
+			href: "/dashboard",
+			label: "Dashboard",
+			icon: <DashboardIcon />,
+		},
+		{
+			href: "/approval",
+			label: "Pending Approvals",
+			icon: <AssignmentIcon />,
+		},
+		{
+			href: "/instance",
+			label: "Manage Instances",
+			icon: <StorageIcon />,
+		},
+		{
+			href: "/storage",
+			label: "Storage",
+			icon: <FolderIcon />,
+			disabled: true, // Placeholder for future feature
+		},
+		{
+			href: "/course",
+			label: "Courses",
+			icon: <BookIcon />,
 		},
 		{
 			href: "/settings",
@@ -110,7 +176,7 @@ export const Sidebar: React.FC = () => {
 					<div
 						className={cn(
 							"w-8 h-8 rounded-lg flex items-center justify-center",
-							user.role === Role.Staff
+							[Role.Administrator, Role.Teacher, Role.Staff].includes(user.role)
 								? "bg-gradient-secondary"
 								: "bg-gradient-primary",
 						)}

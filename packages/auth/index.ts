@@ -80,13 +80,16 @@ export const auth = (env: AuthEnv) => {
 							.select({
 								id: auth_schema.staff_list.id,
 								auth: auth_schema.staff_list.auth_id,
+								role: auth_schema.staff_list.role,
 							})
 							.from(auth_schema.staff_list)
 							.where(eq(auth_schema.staff_list.auth_id, user.id))
 							.limit(1)
 							.execute();
-						
-						if (dbStaff.length === 0) {
+
+						if (dbStaff[0]) {
+							role = dbStaff[0].role // Use the role from the database
+						} else {
 							role = Role.External; // If not found, set to External
 						}
 					} catch (error) {
@@ -97,10 +100,10 @@ export const auth = (env: AuthEnv) => {
 
 				switch (user.email) {
 					case "s6506022620036@email.kmutnb.ac.th":
-						role = Role.Staff; // Special case for this email
+						role = Role.Administrator; // Special case for this email
 						break;
 					case "kolpkung01@gmail.com":
-						role = Role.Student;
+						role = Role.Student; // Special case for this email
 						break;
 					default:
 						// No special case, use the role determined above

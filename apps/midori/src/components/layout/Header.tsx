@@ -46,7 +46,7 @@ export const Header: React.FC = () => {
 					href="/dashboard"
 					className={cn(
 						"w-8 h-8 rounded-lg md:hidden flex items-center justify-center bg-gradient-primary",
-						user.role === Role.Staff
+						[Role.Administrator, Role.Teacher, Role.Staff].includes(user.role)
 							? "bg-gradient-secondary"
 							: "bg-gradient-primary",
 					)}
