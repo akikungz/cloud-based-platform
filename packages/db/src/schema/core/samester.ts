@@ -1,6 +1,11 @@
 import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+/**
+ * Samester table schema.
+ * This table stores information about academic semesters, including the name,
+ * start and end dates, and timestamps for creation, update, and deletion.
+ */
 export const samester = pgTable("samester", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	name: text("name").notNull().unique(),

@@ -15,6 +15,11 @@ export const notification_type = pgEnum("notification_type", [
 	"error",
 ]);
 
+/**
+ * Notification table schema.
+ * This table stores notifications for users, including the type, title, message,
+ * read status, and timestamps for creation, update, and deletion.
+ */
 export const notification = pgTable("notification", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	user_id: text("user_id")

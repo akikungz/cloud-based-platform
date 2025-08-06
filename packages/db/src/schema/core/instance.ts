@@ -44,6 +44,10 @@ export const node_status = pgEnum("node_status", [
 	"unknown",
 ]);
 
+/**
+ * PVE (Proxmox Virtual Environment) database schema.
+ * This schema defines the structure for managing PVE nodes, instances, and related data.
+ */
 export const pve_node = pgTable("pve_node", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	name: text("name").notNull().unique(),
@@ -53,6 +57,10 @@ export const pve_node = pgTable("pve_node", {
 	deleted_at: timestamp("deleted_at"),
 });
 
+/**
+ * PVE Instance Template schema.
+ * This schema defines the structure for managing instance templates in PVE.
+ */
 export const instance_template = pgTable("instance_template", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	os_name: text("os_name").notNull(),
@@ -66,6 +74,11 @@ export const instance_template = pgTable("instance_template", {
 	deleted_at: timestamp("deleted_at"),
 });
 
+/**
+ * Instance Course schema.
+ * This schema defines the structure for managing courses associated with instances.
+ * It includes references to staff members and course details.
+ */
 export const instance_course = pgTable("instance_course", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	course_id: text("course_id").notNull(),
@@ -93,6 +106,11 @@ export const instance_course = pgTable("instance_course", {
 	deleted_at: timestamp("deleted_at"),
 });
 
+/**
+ * Instance Request schema.
+ * This schema defines the structure for managing instance requests made by users.
+ * It includes fields for user information, instance details, and request status.
+ */
 export const instance_request = pgTable("instance_request", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	// User fields
@@ -122,6 +140,11 @@ export const instance_request = pgTable("instance_request", {
 	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
 });
 
+/**
+ * Instance schema.
+ * This schema defines the structure for managing instances in the PVE environment.
+ * It includes fields for user information, instance details, and PVE-specific configurations.
+ */
 export const instance = pgTable("instance", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	// User fields
@@ -161,6 +184,11 @@ export const instance = pgTable("instance", {
 	deleted_at: timestamp("deleted_at"),
 });
 
+/**
+ * Instance Request Extends schema.
+ * This schema extends the instance request with additional fields for more detailed requests.
+ * It includes fields for the instance, request title, description, state, and reason.
+ */
 export const instance_request_extends = pgTable("instance_request_extends", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	// instance fields

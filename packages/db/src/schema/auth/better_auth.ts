@@ -1,5 +1,10 @@
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
+/**
+ * This table defines the user schema for authentication.
+ * It includes fields for user identification, such as id, name email,
+ * and timestamps for creation and updates.
+ */
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull(),
