@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { staff_list } from "../auth";
 import { user } from "../auth/better_auth";
+import { ip_address } from "./network";
 import { samester } from "./samester";
 
 export const instance_state = pgEnum("instance_state", [
@@ -139,7 +140,8 @@ export const instance_request = pgTable("instance_request", {
 
 /**
  * Instance schema.
- * This schema defines the structure for managing instances in the PVE environment.
+ * 
+ * This schema defines the structure for managing instances in the PVE.
  * It includes fields for user information, instance details, and PVE-specific configurations.
  */
 export const instance = pgTable("instance", {
@@ -159,8 +161,7 @@ export const instance = pgTable("instance", {
 	samester: uuid("samester")
 		.references(() => samester.id, {
 			onDelete: "cascade",
-		})
-		.notNull(),
+		}),
 	// Instance fields
 	template: uuid("template")
 		.references(() => instance_template.id, { onDelete: "cascade" })
@@ -176,6 +177,11 @@ export const instance = pgTable("instance", {
 		})
 		.notNull(),
 	vm_id: text("vm_id").notNull(),
+	ip_address: text("ip_address")
+		.references(() => ip_address.ip, {
+			onDelete: "cascade",
+		})
+		.unique(),
 	created_at: timestamp("created_at").default(sql`now()`).notNull(),
 	updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
 	deleted_at: timestamp("deleted_at"),

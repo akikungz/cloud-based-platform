@@ -1,0 +1,1 @@
+ALTER TABLE "network" ADD COLUMN "is_used" boolean DEFAULT false NOT NULL;

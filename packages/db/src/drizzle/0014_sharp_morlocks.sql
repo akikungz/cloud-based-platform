@@ -1,0 +1,1 @@
+ALTER TABLE "instance" ALTER COLUMN "samester" DROP NOT NULL;
