@@ -1,6 +1,19 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./better_auth";
+
+/**
+ * Enum for staff roles.
+ * This enum defines the different roles that a staff member can have.
+ * - Administrator: Full access to all features.
+ * - Teacher: Access to teaching-related features.
+ * - Staff: General staff access.
+ */
+export const staff_role = pgEnum("staff_role", [
+	"Administrator",
+	"Teacher",
+	"Staff",
+]);
 
 /**
  * Table for storing staff members.
@@ -11,6 +24,7 @@ export const staff_list = pgTable("staff_list", {
 	auth_id: text("auth_id")
 		.references(() => user.id, { onDelete: "cascade" })
 		.notNull(),
+	role: staff_role("role").default("Staff").notNull(),
 	createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 	updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 	deleted_at: timestamp("deleted_at"),
