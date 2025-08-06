@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { customSession, openAPI } from "better-auth/plugins";
-import { auth_schema, better_auth, db, drizzle } from "db";
+import { auth_schema, better_auth, db as _db } from "db";
+import { eq } from "drizzle-orm";
 import { getRoleFromEmail, omit, Role, union } from "utils";
 
 export interface AuthEnv {
@@ -16,9 +17,18 @@ export interface AuthEnv {
 	DATABASE_URL: string;
 }
 
-export const auth = (env: AuthEnv) =>
-	betterAuth({
-		database: drizzleAdapter(db(env.DATABASE_URL), {
+/**
+ * Initializes the authentication system with the provided environment variables.
+ * This function sets up the authentication client, session handling, and social providers.
+ * It also configures logging and error handling for the authentication API.
+ * @param env - The environment variables required for authentication.
+ * @returns An instance of the authentication system.
+ */
+export const auth = (env: AuthEnv) => {
+	const db = _db(env.DATABASE_URL);
+
+	return betterAuth({
+		database: drizzleAdapter(db, {
 			provider: "pg",
 			schema: {
 				account: better_auth.account,
@@ -66,13 +76,13 @@ export const auth = (env: AuthEnv) =>
 				if (role === Role.Staff) {
 					// Check is staff exists in the database
 					try {
-						const dbStaff = await db(env.DATABASE_URL)
+						const dbStaff = await db
 							.select({
 								id: auth_schema.staff_list.id,
 								auth: auth_schema.staff_list.auth_id,
 							})
 							.from(auth_schema.staff_list)
-							.where(drizzle.eq(auth_schema.staff_list.auth_id, user.id))
+							.where(eq(auth_schema.staff_list.auth_id, user.id))
 							.limit(1)
 							.execute();
 						
@@ -84,10 +94,6 @@ export const auth = (env: AuthEnv) =>
 						role = Role.External; // Fallback to External on error
 					}
 				}
-
-				// if (user.email == "s6506022620036@email.kmutnb.ac.th") {
-				// 	role = Role.Staff; // Special case for this email
-				// }
 
 				switch (user.email) {
 					case "s6506022620036@email.kmutnb.ac.th":
@@ -123,5 +129,11 @@ export const auth = (env: AuthEnv) =>
 			errorURL: `${env.FRONTEND_BASE_URL}/sign-in?error=true`,
 		},
 	});
+}
 
+/**
+ * Type definition for the Auth object.
+ * This type is derived from the return type of the `auth` function,
+ * which includes user and session information along with custom session handling.
+ */
 export type Auth = ReturnType<typeof auth>;
