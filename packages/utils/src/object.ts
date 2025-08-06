@@ -1,4 +1,10 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: <any> */
+
+/**
+ * Utility functions for object manipulation.
+ * These functions provide methods to omit keys, add new keys, union objects,
+ * and pick specific keys from an object.
+ */
 export const omit = <T extends Record<string, any>, K extends keyof T>(
 	obj: T,
 	keys: K[],
@@ -10,6 +16,10 @@ export const omit = <T extends Record<string, any>, K extends keyof T>(
 	return result;
 };
 
+/**
+ * Adds a new key-value pair to an object.
+ * If the key already exists, it throws an error.
+ */
 export const add = <T extends Record<string, any>, K extends string, V>(
 	obj: T,
 	key: K extends string & keyof T ? never : K,
@@ -21,6 +31,14 @@ export const add = <T extends Record<string, any>, K extends string, V>(
 	return { ...obj, [key]: value };
 };
 
+/**
+ * Merges two objects into one.
+ * If a key exists in both objects, it throws an error.
+ *
+ * @param obj1 - The first object.
+ * @param obj2 - The second object.
+ * @returns A new object that is the union of the two input objects.
+ */
 export const union = <
 	T extends Record<string, any>,
 	U extends Record<string, any>,
@@ -37,6 +55,15 @@ export const union = <
 	return result as T & U;
 };
 
+/**
+ * Picks specific keys from an object.
+ * If a key does not exist in the object, it is ignored.
+ * This function returns a new object containing only the specified keys.
+ *
+ * @param obj - The source object.
+ * @param keys - An array of keys to pick from the object.
+ * @returns A new object containing only the specified keys.
+ */
 export const pick = <T extends Record<string, any>, K extends keyof T>(
 	obj: T,
 	keys: K[],
