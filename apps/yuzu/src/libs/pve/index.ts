@@ -1,6 +1,6 @@
 import { env } from '@yuzu/libs/env';
 import { http_instance } from '@yuzu/libs/http';
-import type { PVE_API, RequestBody, RequestParams, RequestResponse } from '@yuzu/libs/pve/types';
+import type { PVE_API, PVE_PATH, PVE_RequestBody, PVE_RequestParams, PVE_RequestResponse } from '@yuzu/libs/pve/types';
 
 export const pve_instance = http_instance.create({
   baseURL: env.PVE_API_URL,
@@ -18,11 +18,11 @@ pve_instance.interceptors.response.use(
 );
 
 export const requestPVE = async <
-  Path extends keyof PVE_API,
-  Method extends keyof PVE_API[Path],
-  Params extends RequestParams<Path, Method> = RequestParams<Path, Method>,
-  Body extends RequestBody<Path, Method> = RequestBody<Path, Method>,
-  Response extends RequestResponse<Path, Method> = RequestResponse<Path, Method>
+  Path extends PVE_PATH,
+  Method extends keyof PVE_API<Path>,
+  Params extends PVE_RequestParams<Path, Method> = PVE_RequestParams<Path, Method>,
+  Body extends PVE_RequestBody<Path, Method> = PVE_RequestBody<Path, Method>,
+  Response extends PVE_RequestResponse<Path, Method> = PVE_RequestResponse<Path, Method>
 >({ path, method, params, body }: {
   path: Path;
   method: Method;

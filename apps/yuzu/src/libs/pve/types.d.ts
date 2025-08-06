@@ -70,7 +70,7 @@ export type PVE_API_Structure = {
   }
 };
 
-export interface PVE_API extends PVE_API_Structure {
+export interface PVE_API_Template extends PVE_API_Structure {
   // Node related endpoints
   "/nodes": {
     GET: RequestOptions<
@@ -303,11 +303,13 @@ export interface PVE_API extends PVE_API_Structure {
   }
 };
 
-export type RequestBody<Path extends keyof PVE_API, Method extends keyof PVE_API[Path]> =
-  PVE_API[Path][Method] extends RequestOptions<any, any, infer B, any> ? B : Record<string, never>;
+export type PVE_API<Path extends keyof PVE_API_Template> = PVE_API_Template[Path];
 
-export type RequestParams<Path extends keyof PVE_API, Method extends keyof PVE_API[Path]> =
-  PVE_API[Path][Method] extends RequestOptions<any, infer P, any, any> ? P : Record<string, never>;
+export type PVE_RequestBody<Path extends keyof PVE_API_Template, Method extends keyof PVE_API_Template[Path]> =
+  PVE_API_Template[Path][Method] extends RequestOptions<any, any, infer B, any> ? B : Record<string, never>;
 
-export type RequestResponse<Path extends keyof PVE_API, Method extends keyof PVE_API[Path]> =
-  PVE_API[Path][Method] extends RequestOptions<any, any, any, infer R> ? R : Record<string, never>;
+export type PVE_RequestParams<Path extends keyof PVE_API_Template, Method extends keyof PVE_API_Template[Path]> =
+  PVE_API_Template[Path][Method] extends RequestOptions<any, infer P, any, any> ? P : Record<string, never>;
+
+export type PVE_RequestResponse<Path extends keyof PVE_API_Template, Method extends keyof PVE_API_Template[Path]> =
+  PVE_API_Template[Path][Method] extends RequestOptions<any, any, any, infer R> ? R : Record<string, never>;
