@@ -1,0 +1,1 @@
+ALTER TABLE "network" ADD COLUMN "gateway" text NOT NULL;
