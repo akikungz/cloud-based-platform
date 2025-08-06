@@ -16,6 +16,7 @@ export const network = pgTable("network", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   network: text("network").notNull(),
+  gateway: text("gateway").notNull(),
   created_at: timestamp("created_at").default(sql`now()`).notNull(),
   updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
   deleted_at: timestamp("deleted_at")
