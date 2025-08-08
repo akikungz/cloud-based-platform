@@ -1,3 +1,4 @@
+import { record } from "@elysiajs/opentelemetry";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { customSession, openAPI } from "better-auth/plugins";
@@ -60,6 +61,9 @@ export const auth = (env: AuthEnv) => {
 				enabled: true,
 				maxAge: 60 * 60 * 24 * 7, // 7 days
 			},
+			expiresIn: 60 * 60 * 24 * 7, // 7 days
+			updateAge: 60 * 60 * 24, // 24 hours
+			secret: env.GOOGLE_CLIENT_ID, // Use client ID as secret for simplicity
 		},
 		logger: {
 			disabled: false,
@@ -74,33 +78,36 @@ export const auth = (env: AuthEnv) => {
 				let role = getRoleFromEmail(user.email);
 
 				if (role === Role.Staff) {
-					// Check is staff exists in the database
-					try {
-						const dbStaff = await db
-							.select({
-								id: auth_schema.staff_list.id,
-								auth: auth_schema.staff_list.auth_id,
-								role: auth_schema.staff_list.role,
-							})
-							.from(auth_schema.staff_list)
-							.where(eq(auth_schema.staff_list.auth_id, user.id))
-							.limit(1)
-							.execute();
-
-						if (dbStaff[0]) {
-							role = dbStaff[0].role // Use the role from the database
-						} else {
-							role = Role.External; // If not found, set to External
+					role = await record("auth.getStaffRole", async () => {
+						// Check is staff exists in the database
+						try {
+							const dbStaff = await db
+								.select({
+									id: auth_schema.staff_list.id,
+									auth: auth_schema.staff_list.auth_id,
+									role: auth_schema.staff_list.role,
+								})
+								.from(auth_schema.staff_list)
+								.where(eq(auth_schema.staff_list.auth_id, user.id))
+								.limit(1)
+								.execute();
+	
+							if (dbStaff[0]) {
+								// role = dbStaff[0].role // Use the role from the database
+								return Role.Staff; // If found, set to Staff
+							} else {
+								return Role.External; // If not found, set to External
+							}
+						} catch (error) {
+							console.error("Error checking staff existence:", error);
+							return Role.External; // Fallback to External on error
 						}
-					} catch (error) {
-						console.error("Error checking staff existence:", error);
-						role = Role.External; // Fallback to External on error
-					}
+					});
 				}
 
 				switch (user.email) {
 					case "s6506022620036@email.kmutnb.ac.th":
-						role = Role.Administrator; // Special case for this email
+						role = Role.Staff; // Special case for this email
 						break;
 					case "kolpkung01@gmail.com":
 						role = Role.Student; // Special case for this email

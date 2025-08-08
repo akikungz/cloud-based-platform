@@ -40,10 +40,10 @@ export const getRoleFromEmail = (email: string): Role => {
  * @returns True if the student ID is valid, false otherwise.
  */
 export const studentValidationFromId = (student_id: string): boolean => {
-	if (student_id.startsWith("s")) {
+	if (student_id.startsWith("s") && student_id.length <= 14) {
 		student_id = student_id.slice(1); // Remove leading 's'
-	} else {
-		return false; // Invalid if it does not start with 's'
+	} else if (student_id.length > 13) {
+		return false; // Invalid length for student ID
 	}
 
 	return student_id_pattern.test(student_id);
