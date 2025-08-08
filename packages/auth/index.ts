@@ -29,15 +29,18 @@ export const auth = (env: AuthEnv) => {
 	const db = _db(env.DATABASE_URL);
 
 	return betterAuth({
-		database: drizzleAdapter(db, {
-			provider: "pg",
-			schema: {
-				account: better_auth.account,
-				session: better_auth.session,
-				user: better_auth.user,
-				verification: better_auth.verification,
-			},
-		}),
+		database: record(
+			"auth.database", 
+			() => drizzleAdapter(db, {
+				provider: "pg",
+				schema: {
+					account: better_auth.account,
+					session: better_auth.session,
+					user: better_auth.user,
+					verification: better_auth.verification,
+				},
+			})
+		),
 		baseURL: env.API_URL,
 		basePath: "/api/auth",
 		trustedOrigins: ["*", ...(env.TRUSTED_ORIGINS || [])],
@@ -74,61 +77,63 @@ export const auth = (env: AuthEnv) => {
 		},
 		plugins: [
 			openAPI(),
-			customSession(async ({ user, session }) => {
-				let role = getRoleFromEmail(user.email);
+			customSession(async ({ user, session }) => 
+				record("auth.customSession", async () => {
+					let role = getRoleFromEmail(user.email);
 
-				if (role === Role.Staff) {
-					role = await record("auth.getStaffRole", async () => {
-						// Check is staff exists in the database
-						try {
-							const dbStaff = await db
-								.select({
-									id: auth_schema.staff_list.id,
-									auth: auth_schema.staff_list.auth_id,
-									role: auth_schema.staff_list.role,
-								})
-								.from(auth_schema.staff_list)
-								.where(eq(auth_schema.staff_list.auth_id, user.id))
-								.limit(1)
-								.execute();
-	
-							if (dbStaff[0]) {
-								// role = dbStaff[0].role // Use the role from the database
-								return Role.Staff; // If found, set to Staff
-							} else {
-								return Role.External; // If not found, set to External
+					if (role === Role.Staff) {
+						role = await record("auth.getStaffRole", async () => {
+							// Check is staff exists in the database
+							try {
+								const dbStaff = await db
+									.select({
+										id: auth_schema.staff_list.id,
+										auth: auth_schema.staff_list.auth_id,
+										role: auth_schema.staff_list.role,
+									})
+									.from(auth_schema.staff_list)
+									.where(eq(auth_schema.staff_list.auth_id, user.id))
+									.limit(1)
+									.execute();
+		
+								if (dbStaff[0]) {
+									// role = dbStaff[0].role // Use the role from the database
+									return Role.Staff; // If found, set to Staff
+								} else {
+									return Role.External; // If not found, set to External
+								}
+							} catch (error) {
+								console.error("Error checking staff existence:", error);
+								return Role.External; // Fallback to External on error
 							}
-						} catch (error) {
-							console.error("Error checking staff existence:", error);
-							return Role.External; // Fallback to External on error
-						}
-					});
-				}
+						});
+					}
 
-				switch (user.email) {
-					case "s6506022620036@email.kmutnb.ac.th":
-						role = Role.Staff; // Special case for this email
-						break;
-					case "kolpkung01@gmail.com":
-						role = Role.Student; // Special case for this email
-						break;
-					default:
-						// No special case, use the role determined above
-						break;
-				}
+					switch (user.email) {
+						case "s6506022620036@email.kmutnb.ac.th":
+							role = Role.Staff; // Special case for this email
+							break;
+						case "kolpkung01@gmail.com":
+							role = Role.Student; // Special case for this email
+							break;
+						default:
+							// No special case, use the role determined above
+							break;
+					}
 
-				const data = {
-					user: union(
-						omit(user, ["createdAt", "updatedAt", "emailVerified"]),
-						{
-              role,
-            }
-					),
-					session,
-				};
+					const data = {
+						user: union(
+							omit(user, ["createdAt", "updatedAt", "emailVerified"]),
+							{
+								role,
+							}
+						),
+						session,
+					};
 
-        return data;
-			}),
+					return data;
+				})
+			),
 		],
 		onAPIError: {
 			throw: true,
