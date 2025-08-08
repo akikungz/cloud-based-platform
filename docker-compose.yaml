@@ -45,17 +45,17 @@ services:
   #   depends_on:
   #     - logging
   
-  # tracing:
-  #   image: jaegertracing/jaeger:2.8.0
-  #   environment:
-  #     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-  #   ports:
-  #     - "16686:16686"
-  #     - "4317:4317"
-  #     - "4318:4318"
-  #     - "5778:5778"
-  #   volumes:
-  #     - ./config/monitoring/jaeger/jaeger.yml:/etc/jaeger/config.yaml
+  tracing:
+    image: jaegertracing/jaeger:2.8.0
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+      - "5778:5778"
+    volumes:
+      - ./config/monitoring/jaeger/jaeger.yml:/etc/jaeger/config.yaml
   #   logging:
   #     driver: "loki"
   #     options:
