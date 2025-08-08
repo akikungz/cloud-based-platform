@@ -1,5 +1,5 @@
 "use client";
-import { authClient } from "@midori/libs/auth";
+import { authClient, useSession } from "@midori/libs/auth";
 import { env } from "@midori/libs/env";
 import { cn } from "@midori/utils/format";
 import CheckIcon from "@mui/icons-material/Check";
@@ -22,8 +22,8 @@ export default function SignIn() {
 	const [error, setError] = useState<string | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [studentId, setStudentId] = useState("");
-
-	const isStudentIdValid = studentValidationFromId(studentId);
+	const [isStudentIdValid, setIsStudentIdValid] = useState(false);
+	const session = useSession();
 
 	const handleSignIn = async () => {
 		const signin = await authClient.signIn.social({
@@ -51,6 +51,25 @@ export default function SignIn() {
 		}
 	}, [searchParams]);
 
+	useEffect(() => {
+		if (studentId) {
+			const isValid = studentValidationFromId(studentId);
+			setIsStudentIdValid(isValid);
+		} else {
+			setIsStudentIdValid(false);
+		}
+	}, [studentId]);
+
+	useEffect(() => {
+		if (!session.isPending) {
+			if (session.data) {
+				if (session.data.user) {
+					return window.location.replace("/dashboard");
+				}
+			}
+		}
+	}, [session]);
+
 	return (
 		<div className="w-full min-h-dvh flex items-center justify-center relative p-4 bg-gradient-accent">
 			{error && (
@@ -70,6 +89,37 @@ export default function SignIn() {
 				</DialogTitle>
 				<DialogContent>
 					<div className="flex flex-col gap-4">
+						<div className="p-4 bg-vm-blue-100 flex flex-col gap-2 rounded-lg">
+							<h2 className="font-bold text-vm-blue-600 text-left">Students</h2>
+							<div className="bg-white/60 rounded-xl shadow-sm">
+								<TextField
+									label="Check access with Student ID"
+									variant="outlined"	
+									placeholder="KMUTNB Student ID"
+									size="small"
+									fullWidth
+									slotProps={{
+										input: {
+											startAdornment: isStudentIdValid ? (
+												<CheckIcon className="text-green-500 mr-1" />
+											) : (
+												<CloseIcon className="text-red-500 mr-1" />
+											),
+										},
+									}}
+									onChange={(e) => setStudentId(e.target.value)}
+									value={studentId}
+									className="shadow-sm"
+								/>
+							</div>
+
+							<p className="text-sm text-gray-700">
+								Students from the Department of Information Technology, Faculty
+								of Industrial Technology and Management, King Mongkut's
+								University of Technology North Bangkok.
+							</p>
+						</div>
+
 						<div className="p-4 bg-vm-orange-100 flex flex-col gap-2 rounded-lg">
 							<h2 className="font-bold text-vm-orange-600 text-left">Staff</h2>
 							<p className="text-sm text-gray-700">
@@ -85,37 +135,6 @@ export default function SignIn() {
 							>
 								Staff members
 							</a>
-						</div>
-
-						<div className="p-4 bg-vm-blue-100 flex flex-col gap-2 rounded-lg">
-							<h2 className="font-bold text-vm-blue-600 text-left">Students</h2>
-
-							<p className="text-sm text-gray-700">
-								Students from the Department of Information Technology, Faculty
-								of Industrial Technology and Management, King Mongkut's
-								University of Technology North Bangkok.
-							</p>
-
-							<div className="bg-white p-2 rounded-xl shadow-sm">
-								<TextField
-									label="Check access with Student ID"
-									variant="outlined"
-									fullWidth
-									placeholder="KMUTNB Student ID"
-									size="small"
-									slotProps={{
-										input: {
-											startAdornment: isStudentIdValid ? (
-												<CheckIcon className="text-green-500 mr-1" />
-											) : (
-												<CloseIcon className="text-red-500 mr-1" />
-											),
-										},
-									}}
-									onChange={(e) => setStudentId(e.target.value)}
-									value={studentId}
-								/>
-							</div>
 						</div>
 					</div>
 				</DialogContent>
