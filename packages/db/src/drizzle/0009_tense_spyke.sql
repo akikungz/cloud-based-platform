@@ -1,1 +1,0 @@
-ALTER TABLE "instance" ALTER COLUMN "pve_node" SET DATA TYPE text;

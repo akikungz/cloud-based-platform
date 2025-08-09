@@ -22,10 +22,17 @@ export const staff_role = pgEnum("staff_role", [
  */
 export const staff_list = pgTable("staff_list", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-	auth_id: text("auth_id")
-		.references(() => user.id, { onDelete: "cascade" })
-		.notNull(),
+	// The ID of the user in the auth system with email domain @itm.kmutnb.ac.th
+	auth_itm: uuid("auth_itm").references(() => user.id, {
+		onDelete: "cascade"
+	}),
+	// The ID of the user in the auth system with email domain @fitm.kmutnb.ac.th
+	auth_fitm: uuid("auth_fitm").references(() => user.id, {
+		onDelete: "cascade"
+	}),
+	// The role of the staff member, defaulting to Staff
 	role: staff_role("role").default(Role.Staff).notNull(),
+	// Timestamps for tracking creation, updates, and deletion
 	createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 	updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 	deleted_at: timestamp("deleted_at"),
