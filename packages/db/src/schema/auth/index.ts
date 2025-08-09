@@ -23,11 +23,11 @@ export const staff_role = pgEnum("staff_role", [
 export const staff_list = pgTable("staff_list", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	// The ID of the user in the auth system with email domain @itm.kmutnb.ac.th
-	auth_itm: uuid("auth_itm").references(() => user.id, {
+	auth_itm: text("auth_itm").references(() => user.id, {
 		onDelete: "cascade"
 	}),
 	// The ID of the user in the auth system with email domain @fitm.kmutnb.ac.th
-	auth_fitm: uuid("auth_fitm").references(() => user.id, {
+	auth_fitm: text("auth_fitm").references(() => user.id, {
 		onDelete: "cascade"
 	}),
 	// The role of the staff member, defaulting to Staff
