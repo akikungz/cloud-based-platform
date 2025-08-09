@@ -4,15 +4,35 @@ import { env } from "@momoi/libs/env";
 
 app.trace(({ context, onHandle }) => {
 	onHandle(async ({ error, total }) => {
-		console.log(
-			`Request ${context.request.method} ${context.route} ${context.request.url} handled in ${total}ms`,
+		console.info(
+			JSON.stringify({
+				timestamp: new Date().toISOString(),
+				level: "info",
+				message: "Request handled",
+				data: {
+					route: context.route,
+					method: context.request.method,
+					status: context.status,
+					totalTime: `${total} ms`,
+				},
+			})
 		);
+
 		if (error) {
 			const opt = await error;
 			if (opt) {
 				console.error(
-					`Error in request ${context.request.method} ${context.route} ${context.request.url}:`,
-					opt,
+					JSON.stringify({
+						timestamp: new Date().toISOString(),
+						level: "error",
+						message: "Error occurred",
+						data: {
+							route: context.route,
+							method: context.request.method,
+							status: context.status,
+							error: opt.message,
+						},
+					})
 				);
 			}
 		}

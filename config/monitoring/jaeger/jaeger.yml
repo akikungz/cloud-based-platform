@@ -37,36 +37,16 @@ extensions:
   jaeger_storage:
     backends:
       trace_store:
-        elasticsearch:
+        es:
           server_urls:
             - "http://trace_store:9200"
           indices:
             index_prefix: "jaeger-traces"
-            spans:
-              date_layout: "2006-01-02"
-              rollover_frequency: "day"
-              shards: 5
-              replicas: 1
-            services:
-              date_layout: "2006-01-02"
-              rollover_frequency: "day"
-              shards: 5
-              replicas: 1
-            dependencies:
-              date_layout: "2006-01-02"
-              rollover_frequency: "day"
-              shards: 5
-              replicas: 1
-            sampling:
-              date_layout: "2006-01-02"
-              rollover_frequency: "day"
-              shards: 5
-              replicas: 1
         badger:
           directory: "/var/lib/jaeger/badger"
           max_age: "7d"
       trace_store_archive:
-        elasticsearch:
+        es:
           server_urls:
             - "http://trace_store:9200"
           indices:
@@ -84,10 +64,14 @@ receivers:
     protocols:
       grpc:
       http:
+  spanmetrics:
+    endpoint: jaeger_storage_exporter
 
 processors:
   batch:
 
 exporters:
+  prometheus:
+    endpoint: "http://prometheus:9090"
   jaeger_storage_exporter:
     trace_storage: trace_store

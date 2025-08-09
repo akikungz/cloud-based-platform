@@ -3,7 +3,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { customSession, openAPI } from "better-auth/plugins";
 import { auth_schema, better_auth, db as _db } from "db";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { getRoleFromEmail, omit, Role, union } from "utils";
 
 export interface AuthEnv {
@@ -88,11 +88,17 @@ export const auth = (env: AuthEnv) => {
 								const dbStaff = await db
 									.select({
 										id: auth_schema.staff_list.id,
-										auth: auth_schema.staff_list.auth_id,
+										auth_itm: auth_schema.staff_list.auth_itm,
+										auth_fitm: auth_schema.staff_list.auth_fitm,
 										role: auth_schema.staff_list.role,
 									})
 									.from(auth_schema.staff_list)
-									.where(eq(auth_schema.staff_list.auth_id, user.id))
+									.where(
+										or(
+											eq(auth_schema.staff_list.auth_itm, user.id),
+											eq(auth_schema.staff_list.auth_fitm, user.id)
+										)
+									)
 									.limit(1)
 									.execute();
 		

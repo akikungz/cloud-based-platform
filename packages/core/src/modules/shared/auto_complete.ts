@@ -2,7 +2,7 @@ import { DrizzleAdapter } from "@core/adapters/drizzle";
 import type { InstanceCourse } from "@core/schema/instance";
 import type { User } from "@core/schema/user";
 import type { db } from "db";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 export class AutoComplete extends DrizzleAdapter {
 	// biome-ignore lint/complexity/noUselessConstructor: This constructor is necessary for dependency injection
@@ -22,27 +22,22 @@ export class AutoComplete extends DrizzleAdapter {
 			.from(this.instance_course)
 			.execute();
 
-		if (result.length === 0) {
-			throw new Error("No courses found");
-		}
-
 		return result;
 	}
 
 	public async getStaffList(): Promise<Omit<User, "image">[]> {
 		const result = await this.db
 			.select({
-				id: this.user.id,
+				id: this.staff_list.id,
 				name: this.user.name,
 				email: this.user.email,
 			})
 			.from(this.user)
-			.innerJoin(this.staff_list, eq(this.user.id, this.staff_list.auth_id))
+			.innerJoin(this.staff_list, or(
+				eq(this.user.id, this.staff_list.auth_itm),
+				eq(this.user.id, this.staff_list.auth_fitm)
+			))
 			.execute();
-
-		if (result.length === 0) {
-			throw new Error("No staff found");
-		}
 
 		return result;
 	}
@@ -60,10 +55,6 @@ export class AutoComplete extends DrizzleAdapter {
 			})
 			.from(this.instance_template)
 			.execute();
-
-		if (result.length === 0) {
-			throw new Error("No templates found");
-		}
 
 		return result;
 	}
