@@ -49,12 +49,12 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
 			{/* Main Content */}
 			<div
 				className={cn(
-					"transition-all duration-300",
+					"transition-all duration-300 flex flex-col h-screen",
 					sidebarContext.isCollapsed ? "md:ml-16" : "md:ml-64",
 				)}
 			>
 				<Header />
-				<main className="p-6 pt-6">{children}</main>
+				<main className="p-4 flex-1 max-h-[calc(100vh-64px)] overflow-auto">{children}</main>
 			</div>
 		</div>
 	);

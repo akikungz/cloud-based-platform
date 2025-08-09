@@ -14,7 +14,7 @@ import StorageIcon from "@mui/icons-material/Storage";
 import { Tooltip } from "@mui/material";
 import { LogOut, Server } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import { useContext } from "react";
 import { Role } from "utils";
 
@@ -158,6 +158,7 @@ const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
 export const Sidebar: React.FC = () => {
 	const { isOpen, isCollapsed } = useContext(SidebarContext);
 	const { user, isPending } = useContext(UserContext);
+	const pathname = usePathname();
 
 	if (isPending) return null;
 	if (!user) return redirect("/sign-in");
@@ -194,6 +195,8 @@ export const Sidebar: React.FC = () => {
 
 			<div className="flex flex-col flex-1 items-center gap-1 p-2">
 				{ClientMenu[user.role].map((item) => {
+					const isActive = pathname === item.href;
+
 					return (
 						<Tooltip
 							key={item.label}
@@ -209,6 +212,9 @@ export const Sidebar: React.FC = () => {
 									"text-vm-blue-700 rounded-lg",
 									item.disabled ? "cursor-not-allowed opacity-50" : "",
 									isCollapsed ? "px-3" : "px-4",
+									isActive
+										? "bg-vm-blue-100 text-vm-blue-900"
+										: "text-vm-blue-700",
 								)}
 							>
 								{item.icon}
