@@ -194,7 +194,11 @@ export const Sidebar: React.FC = () => {
 			</div>
 
 			<div className="flex flex-col flex-1 items-center gap-1 p-2">
-				{ClientMenu[user.role].map((item) => {
+				{ClientMenu[
+					user.role === Role.Staff ?
+						Role.Administrator :
+						user.role
+				].map((item) => {
 					const isActive = pathname === item.href;
 
 					return (
