@@ -33,12 +33,12 @@ const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
 			icon: <DashboardIcon />,
 		},
 		{
-			href: "/approval",
+			href: "/approvals",
 			label: "Pending Approvals",
 			icon: <AssignmentIcon />,
 		},
 		{
-			href: "/instance",
+			href: "/instances",
 			label: "Manage Instances",
 			icon: <StorageIcon />,
 		},
@@ -49,12 +49,12 @@ const ClientMenu: Record<keyof typeof Role, ClientMenuItem[]> = {
 			disabled: true, // Placeholder for future feature
 		},
 		{
-			href: "/samester",
+			href: "/samesters",
 			label: "Samesters",
 			icon: <SchoolIcon />,
 		},
 		{
-			href: "/course",
+			href: "/courses",
 			label: "Courses",
 			icon: <BookIcon />,
 		},
