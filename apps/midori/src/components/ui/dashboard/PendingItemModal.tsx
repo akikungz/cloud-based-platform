@@ -6,7 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MemoryIcon from '@mui/icons-material/Memory';
 import SettingsIcon from '@mui/icons-material/Settings';
 import StorageIcon from '@mui/icons-material/Storage';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, MenuItem, Stack, TextField, Typography } from "@mui/material";
 
 interface PendingItemModalProps {
   item: PendingRequestItemProps;
@@ -17,16 +17,18 @@ const PendingItemModal: React.FC<PendingItemModalProps> = ({ item, onClose }) =>
   return (
     <Dialog open onClose={onClose} fullWidth>
       <DialogTitle>
-        <Typography variant="h6" component="div">
-          {item.title}
-        </Typography>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
+        <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
+          <Typography variant="h6" component="div">
+            {item.title}
+          </Typography>
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Stack>
       </DialogTitle>
       <DialogContent>
         {/* General content */}
