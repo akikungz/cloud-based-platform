@@ -6,15 +6,13 @@ export const Dashboard: React.FC = () => {
 	return (
 		<div className="flex flex-col items-center justify-center gap-4">
 			{/* Header */}
-			<div className="flex items-center justify-between w-full px-2 pt-2">
-				<div className="flex flex-col">
-					<h2 className="text-3xl font-semibold">
-						Instant Management Dashboard
-					</h2>
-					<p className="text-vm-blue-600">
-						Manage your virtual machines and resources efficiently.
-					</p>
-				</div>
+			<div className="flex flex-col w-full px-2 pt-2">
+				<h2 className="text-3xl font-semibold">
+					Dashboard
+				</h2>
+				<p className="text-vm-blue-600">
+					Monitor and manage student requests and approvals.
+				</p>
 			</div>
 
 			{/* Pending Requests */}

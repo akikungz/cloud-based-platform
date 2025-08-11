@@ -1,3 +1,3 @@
-import Approval from "@midori/pages/staff/Approval";
+import Approvals from "@midori/pages/staff/Approvals";
 
-export default Approval;
+export default Approvals;

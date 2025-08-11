@@ -5,7 +5,7 @@ import { MenuItem, Pagination, Select, Stack, TextField } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
-export const Approval = () => {
+export const Approvals = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -148,4 +148,4 @@ export const Approval = () => {
   )
 }
 
-export default Approval;
+export default Approvals;

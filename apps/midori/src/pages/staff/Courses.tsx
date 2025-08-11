@@ -7,7 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { Button } from "@mui/material";
 import { useState } from "react";
 
-export const CoursePage = () => {
+export const CoursesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -33,4 +33,4 @@ export const CoursePage = () => {
   )
 }
 
-export default CoursePage;
+export default CoursesPage;

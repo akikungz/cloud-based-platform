@@ -29,7 +29,7 @@ export interface PendingItemContextProps {
   setPendingItem: (item: PendingRequestItemProps | null) => void;
 }
 
-const PendingItemContext = createContext<PendingItemContextProps>({
+export const PendingItemContext = createContext<PendingItemContextProps>({
   pendingItem: null,
   setPendingItem: () => {},
 });

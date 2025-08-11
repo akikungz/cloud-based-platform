@@ -1,3 +1,3 @@
-import { CoursePage } from "@midori/pages/staff/Course";
+import { CoursesPage } from "@midori/pages/staff/Courses";
 
-export default CoursePage;
+export default CoursesPage;
