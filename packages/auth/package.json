@@ -1,16 +1,11 @@
 {
-  "name": "cloud-based-platform",
+  "name": "auth",
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  }
 }
