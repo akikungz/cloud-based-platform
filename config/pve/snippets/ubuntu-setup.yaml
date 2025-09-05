@@ -1,0 +1,17 @@
+#cloud-config
+users:
+  - name: user
+    shell: /bin/bash
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+ssh_pwauth: True
+chpasswd:
+  expire: True
+  list: |
+    user:password
+package_reboot_if_required: true
+package_update: true
+package_upgrade: true
+packages:
+  - qemu-guest-agent
+runcmd:
+  - systemctl enable --now qemu-guest-agent
