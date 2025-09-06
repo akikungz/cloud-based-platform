@@ -1,0 +1,4 @@
+{
+	// "typescript.experimental.useTsgo": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+}
