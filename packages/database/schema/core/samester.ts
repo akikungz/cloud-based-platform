@@ -7,7 +7,7 @@ import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
  * start and end dates, and timestamps for creation, update, and deletion.
  */
 export const samester = pgTable("samester", {
-  id: serial("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   start_at: timestamp("start_at").notNull(),
   end_at: timestamp("end_at").notNull(),
