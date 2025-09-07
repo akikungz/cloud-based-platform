@@ -2,17 +2,15 @@ import { describe, expect, it, beforeEach } from "bun:test";
 
 import { treaty } from "@elysiajs/eden";
 
-import { mockAuthStudent } from "@momoi/core/auth/auth.service-test";
-
-import { resetAll } from "database/functions/test/reset";
-import { instance, instance_course, instance_template, pve_node } from "database/schema/core/instances";
-
-import { requests_controller } from "./requests.controller";
 import { mock_db } from "database";
+import { resetAll } from "database/functions/test/reset";
 import { user } from "database/schema/auth/better-auth";
 import { staff_list } from "database/schema/auth/user";
+import { instance, instance_course, instance_template, pve_node } from "database/schema/core/instances";
 import { ip_address, network } from "database/schema/core/network";
 import { samester } from "database/schema/core/samester";
+
+import { requests_controller } from "./requests.controller";
 
 describe("requests_controller", () => {
   let app: typeof requests_controller;
@@ -20,7 +18,6 @@ describe("requests_controller", () => {
 
   beforeEach(async () => {
     app = requests_controller;
-    app.use(mockAuthStudent);
 
     api = treaty<typeof app>(app);
 
