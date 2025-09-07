@@ -9,16 +9,6 @@ import * as instances from "database/schema/core/instances";
 import * as network from "database/schema/core/network";
 import * as samester from "database/schema/core/samester";
 
-export const reset = async (...schema: PgTableWithColumns<any>[]) => {
-  for (const table of schema) {
-    const [err] = await create_callback(() => mock_db.delete(table).execute());
-
-    if (err) {
-      console.error(`Error resetting table:`, err);
-    }
-  }
-}
-
 export const resetAll = async () => {
   const allSchemas = [
     ...Object.values(better_auth),
@@ -30,5 +20,21 @@ export const resetAll = async () => {
     schema != null && typeof schema === 'object' && 'getSQL' in schema && typeof schema.getSQL === 'function'
   ) as PgTableWithColumns<any>[];
 
-  await reset(...allSchemas);
+  return create_callback(async () => {
+    await Promise.all(allSchemas.map((s) => mock_db.delete(s).execute()));
+  });
+}
+
+export const resetAfterEach = () => {
+  const allSchemas = [
+    ...Object.values(better_auth),
+    ...Object.values(user_auth),
+    ...Object.values(instances),
+    ...Object.values(network),
+    ...Object.values(samester),
+  ].filter((schema) =>
+    schema != null && typeof schema === 'object' && 'getSQL' in schema && typeof schema.getSQL === 'function'
+  ) as PgTableWithColumns<any>[];
+
+  return Promise.all(allSchemas.map((s) => mock_db.delete(s).execute()));
 }

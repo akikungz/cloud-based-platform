@@ -159,9 +159,8 @@ export const instance = pgTable("instance", {
   course: integer("course")
     .references(() => instance_course.id, { onDelete: "cascade" })
     .notNull(),
-  samester: integer("samester").references(() => samester.id, {
-    onDelete: "cascade",
-  }),
+  samester: integer("samester")
+    .references(() => samester.id, { onDelete: "cascade" }),
   // Instance fields
   template: integer("template")
     .references(() => instance_template.id, { onDelete: "cascade" })
@@ -172,15 +171,11 @@ export const instance = pgTable("instance", {
   state: instance_state("state").notNull().default("active"),
   status: instance_status("status").notNull().default("pending"),
   pve_node: text("pve_node")
-    .references(() => pve_node.name, {
-      onDelete: "cascade",
-    })
+    .references(() => pve_node.name, { onDelete: "cascade" })
     .notNull(),
   vm_id: integer("vm_id").notNull(),
   ip_address: text("ip_address")
-    .references(() => ip_address.ip, {
-      onDelete: "cascade",
-    })
+    .references(() => ip_address.ip, { onDelete: "cascade" })
     .unique(),
   created_at: timestamp("created_at").default(sql`now()`).notNull(),
   updated_at: timestamp("updated_at").default(sql`now()`).notNull(),

@@ -1,0 +1,1 @@
+ALTER TABLE "samester" ADD COLUMN "active" boolean DEFAULT false NOT NULL;

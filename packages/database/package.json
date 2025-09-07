@@ -20,6 +20,8 @@
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:push:test": "drizzle-kit push --config=drizzle-test.config.ts"
+    "db:push:test": "drizzle-kit push --config=drizzle-test.config.ts",
+    "db:studio": "drizzle-kit studio --port 3003",
+    "db:studio:test": "drizzle-kit studio --port 3003 --config=drizzle-test.config.ts"
   }
 }

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 /**
  * Samester table schema.
@@ -11,6 +11,7 @@ export const samester = pgTable("samester", {
   name: text("name").notNull().unique(),
   start_at: timestamp("start_at").notNull(),
   end_at: timestamp("end_at").notNull(),
+  active: boolean("active").default(false).notNull(),
   created_at: timestamp("created_at").default(sql`now()`).notNull(),
   updated_at: timestamp("updated_at").default(sql`now()`).notNull(),
   deleted_at: timestamp("deleted_at"),
