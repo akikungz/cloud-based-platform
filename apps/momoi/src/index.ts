@@ -76,4 +76,4 @@ export const app = new Elysia()
 
 export type App = typeof app;
 
-app.listen(env.BACKEND_PORT, () => console.log(`🚀 Momoi is running on port ${env.BACKEND_PORT}`));
+app.listen(env.BACKEND_PORT, () => console.log(`😺 Momoi is running on port ${env.BACKEND_PORT}`));
