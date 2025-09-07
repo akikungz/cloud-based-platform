@@ -10,30 +10,46 @@ import { pick } from "utils/functions/objects";
 export const auth_service = new Elysia({ name: "auth.service" })
   .macro({
     auth: {
-      resolve: async ({ status, request: { headers } }) => {
+      resolve: async (ctx) => {
         const result = await record("auth.resolve", () =>
-          auth.api.getSession({ headers })
+          auth.api.getSession({ headers: ctx.request.headers })
         );
 
         if (!result) {
-          logger.info("No session found");
-          return status(401, { message: "Unauthorized" });
+          logger.info({
+            route: ctx.route,
+            method: ctx.request.method,
+            status: ctx.set.status,
+          }, "No session found");
+          return ctx.status(401, { message: "Unauthorized" });
         }
 
         const { user, session } = result;
         if (!session) {
-          logger.info("No session found");
-          return status(401, { message: "Unauthorized" });
+          logger.info({
+            route: ctx.route,
+            method: ctx.request.method,
+            status: ctx.set.status
+          }, "No session found");
+          return ctx.status(401, { message: "Unauthorized" });
         } else {
           if (session.expiresAt < new Date()) {
-            logger.info("Session expired");
-            return status(401, { message: "Unauthorized" });
+            logger.info({
+              route: ctx.route,
+              method: ctx.request.method,
+              status: ctx.set.status
+            }, "Session expired");
+            return ctx.status(401, { message: "Unauthorized" });
           }
         }
 
         if (!user) {
-          logger.info("No user found");
-          return status(401, { message: "Unauthorized" });
+          logger.info({
+            route: ctx.route,
+            method: ctx.request.method,
+            status: ctx.set.status
+          });
+          return ctx.status(401, { message: "Unauthorized" });
         }
 
         return {
