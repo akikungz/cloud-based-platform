@@ -18,7 +18,9 @@ export const requests_controller = new Elysia({
   })
   .get("/", async ({ status, user }) => {
     const requests = await RequestsService.getRequests(user.id);
-    return status(200, { message: "Student requests controller", data: requests });
+    const extend_requests = await RequestsService.getExtendRequests(user.id);
+
+    return status(200, { message: "Student requests controller", data: { requests, extend_requests } });
   })
   .post("/", async ({ status, user, body }) => {
     const [err, result] = await create_callback(() => RequestsService.createRequest(user.id, body));
@@ -44,4 +46,20 @@ export const requests_controller = new Elysia({
       memory: t.Number({ minimum: 256, maximum: 8192 }),
       disk: t.Number({ minimum: 8, maximum: 32 }),
     })
-  });
+  })
+  .post("/extend", async ({ status, body, user }) => {
+    const [err, result] = await create_callback(() => RequestsService.createRequestExtends(body, user.id));
+
+    if (err) {
+      console.error("Error creating extend request:", err);
+      return status(500, { message: "Failed to create extend request", error: err });
+    }
+
+    return status(201, { message: "Create a new extend request", data: result });
+  }, {
+    body: t.Object({
+      instance: t.Number(),
+      title: t.String(),
+      description: t.String(),
+    })
+  })
