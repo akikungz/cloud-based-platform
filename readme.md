@@ -41,7 +41,7 @@ And this project is a part of the Special Project course in the 4th year of the 
 - Documentation: [Markdown](https://www.markdownguide.org/) and [LaTeX](https://www.latex-project.org/)
 - Other Libraries: 
   - [Zod](https://zod.dev/) for schema validation
-  - [Drizzle ORM](https://orm.drizzle.team/) for database interactions
+  - [Prisma](https://www.prisma.io/orm) for database ORM
   - [Axios](https://axios-http.com/) for HTTP requests
   - [BetterAuth](https://www.better-auth.com/) for authentication (in this case, Google OAuth2)
   - [NextJS](https://nextjs.org/) for react framework
