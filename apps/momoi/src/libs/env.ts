@@ -97,7 +97,7 @@ const testEnvSchema = z.object({
   // Application environment
   NODE_ENV: z.enum(["development", "production", "test"], {
     message: "NODE_ENV must be one of development, production, or test",
-  }),
+  }).optional(),
   // Logging level
   LOG_LEVEL: z
     .enum(["debug", "info", "warn", "error"], {
@@ -208,12 +208,13 @@ const testEnvSchema = z.object({
 const envSchema = z.preprocess(
   (data) => {
     const nodeEnv = (data as any)?.NODE_ENV || process.env.NODE_ENV;
-    return { ...(data as object), _nodeEnv: nodeEnv };
+    return { ...(data as object), NODE_ENV: nodeEnv };
   },
   z.object({
-    _nodeEnv: z.string(),
+    NODE_ENV: z.string(),
   }).transform((data) => {
-    if (data._nodeEnv === "test") {
+    // If NODE_ENV is test or undefined (common in test environments), use test schema
+    if (data.NODE_ENV === "test" || !data.NODE_ENV) {
       return testEnvSchema.parse(data);
     }
     return baseEnvSchema.parse(data);

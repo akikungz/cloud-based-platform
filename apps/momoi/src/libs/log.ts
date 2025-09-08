@@ -3,7 +3,10 @@ import type { LokiOptions } from "pino-loki";
 
 import { env } from "@momoi/libs/env";
 
-export const init_transport = env.LOG_TARGET === "loki"
+// In test environment, use simple console logging
+export const init_transport = (env.NODE_ENV === "test" || !env.NODE_ENV)
+  ? undefined // Use default console transport
+  : env.LOG_TARGET === "loki"
   ? transport<LokiOptions>({
     target: "pino-loki",
     options: {
