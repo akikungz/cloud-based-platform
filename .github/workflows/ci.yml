@@ -3,6 +3,12 @@ name: CI
 on:
   push:
     branches: [ main, development ]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.prisma'
   pull_request:
     branches: [ main, development ]
 
