@@ -145,6 +145,8 @@ model ip_address {
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
+
+  instance instance[]
 }
 
 model samester {
@@ -247,7 +249,8 @@ model instance {
   pve_node                 String
   node                     pve_node                   @relation(fields: [pve_node], references: [name], onDelete: Cascade)
   vm_id                    Int
-  ip_address               String?                    @unique
+  ip_address_id            Int?
+  ip_address               ip_address?                @relation(fields: [ip_address_id], references: [id], onDelete: SetNull)
   created_at               DateTime                   @default(now())
   updated_at               DateTime                   @default(now())
   deleted_at               DateTime?
