@@ -1,1 +1,0 @@
-ALTER TABLE "samester" ALTER COLUMN "id" DROP DEFAULT;

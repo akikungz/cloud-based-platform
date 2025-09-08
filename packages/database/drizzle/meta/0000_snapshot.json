@@ -1,5 +1,5 @@
 {
-  "id": "71c36d33-3910-4886-a8d1-8b96b059e675",
+  "id": "a2791e8f-3194-4643-ac3d-91714dcea374",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1286,8 +1286,7 @@
           "name": "id",
           "type": "serial",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -1306,6 +1305,13 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "created_at": {
           "name": "created_at",

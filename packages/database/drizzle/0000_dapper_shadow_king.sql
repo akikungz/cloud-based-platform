@@ -177,10 +177,11 @@ CREATE TABLE "network" (
 );
 --> statement-breakpoint
 CREATE TABLE "samester" (
-	"id" serial PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"start_at" timestamp NOT NULL,
 	"end_at" timestamp NOT NULL,
+	"active" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"deleted_at" timestamp,
