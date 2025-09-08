@@ -1,0 +1,269 @@
+// Prisma schema generated to mirror existing Drizzle models
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
+}
+
+generator prismabox {
+  provider                    = "prismabox"
+  typeboxImportDependencyName = "elysia"
+  typeboxImportVariableName   = "t"
+  inputModel                  = true
+  output                      = "../generated/prismabox"
+}
+
+enum instance_state {
+  active
+  deleted
+  archived
+}
+
+enum instance_status {
+  pending
+  running
+  stopped
+}
+
+enum instance_request_type {
+  course
+  project
+}
+
+enum request_state {
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum vm_type {
+  qemu
+  lxc
+}
+
+enum node_status {
+  online
+  offline
+  maintenance
+  unknown
+}
+
+model user {
+  id             String   @id
+  name           String
+  email          String   @unique
+  email_verified Boolean  @default(false)
+  image          String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  session          session[]
+  account          account[]
+  instance_request instance_request[]
+  instance         instance[]
+}
+
+model session {
+  id         String   @id
+  expires_at DateTime
+  token      String   @unique
+  created_at DateTime
+  updated_at DateTime
+  ip_address String?
+  user_agent String?
+  user_id    String
+  user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model account {
+  id                       String    @id
+  account_id               String
+  provider_id              String
+  user_id                  String
+  user                     user      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  access_token             String?
+  refresh_token            String?
+  id_token                 String?
+  access_token_expires_at  DateTime?
+  refresh_token_expires_at DateTime?
+  scope                    String?
+  password                 String?
+  created_at               DateTime
+  updated_at               DateTime
+}
+
+model verification {
+  id         String   @id
+  identifier String
+  value      String
+  expires_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+model staff_list {
+  id         Int       @id @default(autoincrement())
+  user_id    String    @unique
+  is_staff   Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+}
+
+model user_public_key {
+  id         Int       @id @default(autoincrement())
+  user_id    String    @unique
+  public_key String
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+}
+
+model network {
+  id         Int       @id @default(autoincrement())
+  name       String
+  network    String
+  gateway    String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  ip_address ip_address[]
+}
+
+model ip_address {
+  id         Int       @id @default(autoincrement())
+  network_id Int
+  network    network   @relation(fields: [network_id], references: [id], onDelete: Cascade)
+  ip         String    @unique
+  is_used    Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+}
+
+model samester {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  start_at   DateTime
+  end_at     DateTime
+  active     Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  instance instance[]
+}
+
+model pve_node {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  status     node_status
+  created_at DateTime    @default(now())
+  updated_at DateTime    @default(now())
+  deleted_at DateTime?
+
+  instance          instance[]
+  instance_template instance_template[] @relation("template_host")
+}
+
+model instance_template {
+  id               Int       @id @default(autoincrement())
+  os_name          String
+  vm_template_id   String
+  vm_template_host String
+  host             pve_node  @relation("template_host", fields: [vm_template_host], references: [name], onDelete: Cascade)
+  vm_type          vm_type
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @default(now())
+  deleted_at       DateTime?
+
+  instance_request instance_request[]
+  instance         instance[]
+}
+
+model instance_course {
+  id                Int                @id @default(autoincrement())
+  course_id         String
+  course_title      String
+  main_staff        Int
+  assistant_staff_1 Int?
+  assistant_staff_2 Int?
+  assistant_staff_3 Int?
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @default(now())
+  deleted_at        DateTime?
+  instance_request  instance_request[]
+  instance          instance[]
+}
+
+model instance_request {
+  id          Int                   @id @default(autoincrement())
+  user_id     String
+  user        user                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  title       String
+  hostname    String
+  description String
+  type        instance_request_type
+  course_id   Int
+  course      instance_course       @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  template_id Int
+  template    instance_template     @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  cpus        Int
+  memory      Int
+  disk        Int
+  state       request_state         @default(pending)
+  reason      String?
+  created_at  DateTime              @default(now())
+  updated_at  DateTime              @default(now())
+
+  extends instance_request_extends[]
+}
+
+model instance {
+  id                       Int                        @id @default(autoincrement())
+  user_id                  String
+  user                     user                       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  title                    String
+  hostname                 String
+  description              String
+  type                     instance_request_type
+  course_id                Int
+  course                   instance_course            @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  samester_id              Int?
+  samester                 samester?                  @relation(fields: [samester_id], references: [id], onDelete: Cascade)
+  template_id              Int
+  template                 instance_template          @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  cpus                     Int
+  memory                   Int
+  disk                     Int
+  state                    instance_state             @default(active)
+  status                   instance_status            @default(pending)
+  pve_node                 String
+  node                     pve_node                   @relation(fields: [pve_node], references: [name], onDelete: Cascade)
+  vm_id                    Int
+  ip_address               String?                    @unique
+  created_at               DateTime                   @default(now())
+  updated_at               DateTime                   @default(now())
+  deleted_at               DateTime?
+  instance_request_extends instance_request_extends[]
+}
+
+model instance_request_extends {
+  id                 Int               @id @default(autoincrement())
+  instance_id        Int
+  instance           instance          @relation(fields: [instance_id], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  state              request_state     @default(pending)
+  reason             String?
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @default(now())
+  instance_request   instance_request? @relation(fields: [instance_requestId], references: [id])
+  instance_requestId Int?
+}

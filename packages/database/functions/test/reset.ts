@@ -1,40 +1,48 @@
-import type { PgTableWithColumns } from "drizzle-orm/pg-core";
-
-import { mock_db } from "database";
+import type { PrismaDB } from "database";
 import { create_callback } from "utils/functions/callback";
 
-import * as better_auth from "database/schema/auth/better-auth";
-import * as user_auth from "database/schema/auth/user";
-import * as instances from "database/schema/core/instances";
-import * as network from "database/schema/core/network";
-import * as samester from "database/schema/core/samester";
-
-export const resetAll = async () => {
-  const allSchemas = [
-    ...Object.values(better_auth),
-    ...Object.values(user_auth),
-    ...Object.values(instances),
-    ...Object.values(network),
-    ...Object.values(samester),
-  ].filter((schema) =>
-    schema != null && typeof schema === 'object' && 'getSQL' in schema && typeof schema.getSQL === 'function'
-  ) as PgTableWithColumns<any>[];
-
+export const resetAll = async (db: PrismaDB) => {
   return create_callback(async () => {
-    await Promise.all(allSchemas.map((s) => mock_db.delete(s).execute()));
+    await db.verification.deleteMany();
+    await db.account.deleteMany();
+    await db.session.deleteMany();
+    await db.staff_list.deleteMany();
+    await db.user_public_key.deleteMany();
+
+    await db.ip_address.deleteMany();
+    await db.network.deleteMany();
+
+    await db.instance_request_extends.deleteMany();
+    await db.instance.deleteMany();
+    await db.instance_request.deleteMany();
+    await db.instance_template.deleteMany();
+    await db.instance_course.deleteMany();
+
+    await db.pve_node.deleteMany();
+    await db.samester.deleteMany();
+    await db.user.deleteMany();
   });
 }
 
-export const resetAfterEach = () => {
-  const allSchemas = [
-    ...Object.values(better_auth),
-    ...Object.values(user_auth),
-    ...Object.values(instances),
-    ...Object.values(network),
-    ...Object.values(samester),
-  ].filter((schema) =>
-    schema != null && typeof schema === 'object' && 'getSQL' in schema && typeof schema.getSQL === 'function'
-  ) as PgTableWithColumns<any>[];
+export const resetAfterEach = (db: PrismaDB) => {
+  return Promise.all([
+    db.verification.deleteMany(),
+    db.account.deleteMany(),
+    db.session.deleteMany(),
+    db.staff_list.deleteMany(),
+    db.user_public_key.deleteMany(),
 
-  return Promise.all(allSchemas.map((s) => mock_db.delete(s).execute()));
+    db.ip_address.deleteMany(),
+    db.network.deleteMany(),
+
+    db.instance_request_extends.deleteMany(),
+    db.instance.deleteMany(),
+    db.instance_request.deleteMany(),
+    db.instance_template.deleteMany(),
+    db.instance_course.deleteMany(),
+
+    db.pve_node.deleteMany(),
+    db.samester.deleteMany(),
+    db.user.deleteMany(),
+  ]);
 }

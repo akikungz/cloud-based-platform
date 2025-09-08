@@ -1,14 +1,6 @@
-import { eq } from "drizzle-orm";
+import type { PrismaDB } from "database";
 
-import { type DB } from "database";
-import { staff_list } from "database/schema/auth/user";
-
-export const check_staff = async (db: DB, id: string) => {
-  const staff = await db
-    .select()
-    .from(staff_list)
-    .where(eq(staff_list.user_id, id))
-
-  if (staff.length == 1) return true;
-  return false;
+export const check_staff = async (db: PrismaDB, id: string) => {
+  const count = await db.staff_list.count({ where: { user_id: id } });
+  return count === 1;
 }

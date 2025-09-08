@@ -1,35 +1,35 @@
-import { eq, or } from "drizzle-orm";
+import type { PrismaDB } from "database";
 
-import type { DB } from "database";
-import { staff_list } from "database/schema/auth/user";
-import { instance_course, instance_template } from "database/schema/core/instances";
-import { user } from "database/schema/auth/better-auth";
-
-export const get_staff = (db: DB) => {
-  return db.select().from(staff_list);
+export const get_staff = async (db: PrismaDB) => {
+  return db.staff_list.findMany();
 }
 
-export const get_course = (db: DB) => {
-  return db.select({
-    id: instance_course.id,
-    code: instance_course.course_id,
-    name: instance_course.course_title,
-    main_staff: user.name,
-    assistant_staff_1: user.name,
-    assistant_staff_2: user.name,
-    assistant_staff_3: user.name,
-  })
-    .from(instance_course)
-    .innerJoin(user,
-      or(
-        eq(instance_course.main_staff, user.id),
-        eq(instance_course.assistant_staff_1, user.id),
-        eq(instance_course.assistant_staff_2, user.id),
-        eq(instance_course.assistant_staff_3, user.id),
-      )
-    )
+export const get_course = async (db: PrismaDB) => {
+  // Prisma schema does not define relations to user for staff fields,
+  // so we return course info only. Names can be joined upstream if needed.
+  const courses = await db.instance_course.findMany({
+    select: {
+      id: true,
+      course_id: true,
+      course_title: true,
+      main_staff: true,
+      assistant_staff_1: true,
+      assistant_staff_2: true,
+      assistant_staff_3: true,
+    },
+  });
+
+  return courses.map((c) => ({
+    id: c.id,
+    code: c.course_id,
+    name: c.course_title,
+    main_staff: String(c.main_staff ?? ""),
+    assistant_staff_1: String(c.assistant_staff_1 ?? ""),
+    assistant_staff_2: String(c.assistant_staff_2 ?? ""),
+    assistant_staff_3: String(c.assistant_staff_3 ?? ""),
+  }));
 }
 
-export const get_template = (db: DB) => {
-  return db.select().from(instance_template);
+export const get_template = async (db: PrismaDB) => {
+  return db.instance_template.findMany();
 }
