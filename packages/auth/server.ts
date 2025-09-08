@@ -4,7 +4,6 @@ import { customSession, openAPI } from "better-auth/plugins";
 import { record } from "@elysiajs/opentelemetry"
 
 import type { PrismaDB } from "database";
-import { check_staff } from "database/functions/auth/staff";
 import { is_staff, is_student, role_validator } from "./utils/role";
 
 const return_null = {
@@ -67,7 +66,10 @@ export const auth = (db: PrismaDB, env: AuthEnv) => betterAuth({
           const response = await record(
             "auth.staff_validation",
             async () => {
-              const isStaff = await check_staff(db, user.id);
+              const isStaff = await db.staff_list.findUnique({
+                where: { user_id: user.id },
+              });
+
               if (!isStaff) return return_null;
 
               return { user: { ...user, role }, session }
