@@ -2,13 +2,7 @@ import { describe, expect, it, beforeEach } from "bun:test";
 
 import { treaty } from "@elysiajs/eden";
 
-import { mock_db } from "database";
-import { resetAll } from "database/functions/test/reset";
-import { user } from "database/schema/auth/better-auth";
-import { staff_list } from "database/schema/auth/user";
-import { instance, instance_course, instance_template, pve_node } from "database/schema/core/instances";
-import { ip_address, network } from "database/schema/core/network";
-import { samester } from "database/schema/core/samester";
+import { db } from "@momoi/libs/db";
 
 import { requests_controller } from "./requests.controller";
 
@@ -21,130 +15,75 @@ describe("requests_controller", () => {
 
     api = treaty<typeof app>(app);
 
-    // Reset database
-    await resetAll();
+    // Reset database (delete children before parents)
+    await db.instance_request_extends.deleteMany();
+    await db.instance_request.deleteMany();
+    await db.instance.deleteMany();
+    await db.ip_address.deleteMany();
+    await db.network.deleteMany();
+    await db.instance_template.deleteMany();
+    await db.pve_node.deleteMany();
+    await db.instance_course.deleteMany();
+    await db.staff_list.deleteMany();
+    await db.samester.deleteMany();
+    await db.user.deleteMany();
 
     // Mock user data
-    await mock_db
-      .insert(user)
-      .values([
-        {
-          id: "test-student-id",
-          email: "s6506022620036@email.kmutnb.ac.th",
-          name: "Student Test",
-        },
-        {
-          id: "test-staff-id",
-          email: "staff.t@itm.kmutnb.ac.th",
-          name: "Staff Test",
-        }
-      ])
-      .onConflictDoNothing()
-      .execute();
+    await db.user.createMany({
+      data: [
+        { id: "test-student-id", email: "s6506022620036@email.kmutnb.ac.th", name: "Student Test" },
+        { id: "test-staff-id", email: "staff.t@itm.kmutnb.ac.th", name: "Staff Test" }
+      ],
+      skipDuplicates: true
+    });
 
     // Mock staff list
-    await mock_db
-      .insert(staff_list)
-      .values({
-        id: 1,
-        user_id: "test-staff-id",
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.staff_list.create({ data: { id: 1, user_id: "test-staff-id", is_staff: true } });
 
     // Mock instance course
-    await mock_db
-      .insert(instance_course)
-      .values({
-        id: 1,
-        course_id: "060233101",
-        course_title: "Introduction to Information and Network Engineering",
-        main_staff: 1,
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.instance_course.create({
+      data: { id: 1, course_id: "060233101", course_title: "Introduction to Information and Network Engineering", main_staff: 1 }
+    });
 
     // Mock PVE node
-    await mock_db
-      .insert(pve_node)
-      .values({
-        id: 1,
-        name: "Test Node",
-        status: "online",
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.pve_node.create({ data: { id: 1, name: "Test Node", status: "online" } });
 
     // Mock instance template
-    await mock_db
-      .insert(instance_template)
-      .values({
-        id: 1,
-        vm_template_id: "101",
-        vm_template_host: "Test Node",
-        vm_type: "qemu",
-        os_name: "Ubuntu 24.04",
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.instance_template.create({
+      data: { id: 1, vm_template_id: "101", vm_template_host: "Test Node", vm_type: "qemu", os_name: "Ubuntu 24.04" }
+    });
 
     // Mock network
-    await mock_db
-      .insert(network)
-      .values({
-        id: 1,
-        name: "Test Network",
-        network: "10.20.31.0/24",
-        gateway: "10.20.31.1"
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.network.create({
+      data: { id: 1, name: "Test Network", network: "10.20.31.0/24", gateway: "10.20.31.1" }
+    });
 
     // Mock ip address
-    await mock_db
-      .insert(ip_address)
-      .values([2, 3, 4, 5, 6].map((i, index) => ({
-        id: index + 1,
-        network: 1,
-        ip: `10.20.31.${i}/24`,
-      })))
-      .onConflictDoNothing()
-      .execute();
+    await db.ip_address.createMany({
+      data: [2, 3, 4, 5, 6].map((i, index) => ({ id: index + 1, network_id: 1, ip: `10.20.31.${i}/24` })),
+      skipDuplicates: true
+    });
 
     // Mock samester
-    await mock_db
-      .insert(samester)
-      .values([
-        {
-          id: 1,
-          name: "1/2568",
-          start_at: new Date("2024-06-01"),
-          end_at: new Date("2024-10-30"),
-          active: true,
-        },
-        {
-          id: 2,
-          name: "2/2568",
-          start_at: new Date("2024-11-01"),
-          end_at: new Date("2025-03-31"),
-          active: false,
-        }
-      ])
-      .onConflictDoNothing()
-      .execute();
+    await db.samester.createMany({
+      data: [
+        { id: 1, name: "1/2568", start_at: new Date("2024-06-01"), end_at: new Date("2024-10-30"), active: true },
+        { id: 2, name: "2/2568", start_at: new Date("2024-11-01"), end_at: new Date("2025-03-31"), active: false }
+      ],
+      skipDuplicates: true
+    });
 
     // Mock instance
-    await mock_db
-      .insert(instance)
-      .values({
+    await db.instance.create({
+      data: {
         id: 1,
-        course: 1,
+        course_id: 1,
         title: "Test Instance",
         description: "This is a test instance",
         type: "course",
         hostname: "test-instance",
-        user: "test-student-id",
-        template: 1,
+        user_id: "test-student-id",
+        template_id: 1,
         pve_node: "Test Node",
         vm_id: 1001,
         status: "running",
@@ -152,10 +91,10 @@ describe("requests_controller", () => {
         cpus: 2,
         memory: 2048,
         disk: 20,
-        samester: 1,
-      })
-      .onConflictDoNothing()
-      .execute();
+        samester_id: 1,
+        state: "active"
+      }
+    });
   });
 
   // afterEach(resetAfterEach);
@@ -174,12 +113,12 @@ describe("requests_controller", () => {
       title: "Test Request",
       description: "This is a test request",
       hostname: "test-host",
-      course: 1,
-      template: 1,
+      course_id: 1,
+      template_id: 1,
       cpus: 2,
       memory: 512,
       disk: 16,
-    });
+    } as any);
 
     expect(response.status).toBe(201);
     expect(response.data).toHaveProperty("message", "Create a new request");
@@ -191,10 +130,10 @@ describe("requests_controller", () => {
 
   it("POST /requests/extend", async () => {
     const response = await api.requests.extend.post({
-      instance: 1,
+      instance_id: 1,
       title: "Extend Request",
       description: "This is a test extend request",
-    });
+    } as any);
 
     expect(response.status).toBe(201);
     expect(response.data).toHaveProperty("message", "Create a new extend request");

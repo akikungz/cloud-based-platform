@@ -3,11 +3,7 @@ import { treaty } from "@elysiajs/eden";
 
 import { autocomplete_controller } from "./autocomplete.controller";
 
-import { mock_db } from "database";
-import { resetAll } from "database/functions/test/reset";
-import { instance_course, instance_template, pve_node } from "database/schema/core/instances";
-import { staff_list } from "database/schema/auth/user";
-import { user } from "database/schema/auth/better-auth";
+import { db } from "@momoi/libs/db";
 
 describe("autocomplete_controller", () => {
   let app: typeof autocomplete_controller;
@@ -17,79 +13,47 @@ describe("autocomplete_controller", () => {
     app = autocomplete_controller;
     api = treaty<typeof app>(app);
 
-    // Reset database
-    await resetAll();
+    // Reset database (delete children before parents)
+    await db.instance_request_extends.deleteMany();
+    await db.instance_request.deleteMany();
+    await db.instance.deleteMany();
+    await db.ip_address.deleteMany();
+    await db.network.deleteMany();
+    await db.instance_template.deleteMany();
+    await db.pve_node.deleteMany();
+    await db.instance_course.deleteMany();
+    await db.staff_list.deleteMany();
+    await db.samester.deleteMany();
+    await db.user.deleteMany();
 
     // Mock user data
-    await mock_db
-      .insert(user)
-      .values([
-        {
-          id: "test-staff-id",
-          email: "staff.t@itm.kmutnb.ac.th",
-          name: "Staff Test",
-        },
-        {
-          id: "test-student-id",
-          email: "s6506022620036@email.kmutnb.ac.th",
-          name: "Student Test",
-        },
-        {
-          id: "test-non-staff-id",
-          email: "non.s@itm.kmutnb.ac.th",
-          name: "Non Staff Test",
-        }
-      ])
-      .onConflictDoNothing()
-      .execute();
+    await db.user.createMany({
+      data: [
+        { id: "test-staff-id", email: "staff.t@itm.kmutnb.ac.th", name: "Staff Test" },
+        { id: "test-student-id", email: "s6506022620036@email.kmutnb.ac.th", name: "Student Test" },
+        { id: "test-non-staff-id", email: "non.s@itm.kmutnb.ac.th", name: "Non Staff Test" }
+      ],
+      skipDuplicates: true
+    });
 
     // Mock staff list
-    await mock_db
-      .insert(staff_list)
-      .values({
-        id: 1,
-        user_id: "test-staff-id",
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.staff_list.create({ data: { id: 1, user_id: "test-staff-id", is_staff: true } });
 
     // Mock instance course
-    await mock_db
-      .insert(instance_course)
-      .values({
-        id: 1,
-        course_id: "060233101",
-        course_title: "Introduction to Information and Network Engineering",
-        main_staff: 1,
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.instance_course.create({
+      data: { id: 1, course_id: "060233101", course_title: "Introduction to Information and Network Engineering", main_staff: 1 }
+    });
 
     // Mock PVE node
-    await mock_db
-      .insert(pve_node)
-      .values({
-        id: 1,
-        name: "Test Node",
-        status: "online",
-      })
-      .onConflictDoNothing()
-      .execute();
+    await db.pve_node.create({ data: { id: 1, name: "Test Node", status: "online" } });
 
     // Mock instance template
-    await mock_db
-      .insert(instance_template)
-      .values([
-        {
-          id: 1,
-          os_name: "Ubuntu 20.04",
-          vm_type: "qemu",
-          vm_template_id: "101",
-          vm_template_host: "Test Node",
-        }
-      ])
-      .onConflictDoNothing()
-      .execute();
+    await db.instance_template.createMany({
+      data: [
+        { id: 1, os_name: "Ubuntu 20.04", vm_type: "qemu", vm_template_id: "101", vm_template_host: "Test Node" }
+      ],
+      skipDuplicates: true
+    });
   });
 
   // afterEach(resetAfterEach);

@@ -1,48 +1,26 @@
-import { eq } from "drizzle-orm";
-
 import { db } from "@momoi/libs/db";
 import { env } from "@momoi/libs/env";
 
-import { mock_db } from "database";
-import { user } from "database/schema/auth/better-auth";
-import { instance_course, instance_template } from "database/schema/core/instances";
-import { staff_list } from "database/schema/auth/user";
-
 export class AutoCompleteService {
-  private static db = env.NODE_ENV === "test" ? (mock_db as unknown as typeof db) : db;
+  private static db = db;
 
   public static async getCourse() {
-    // Logic to get course autocomplete
-    const results = await this.db
-      .select({
-        id: instance_course.id,
-        title: instance_course.course_title,
-        code: instance_course.course_id
-      })
-      .from(instance_course);
-
-    return results;
+    const results = await this.db.instance_course.findMany({
+      select: { id: true, course_title: true, course_id: true }
+    });
+    return results.map(r => ({ id: r.id, title: r.course_title, code: r.course_id }));
   }
 
   public static async getStaff() {
-    // Logic to get staff autocomplete
-    const results = await this.db
-      .select()
-      .from(user)
-      .innerJoin(staff_list, eq(user.id, staff_list.user_id));
-
-    return results;
+    // staff_list is a separate model with user_id string; fetch joins via two queries
+    const staff = await this.db.staff_list.findMany({ select: { user_id: true } });
+    const ids = staff.map(s => s.user_id);
+    return this.db.user.findMany({ where: { id: { in: ids } } });
   }
 
   public static async getTemplate() {
-    const results = await this.db
-      .select({
-        id: instance_template.id,
-        os_name: instance_template.os_name,
-        vm_type: instance_template.vm_type
-      })
-      .from(instance_template);
-
-    return results;
+    return this.db.instance_template.findMany({
+      select: { id: true, os_name: true, vm_type: true }
+    });
   }
 }

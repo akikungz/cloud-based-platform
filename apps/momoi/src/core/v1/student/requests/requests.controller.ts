@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { instance_request_type } from "database/generated/prismabox/barrel";
 import { create_callback } from "utils/functions/callback";
 
 import env from "@momoi/libs/env";
@@ -35,13 +36,10 @@ export const requests_controller = new Elysia({
     body: t.Object({
       title: t.String(),
       description: t.String(),
-      type: t.Enum({
-        course: "course",
-        project: "project",
-      }),
+      type: instance_request_type,
       hostname: t.String(),
-      course: t.Number(),
-      template: t.Number(),
+      course_id: t.Number(),
+      template_id: t.Number(),
       cpus: t.Number({ minimum: 1, maximum: 8 }),
       memory: t.Number({ minimum: 256, maximum: 8192 }),
       disk: t.Number({ minimum: 8, maximum: 32 }),
@@ -58,7 +56,7 @@ export const requests_controller = new Elysia({
     return status(201, { message: "Create a new extend request", data: result });
   }, {
     body: t.Object({
-      instance: t.Number(),
+      instance_id: t.Number(),
       title: t.String(),
       description: t.String(),
     })
