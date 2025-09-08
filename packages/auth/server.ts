@@ -1,11 +1,10 @@
 import { betterAuth } from "better-auth"
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 import { customSession, openAPI } from "better-auth/plugins";
 import { record } from "@elysiajs/opentelemetry"
 
-import { type DB } from "database";
+import type { PrismaDB } from "database";
 import { check_staff } from "database/functions/auth/staff";
-import * as better_auth from "database/schema/auth/better-auth";
 import { is_staff, is_student, role_validator } from "./utils/role";
 
 const return_null = {
@@ -33,18 +32,10 @@ export interface AuthEnv {
  * @param env Authentication environment variables
  * @returns A better-auth instance
  */
-export const auth = (db: DB, env: AuthEnv) => betterAuth({
+export const auth = (db: PrismaDB, env: AuthEnv) => betterAuth({
   database: record(
     "auth.database",
-    () => drizzleAdapter(db, {
-      provider: "pg",
-      schema: {
-        account: better_auth.account,
-        session: better_auth.session,
-        user: better_auth.user,
-        verification: better_auth.verification,
-      }
-    })
+    () => prismaAdapter(db, { provider: "postgresql" })
   ),
   baseUrl: env.base_url,
   basePath: env.base_path,
