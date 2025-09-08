@@ -129,14 +129,14 @@ describe("requests_controller", () => {
   });
 
   it("POST /requests/extend", async () => {
-    const response = await api.requests.extend.post({
+    const response = await api.requests.extends.post({
       instance_id: 1,
-      title: "Extend Request",
-      description: "This is a test extend request",
+      title: "Extends Request",
+      description: "This is a test extends request",
     } as any);
 
     expect(response.status).toBe(201);
-    expect(response.data).toHaveProperty("message", "Create a new extend request");
+    expect(response.data).toHaveProperty("message", "Create a new extends request");
 
     const check_response = await api.requests.get();
     expect(check_response.data).toHaveProperty("data");

@@ -45,15 +45,15 @@ export const requests_controller = new Elysia({
       disk: t.Number({ minimum: 8, maximum: 32 }),
     })
   })
-  .post("/extend", async ({ status, body, user }) => {
+  .post("/extends", async ({ status, body, user }) => {
     const [err, result] = await create_callback(() => RequestsService.createRequestExtends(body, user.id));
 
     if (err) {
-      console.error("Error creating extend request:", err);
-      return status(500, { message: "Failed to create extend request", error: err });
+      console.error("Error creating extends request:", err);
+      return status(500, { message: "Failed to create extends request", error: err });
     }
 
-    return status(201, { message: "Create a new extend request", data: result });
+    return status(201, { message: "Create a new extends request", data: result });
   }, {
     body: t.Object({
       instance_id: t.Number(),
