@@ -6,7 +6,7 @@ import { mock_db } from "database";
 import { instance, instance_request, instance_request_extends } from "database/schema/core/instances";
 
 export class RequestsService {
-  private static db = env.NODE_ENV === "test" ? mock_db : db;
+  private static db = env.NODE_ENV === "test" ? (mock_db as unknown as typeof db) : db;
 
   public static async getRequests(user: string) {
     // Logic to get requests

@@ -24,7 +24,7 @@ export const instances_controller = new Elysia({
   .get("/:id", async ({ status, user, params }) => {
     const [err, instance] = await create_callback(() => InstanceService.getInstanceById(user.id, params.id));
 
-    if (err) {
+    if (err || !instance) {
       console.error("Error fetching instance by ID:", err);
       return status(404, { message: "Instance not found", error: err });
     }
@@ -38,7 +38,7 @@ export const instances_controller = new Elysia({
   .delete("/:id", async ({ status, user, params }) => {
     const [err, result] = await create_callback(() => InstanceService.deleteInstance(user.id, params.id));
 
-    if (err) {
+    if (err || !result) {
       console.error("Error deleting instance:", err);
       return status(500, { message: "Failed to delete instance", error: err });
     }
@@ -48,4 +48,4 @@ export const instances_controller = new Elysia({
     params: t.Object({
       id: t.Number()
     })
-  })
+  });

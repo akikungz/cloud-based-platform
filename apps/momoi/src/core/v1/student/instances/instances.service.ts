@@ -7,7 +7,7 @@ import { instance } from "database/schema/core/instances";
 import { samester } from "database/schema/core/samester";
 
 export class InstanceService {
-  private static db = env.NODE_ENV === "test" ? mock_db : db;
+  private static db = env.NODE_ENV === "test" ? (mock_db as unknown as typeof db) : db;
 
   public static async getInstances(user: string) {
     // Logic to get instances
@@ -51,7 +51,7 @@ export class InstanceService {
       .limit(1);
 
     if (result.length === 0) {
-      throw new Error("Instance not found");
+      return null;
     }
 
     return result[0];

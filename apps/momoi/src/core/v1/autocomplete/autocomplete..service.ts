@@ -9,7 +9,7 @@ import { instance_course, instance_template } from "database/schema/core/instanc
 import { staff_list } from "database/schema/auth/user";
 
 export class AutoCompleteService {
-  private static db = env.NODE_ENV === "test" ? mock_db : db;
+  private static db = env.NODE_ENV === "test" ? (mock_db as unknown as typeof db) : db;
 
   public static async getCourse() {
     // Logic to get course autocomplete
