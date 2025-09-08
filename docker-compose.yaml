@@ -9,17 +9,6 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-  
-  db-test:
-    image: postgres:alpine
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: postgres
-    ports:
-      - "5433:5432"
-    volumes:
-      - db_data_test:/var/lib/postgresql/data
 
   queue:
     image: rabbitmq:3-management
@@ -79,7 +68,6 @@ services:
 
 volumes:
   db_data:
-  db_data_test:
   queue_data:
   jaeger_data:
   jaeger_archive_data:

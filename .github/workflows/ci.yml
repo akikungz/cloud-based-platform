@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main, development ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (workspace root)
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client (packages/database)
+        working-directory: packages/database
+        run: bun run prisma:generate
+
+      - name: Run tests (apps/momoi)
+        env:
+          NODE_ENV: test
+        working-directory: apps/momoi
+        run: bun test --bail
+
+
