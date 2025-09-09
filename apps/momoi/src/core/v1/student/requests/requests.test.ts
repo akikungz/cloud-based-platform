@@ -315,16 +315,16 @@ describe("Student/Requests Module", () => {
       expect([201, 422, 500]).toContain(response.status);
     });
 
-    it("should return 500 when creating extends request with invalid data", async () => {
+    it("should return 404 when creating extends request with invalid data", async () => {
       const response = await api.requests.extends.post({
         instance_id: -1,
         title: "",
         description: "",
       } as any);
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(404);
       if (response.data) {
-        expect(response.data).toHaveProperty("message", "Failed to create extends request");
+        expect(response.data).toHaveProperty("message", "Instance not found or does not belong to the user");
       }
     });
 
@@ -374,9 +374,9 @@ describe("Student/Requests Module", () => {
         description: "This is a test extends request for non-existent instance",
       } as any);
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(404);
       if (response.data) {
-        expect(response.data).toHaveProperty("message", "Failed to create extends request");
+        expect(response.data).toHaveProperty("message", "Instance not found or does not belong to the user");
       }
     });
 
@@ -387,9 +387,9 @@ describe("Student/Requests Module", () => {
         description: "This is a test extends request with negative instance_id",
       } as any);
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(404);
       if (response.data) {
-        expect(response.data).toHaveProperty("message", "Failed to create extends request");
+        expect(response.data).toHaveProperty("message", "Instance not found or does not belong to the user");
       }
     });
 
@@ -400,9 +400,9 @@ describe("Student/Requests Module", () => {
         description: "This is a test extends request with zero instance_id",
       } as any);
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(404);
       if (response.data) {
-        expect(response.data).toHaveProperty("message", "Failed to create extends request");
+        expect(response.data).toHaveProperty("message", "Instance not found or does not belong to the user");
       }
     });
 
@@ -413,9 +413,9 @@ describe("Student/Requests Module", () => {
         description: "This is a test extends request with very large instance_id",
       } as any);
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(404);
       if (response.data) {
-        expect(response.data).toHaveProperty("message", "Failed to create extends request");
+        expect(response.data).toHaveProperty("message", "Instance not found or does not belong to the user");
       }
     });
 
@@ -426,8 +426,8 @@ describe("Student/Requests Module", () => {
         description: "This is a test extends request with floating point instance_id",
       } as any);
 
-      // May return 422 (validation error) or 500 (server error)
-      expect([422, 500]).toContain(response.status);
+      // May return 422 (validation error) or 404 (instance not found)
+      expect([422, 404]).toContain(response.status);
     });
 
     it("should handle concurrent request creation", async () => {

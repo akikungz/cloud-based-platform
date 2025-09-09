@@ -43,7 +43,7 @@ export class RequestsService {
       where: { id: data.instance_id, user_id: userId }
     });
     if (!userInstance) {
-      throw new Error("Instance not found or does not belong to the user");
+      return null;
     }
     return this.db.instance_request_extends.create({
       data

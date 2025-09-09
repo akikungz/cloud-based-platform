@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
 import { instance_request_type } from "database/generated/prismabox/barrel";
-import { create_callback } from "utils/functions/callback";
 
 import env from "@momoi/libs/env";
 import { auth_service } from "@momoi/core/auth/auth.service";
@@ -24,14 +23,13 @@ export const RequestsController = new Elysia({
     return status(200, { message: "Student requests controller", data: { requests, extend_requests } });
   })
   .post("/", async ({ status, user, body }) => {
-    const [err, result] = await create_callback(() => RequestsService.createRequest(user.id, body));
-
-    if (err) {
-      console.error("Error creating request:", err);
-      return status(500, { message: "Failed to create request", error: err });
+    try {
+      const result = await RequestsService.createRequest(user.id, body);
+      return status(201, { message: "Create a new request", data: result });
+    } catch (error) {
+      console.error("Error creating request:", error);
+      return status(500, { message: "Failed to create request", error });
     }
-
-    return status(201, { message: "Create a new request", data: result });
   }, {
     body: t.Object({
       title: t.String(),
@@ -46,11 +44,10 @@ export const RequestsController = new Elysia({
     })
   })
   .post("/extends", async ({ status, body, user }) => {
-    const [err, result] = await create_callback(() => RequestsService.createRequestExtends(body, user.id));
+    const result = await RequestsService.createRequestExtends(body, user.id);
 
-    if (err) {
-      console.error("Error creating extends request:", err);
-      return status(500, { message: "Failed to create extends request", error: err });
+    if (!result) {
+      return status(404, { message: "Instance not found or does not belong to the user" });
     }
 
     return status(201, { message: "Create a new extends request", data: result });
