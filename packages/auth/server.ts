@@ -69,7 +69,7 @@ export const auth = (db: PrismaDB, env: AuthEnv) => betterAuth({
             async () => {
               const isStaff = await db.staff_list.findUnique({
                 where: { email: user.email! },
-                select: { email: true }
+                select: { email: true, id: true }
               });
 
               if (!isStaff) return return_null;
@@ -77,7 +77,8 @@ export const auth = (db: PrismaDB, env: AuthEnv) => betterAuth({
               return {
                 user: {
                   ...omit(user, ["emailVerified", "createdAt", "updatedAt"]),
-                  role
+                  role,
+                  staff_id: isStaff.id
                 },
                 session
               }
@@ -91,7 +92,8 @@ export const auth = (db: PrismaDB, env: AuthEnv) => betterAuth({
           return {
             user: {
               ...omit(user, ["emailVerified", "createdAt", "updatedAt"]),
-              role
+              role,
+              staff_id: null
             },
             session
           }
