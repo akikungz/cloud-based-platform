@@ -6,3 +6,6 @@ import { PrismaClient } from "./generated/prisma-client";
 export const prisma = () => new PrismaClient();
 
 export type PrismaDB = ReturnType<typeof prisma>;
+
+// Export mock utilities
+export * from "./mocks/";
