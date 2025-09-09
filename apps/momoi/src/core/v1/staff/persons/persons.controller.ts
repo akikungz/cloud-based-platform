@@ -39,12 +39,11 @@ export const PersonsController = new Elysia({
     })
   })
   .delete("/", async ({ status, body }) => {
-    try {
-      const person = await PersonsService.deletePerson(body.email);
-      return status(200, { message: "Delete a person", data: person });
-    } catch (error) {
+    const person = await PersonsService.deletePerson(body.email);
+    if (!person) {
       return status(404, { message: "Person not found" });
     }
+    return status(200, { message: "Delete a person", data: person });
   }, {
     body: t.Object({
       email: t.String()

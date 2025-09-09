@@ -34,6 +34,10 @@ export class PersonsService {
   }
 
   static async deletePerson(email: string) {
-    return this.db.staff_list.delete({ where: { email } });
+    try {
+      return await this.db.staff_list.delete({ where: { email } });
+    } catch (error) {
+      return null;
+    }
   }
 }
