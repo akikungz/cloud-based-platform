@@ -1,5 +1,4 @@
 import { Elysia, t } from "elysia";
-import { create_callback } from "utils/functions/callback";
 
 import env from "@momoi/libs/env";
 import { auth_service } from "@momoi/core/auth/auth.service";
@@ -22,11 +21,10 @@ export const InstancesController = new Elysia({
     return status(200, { message: "Instances fetched successfully", data: instances });
   })
   .get("/:id", async ({ status, user, params }) => {
-    const [err, instance] = await create_callback(() => InstanceService.getInstanceById(user.id, params.id));
+    const instance = await InstanceService.getInstanceById(user.id, params.id);
 
-    if (err || !instance) {
-      console.error("Error fetching instance by ID:", err);
-      return status(404, { message: "Instance not found", error: err });
+    if (!instance) {
+      return status(404, { message: "Instance not found" });
     }
 
     return status(200, { message: "Instance fetched successfully", data: instance });
@@ -36,11 +34,10 @@ export const InstancesController = new Elysia({
     })
   })
   .delete("/:id", async ({ status, user, params }) => {
-    const [err, result] = await create_callback(() => InstanceService.deleteInstance(user.id, params.id));
+    const result = await InstanceService.deleteInstance(user.id, params.id);
 
-    if (err || !result) {
-      console.error("Error deleting instance:", err);
-      return status(500, { message: "Failed to delete instance", error: err });
+    if (!result) {
+      return status(404, { message: "Instance not found or already deleted/archived" });
     }
 
     return status(200, { message: "Instance deleted successfully", data: result });

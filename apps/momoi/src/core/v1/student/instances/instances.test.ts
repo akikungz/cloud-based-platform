@@ -60,12 +60,12 @@ describe("Student/Instances Module", () => {
       }
     });
 
-    it("should return 500 when deleting non-existent instance", async () => {
+    it("should return 404 when deleting non-existent instance", async () => {
       const response = await api.instances({ id: 999999 }).delete();
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(404);
       if (response.data) {
-        expect(response.data).toHaveProperty("message", "Failed to delete instance");
+        expect(response.data).toHaveProperty("message", "Instance not found or already deleted/archived");
       }
     });
 
@@ -286,9 +286,9 @@ describe("Student/Instances Module", () => {
       // Try to delete the same instance again
       const secondDelete = await api.instances({ id: 1 }).delete();
       
-      // First delete might succeed (200) or fail (500), second should fail (500)
-      expect([200, 500]).toContain(firstDelete.status);
-      expect(secondDelete.status).toBe(500);
+      // First delete might succeed (200) or fail (404), second should fail (404)
+      expect([200, 404]).toContain(firstDelete.status);
+      expect(secondDelete.status).toBe(404);
     });
 
     it("should handle instance access after deletion", async () => {

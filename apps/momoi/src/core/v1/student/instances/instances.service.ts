@@ -44,7 +44,7 @@ export class InstanceService {
       where: { user_id: userId, id, NOT: { OR: [{ state: "deleted" }, { state: "archived" }] } }
     });
     if (!existing) {
-      throw new Error("Instance not found or already deleted/archived");
+      return null;
     }
     return this.db.instance.update({
       where: { id },
