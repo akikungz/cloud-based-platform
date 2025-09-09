@@ -21,6 +21,9 @@ export const persons_controller = new Elysia({
   })
   .get("/search", async ({ status, query }) => {
     const person = await PersonsService.getPersonsByEmail(query.email);
+    if (!person) {
+      return status(404, { message: "Person not found" });
+    }
     return status(200, { message: "Get person by email", data: person });
   }, {
     query: t.Object({
@@ -36,8 +39,12 @@ export const persons_controller = new Elysia({
     })
   })
   .delete("/", async ({ status, body }) => {
-    const person = await PersonsService.deletePerson(body.email);
-    return status(200, { message: "Delete a person", data: person });
+    try {
+      const person = await PersonsService.deletePerson(body.email);
+      return status(200, { message: "Delete a person", data: person });
+    } catch (error) {
+      return status(404, { message: "Person not found" });
+    }
   }, {
     body: t.Object({
       email: t.String()

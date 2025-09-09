@@ -1,6 +1,6 @@
 import { db } from "@momoi/libs/db";
 
-import { union } from "utils/functions/objects";
+// import { union } from "utils/functions/objects";
 
 export class PersonsService {
   private static db = db;
@@ -13,7 +13,8 @@ export class PersonsService {
       select: { id: true, email: true, name: true }
     });
 
-    return persons.map(p => union(p, {
+    return persons.map(p => ({
+      ...p,
       staff_id: emails.find(e => e.email === p.email)?.id || null
     })).filter(p => p.staff_id !== null);
   }
@@ -25,7 +26,7 @@ export class PersonsService {
     const staff = await this.db.staff_list.findUnique({ where: { email }, select: { id: true } });
     if (!staff) return null;
 
-    return union(person, { staff_id: staff.id });
+    return { ...person, staff_id: staff.id };
   }
 
   static async createPerson(email: string) {

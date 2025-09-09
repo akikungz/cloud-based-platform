@@ -3,54 +3,29 @@ import { treaty } from "@elysiajs/eden";
 
 import { autocomplete_controller } from "./autocomplete.controller";
 
-import { db } from "@momoi/libs/db";
+import { db, createPrismaMockSetup, createPrismaTestHelpers } from "@momoi/libs/db";
 
 describe("autocomplete_controller", () => {
   let app: typeof autocomplete_controller;
   let api: ReturnType<typeof treaty<typeof app>>;
+  let mockSetup: ReturnType<typeof createPrismaMockSetup>;
+  let testHelpers: ReturnType<typeof createPrismaTestHelpers>;
 
   beforeEach(async () => {
     app = autocomplete_controller;
     api = treaty<typeof app>(app);
 
-    // Reset database (delete children before parents)
-    await db.instance_request_extends.deleteMany();
-    await db.instance_request.deleteMany();
-    await db.instance.deleteMany();
-    await db.ip_address.deleteMany();
-    await db.network.deleteMany();
-    await db.instance_template.deleteMany();
-    await db.pve_node.deleteMany();
-    await db.instance_course.deleteMany();
-    await db.staff_list.deleteMany();
-    await db.samester.deleteMany();
-    await db.user.deleteMany();
+    // Setup mock system
+    mockSetup = createPrismaMockSetup(db);
+    testHelpers = createPrismaTestHelpers(db);
 
-    // Mock user data
+    // Setup complete test environment using the mock system
+    await mockSetup.setupCompleteTestEnvironment();
+
+    // Add additional test data specific to autocomplete tests
     await db.user.createMany({
       data: [
-        { id: "test-staff-id", email: "staff.t@itm.kmutnb.ac.th", name: "Staff Test" },
-        { id: "test-student-id", email: "s6506022620036@email.kmutnb.ac.th", name: "Student Test" },
         { id: "test-non-staff-id", email: "non.s@itm.kmutnb.ac.th", name: "Non Staff Test" }
-      ],
-      skipDuplicates: true
-    });
-
-    // Mock staff list
-    await db.staff_list.create({ data: { id: 1, email: "staff.t@itm.kmutnb.ac.th" } });
-
-    // Mock instance course
-    await db.instance_course.create({
-      data: { id: 1, course_id: "060233101", course_title: "Introduction to Information and Network Engineering", main_staff: 1 }
-    });
-
-    // Mock PVE node
-    await db.pve_node.create({ data: { id: 1, name: "Test Node", status: "online" } });
-
-    // Mock instance template
-    await db.instance_template.createMany({
-      data: [
-        { id: 1, os_name: "Ubuntu 20.04", vm_type: "qemu", vm_template_id: "101", vm_template_host: "Test Node" }
       ],
       skipDuplicates: true
     });

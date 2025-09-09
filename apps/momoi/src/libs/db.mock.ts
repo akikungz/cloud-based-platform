@@ -67,6 +67,9 @@ const createModel = (name: string) => {
     findFirst: async (args?: { where?: Where; include?: any }) => {
       return store.find((r) => matchWhere(r, args?.where)) ?? null;
     },
+    findUnique: async (args?: { where?: Where; include?: any }) => {
+      return store.find((r) => matchWhere(r, args?.where)) ?? null;
+    },
     update: async ({ where, data }: { where: { id: number | string }; data: any }) => {
       const idx = store.findIndex((r) => r.id === where.id);
       if (idx === -1) throw new Error(`${name} not found`);
@@ -75,6 +78,11 @@ const createModel = (name: string) => {
     },
     count: async (args?: { where?: Where }) => {
       return store.filter((r) => matchWhere(r, args?.where)).length;
+    },
+    delete: async (args?: { where?: Where }) => {
+      const idx = store.findIndex((r) => matchWhere(r, args?.where));
+      if (idx === -1) throw new Error(`${name} not found`);
+      return store.splice(idx, 1)[0];
     }
   };
 };
