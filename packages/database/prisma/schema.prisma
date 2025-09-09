@@ -67,6 +67,7 @@ model user {
   account          account[]
   instance_request instance_request[]
   instance         instance[]
+  user_public_key  user_public_key[]
 }
 
 model session {
@@ -109,8 +110,7 @@ model verification {
 
 model staff_list {
   id         Int       @id @default(autoincrement())
-  user_id    String    @unique
-  is_staff   Boolean   @default(false)
+  email      String    @unique
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
@@ -118,7 +118,8 @@ model staff_list {
 
 model user_public_key {
   id         Int       @id @default(autoincrement())
-  user_id    String    @unique
+  user_id    String
+  user       user      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   public_key String
   created_at DateTime  @default(now())
   deleted_at DateTime?
