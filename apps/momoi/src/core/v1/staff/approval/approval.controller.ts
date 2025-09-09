@@ -50,6 +50,9 @@ export const ApprovalController = new Elysia({
     const { request_id } = body;
 
     const approval = await ApprovalService.approveRequest({ request_id }, staff_id);
+    if (!approval) {
+      return status(404, { message: "Request not found or you don't have permission to approve it" });
+    }
     return status(200, { message: "Request approved", data: approval });
   }, {
     description: "Approve a request",
@@ -60,6 +63,9 @@ export const ApprovalController = new Elysia({
   .post("/extends/approve", async ({ body, status }) => {
     const { request_id } = body;
     const approval = await ApprovalService.approveExtendsRequest({ request_id });
+    if (!approval) {
+      return status(404, { message: "Extension request not found" });
+    }
     return status(200, { message: "Extension request approved", data: approval });
   }, {
     description: "Approve an extension request",
@@ -72,6 +78,9 @@ export const ApprovalController = new Elysia({
     const { request_id, reason } = body;
 
     const rejection = await ApprovalService.rejectRequest({ request_id, reason }, staff_id);
+    if (!rejection) {
+      return status(404, { message: "Request not found or you don't have permission to reject it" });
+    }
     return status(200, { message: "Request rejected", data: rejection });
   }, {
     description: "Reject a request",
@@ -83,6 +92,9 @@ export const ApprovalController = new Elysia({
   .post("/extends/reject", async ({ body, status }) => {
     const { request_id, reason } = body;
     const rejection = await ApprovalService.rejectExtendsRequest({ request_id, reason });
+    if (!rejection) {
+      return status(404, { message: "Extension request not found" });
+    }
     return status(200, { message: "Extension request rejected", data: rejection });
   }, {
     description: "Reject an extension request",

@@ -555,8 +555,8 @@ describe("Staff/Approval Module", () => {
       });
 
       // The service should handle non-existent requests gracefully
-      // May return 200 (request not found) or 500 (server error)
-      expect([200, 500]).toContain(response.status);
+      // Should return 404 (request not found)
+      expect(response.status).toBe(404);
     });
 
     it("should handle pagination edge cases", async () => {

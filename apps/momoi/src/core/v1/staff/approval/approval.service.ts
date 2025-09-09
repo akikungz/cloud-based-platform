@@ -56,40 +56,48 @@ export class ApprovalService {
   }
 
   public static async approveRequest({ request_id }: { request_id: number }, staff_id: number) {
-    return this.db.instance_request.update({
-      where: {
-        id: request_id,
-        course: {
-          OR: [
-            { main_staff: staff_id },
-            { assistant_staff_1: staff_id },
-            { assistant_staff_2: staff_id },
-            { assistant_staff_3: staff_id },
-          ]
-        }
-      },
-      data: { state: "approved" }
-    });
+    try {
+      return await this.db.instance_request.update({
+        where: {
+          id: request_id,
+          course: {
+            OR: [
+              { main_staff: staff_id },
+              { assistant_staff_1: staff_id },
+              { assistant_staff_2: staff_id },
+              { assistant_staff_3: staff_id },
+            ]
+          }
+        },
+        data: { state: "approved" }
+      });
+    } catch (error) {
+      return null;
+    }
   }
 
   public static async rejectRequest({ request_id, reason }: { request_id: number, reason: string }, staff_id: number) {
-    return this.db.instance_request.update({
-      where: {
-        id: request_id,
-        course: {
-          OR: [
-            { main_staff: staff_id },
-            { assistant_staff_1: staff_id },
-            { assistant_staff_2: staff_id },
-            { assistant_staff_3: staff_id },
-          ]
+    try {
+      return await this.db.instance_request.update({
+        where: {
+          id: request_id,
+          course: {
+            OR: [
+              { main_staff: staff_id },
+              { assistant_staff_1: staff_id },
+              { assistant_staff_2: staff_id },
+              { assistant_staff_3: staff_id },
+            ]
+          }
+        },
+        data: {
+          state: "rejected",
+          reason
         }
-      },
-      data: {
-        state: "rejected",
-        reason
-      }
-    });
+      });
+    } catch (error) {
+      return null;
+    }
   }
 
   public static async getExtendsRequests({ skip = 1, take = 10 }: { skip: number, take: number }) {
@@ -114,16 +122,24 @@ export class ApprovalService {
   }
 
   public static async approveExtendsRequest({ request_id }: { request_id: number }) {
-    return this.db.instance_request_extends.update({
-      where: { id: request_id },
-      data: { state: "approved" }
-    });
+    try {
+      return await this.db.instance_request_extends.update({
+        where: { id: request_id },
+        data: { state: "approved" }
+      });
+    } catch (error) {
+      return null;
+    }
   }
 
   public static async rejectExtendsRequest({ request_id, reason }: { request_id: number, reason: string }) {
-    return this.db.instance_request_extends.update({
-      where: { id: request_id },
-      data: { state: "rejected", reason }
-    });
+    try {
+      return await this.db.instance_request_extends.update({
+        where: { id: request_id },
+        data: { state: "rejected", reason }
+      });
+    } catch (error) {
+      return null;
+    }
   }
 }
