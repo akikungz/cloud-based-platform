@@ -8,7 +8,7 @@ import { mockAuthStudent } from "@momoi/core/auth/auth.service-test";
 
 import { RequestsService } from "./requests.service";
 
-export const requests_controller = new Elysia({
+export const RequestsController = new Elysia({
   name: "student.requests.controller",
   prefix: "/requests"
 })

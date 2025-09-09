@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 
-export const staff_controller = new Elysia({
+export const StaffController = new Elysia({
   name: "staff.controller",
   prefix: "/staff"
 });

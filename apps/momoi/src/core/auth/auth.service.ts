@@ -53,10 +53,13 @@ export const auth_service = new Elysia({ name: "auth.service" })
         }
 
         return {
-          user: pick(user, ["id", "email", "role", "image"]),
+          user: pick(
+            user,
+            ["id", "email", "role", "image", "staff_id"]
+          ),
           session: pick(session, ["id", "userId", "expiresAt"]),
-          isStaff: user.role === Role.Staff
-        };
+          isStaff: false
+        }
       }
     },
   });

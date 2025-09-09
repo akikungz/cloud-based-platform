@@ -1,5 +1,4 @@
 import { db } from "@momoi/libs/db";
-import { instance_state } from "database/generated/prismabox/barrel";
 
 export class InstanceService {
   private static db = db;

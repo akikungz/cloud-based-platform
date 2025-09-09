@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { AutoCompleteService } from "./autocomplete..service";
 
-export const autocomplete_controller = new Elysia({
+export const AutocompleteController = new Elysia({
   name: "autocomplete.controller",
   prefix: "/autocomplete"
 })

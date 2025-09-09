@@ -6,7 +6,7 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 
 import { PersonsService } from "./persons.service";
 
-export const persons_controller = new Elysia({
+export const PersonsController = new Elysia({
   name: "persons.controller",
   prefix: "/persons"
 })
