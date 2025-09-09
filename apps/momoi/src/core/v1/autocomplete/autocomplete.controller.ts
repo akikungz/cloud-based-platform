@@ -21,6 +21,14 @@ export const autocomplete_controller = new Elysia({
       data: result
     });
   })
+  .get("/staff/emails", async ({ status }) => {
+    const result = await AutoCompleteService.getStaffEmails();
+
+    return status(200, {
+      message: "Get staff emails autocomplete",
+      data: result
+    });
+  })
   .get("/template", async ({ status }) => {
     const result = await AutoCompleteService.getTemplate();
 

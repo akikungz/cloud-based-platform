@@ -1,5 +1,4 @@
 import { db } from "@momoi/libs/db";
-import { env } from "@momoi/libs/env";
 
 export class AutoCompleteService {
   private static db = db;
@@ -13,9 +12,37 @@ export class AutoCompleteService {
 
   public static async getStaff() {
     // staff_list is a separate model with user_id string; fetch joins via two queries
-    const staff = await this.db.staff_list.findMany({ select: { user_id: true } });
-    const ids = staff.map(s => s.user_id);
-    return this.db.user.findMany({ where: { id: { in: ids } } });
+    const staff = await this.db.staff_list.findMany({ select: { email: true } });
+
+    return this.db.user.findMany({
+      where: { email: { in: staff.map(s => s.email) } },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      }
+    });
+  }
+
+  public static async getStaffEmails() {
+    const staffs = await this.db
+      .user
+      .findMany({
+        where: { email: { endsWith: "@itm.kmutnb.ac.th" } },
+        select: { email: true }
+      })
+
+    const listed_staffs = await this.db
+      .staff_list
+      .findMany({ select: { email: true } });
+
+    return staffs
+      .map((s) => {
+        return {
+          email: s.email,
+          is_staff: listed_staffs.some(ls => ls.email === s.email)
+        }
+      })
   }
 
   public static async getTemplate() {

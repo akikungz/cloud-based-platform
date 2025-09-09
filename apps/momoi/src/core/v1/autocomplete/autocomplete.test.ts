@@ -37,7 +37,7 @@ describe("autocomplete_controller", () => {
     });
 
     // Mock staff list
-    await db.staff_list.create({ data: { id: 1, user_id: "test-staff-id", is_staff: true } });
+    await db.staff_list.create({ data: { id: 1, email: "staff.t@itm.kmutnb.ac.th" } });
 
     // Mock instance course
     await db.instance_course.create({
@@ -74,6 +74,16 @@ describe("autocomplete_controller", () => {
     expect(response.status).toBe(200);
     expect(response.data).toEqual({
       message: "Get staff autocomplete",
+      data: expect.any(Array)
+    });
+  });
+
+  it("should return staff emails with is_staff flag", async () => {
+    const response = await api.autocomplete.staff.emails.get();
+
+    expect(response.status).toBe(200);
+    expect(response.data).toEqual({
+      message: "Get staff emails autocomplete",
       data: expect.any(Array)
     });
   });

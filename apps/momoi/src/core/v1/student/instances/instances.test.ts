@@ -37,7 +37,7 @@ describe("instances_controller", () => {
     });
 
     // Mock staff list
-    await db.staff_list.create({ data: { id: 1, user_id: "test-staff-id", is_staff: true } });
+    await db.staff_list.create({ data: { id: 1, email: "staff.t@itm.kmutnb.ac.th" } });
 
     // Mock instance course
     await db.instance_course.create({
@@ -86,7 +86,7 @@ describe("instances_controller", () => {
         pve_node: "Test Node",
         vm_id: 1001,
         status: "running",
-        ip_address: "10.20.31.2/24",
+        ip_address_id: 1,
         cpus: 2,
         memory: 2048,
         disk: 20,
