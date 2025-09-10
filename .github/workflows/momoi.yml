@@ -1,4 +1,4 @@
-name: CI
+name: Momoi CI
 
 on:
   push:
