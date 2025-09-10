@@ -1,6 +1,6 @@
 import { treaty } from "@elysiajs/eden";
 
-import type { App } from "./src/app";
+import type { App } from "@momoi/app";
 
 export const client = (url: string) => treaty<App>(url, {
   fetch: {
