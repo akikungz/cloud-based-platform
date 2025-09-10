@@ -1,5 +1,5 @@
 {
-	// "typescript.experimental.useTsgo": true,
+	"typescript.experimental.useTsgo": false,
   "typescript.tsserver.experimental.enableProjectDiagnostics": true,
   "github.copilot.enable": {
     "*.env": false

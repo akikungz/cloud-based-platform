@@ -1,0 +1,263 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-vm-blue-50: var(--vm-blue-50);
+  --color-vm-blue-100: var(--vm-blue-100);
+  --color-vm-blue-200: var(--vm-blue-200);
+  --color-vm-blue-300: var(--vm-blue-300);
+  --color-vm-blue-400: var(--vm-blue-400);
+  --color-vm-blue-500: var(--vm-blue-500);
+  --color-vm-blue-600: var(--vm-blue-600);
+  --color-vm-blue-700: var(--vm-blue-700);
+  --color-vm-blue-800: var(--vm-blue-800);
+  --color-vm-blue-900: var(--vm-blue-900);
+
+  --color-vm-orange-50: var(--vm-orange-50);
+  --color-vm-orange-100: var(--vm-orange-100);
+  --color-vm-orange-200: var(--vm-orange-200);
+  --color-vm-orange-300: var(--vm-orange-300);
+  --color-vm-orange-400: var(--vm-orange-400);
+  --color-vm-orange-500: var(--vm-orange-500);
+  --color-vm-orange-600: var(--vm-orange-600);
+  --color-vm-orange-700: var(--vm-orange-700);
+  --color-vm-orange-800: var(--vm-orange-800);
+  --color-vm-orange-900: var(--vm-orange-900);
+
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --background-image-gradient-primary: var(--gradient-primary);
+  --background-image-gradient-secondary: var(--gradient-secondary);
+  --background-image-gradient-accent: var(--gradient-accent);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-medium: var(--shadow-medium);
+  --shadow-strong: var(--shadow-strong);
+
+  --ease-smooth: var(--transition-smooth);
+  --ease-bounce: var(--transition-bounce);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border, currentcolor);
+  }
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors converted to HEX format.
+*/
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #0c1525;
+
+    --card: #ffffff;
+    --card-foreground: #0c1525;
+
+    --popover: #ffffff;
+    --popover-foreground: #0c1525;
+
+    --primary: #1374d9;
+    --primary-foreground: #ffffff;
+
+    --secondary: #eef3f8;
+    --secondary-foreground: #0c1525;
+
+    --muted: #eef3f8;
+    --muted-foreground: #5c6b7a;
+
+    --accent: #eef3f8;
+    --accent-foreground: #0c1525;
+
+    --destructive: #dc3545;
+    --destructive-foreground: #ffffff;
+
+    --border: #d9e1e8;
+    --input: #d9e1e8;
+    --ring: #1374d9;
+
+    /* Custom VM Platform Colors */
+    --vm-blue-50: #f0f7ff;
+    --vm-blue-100: #c9e2ff;
+    --vm-blue-200: #93ccff;
+    --vm-blue-300: #5db6ff;
+    --vm-blue-400: #2699ff;
+    --vm-blue-500: #1374d9;
+    --vm-blue-600: #105fb3;
+    --vm-blue-700: #0d4a8c;
+    --vm-blue-800: #0a3566;
+    --vm-blue-900: #07203f;
+
+    --vm-orange-50: #fef7f0;
+    --vm-orange-100: #fde0b8;
+    --vm-orange-200: #fbc980;
+    --vm-orange-300: #f9b248;
+    --vm-orange-400: #f79b10;
+    --vm-orange-500: #e87c00;
+    --vm-orange-600: #d16800;
+    --vm-orange-700: #b95500;
+    --vm-orange-800: #a24200;
+    --vm-orange-900: #8a2f00;
+
+    --gradient-primary: linear-gradient(135deg, var(--vm-blue-500), var(--vm-blue-400));
+    --gradient-secondary: linear-gradient(135deg, var(--vm-orange-500), var(--vm-orange-400));
+    --gradient-accent: linear-gradient(180deg, var(--vm-blue-50), var(--background));
+
+    --shadow-soft: 0 4px 20px -2px color-mix(in srgb, var(--vm-blue-500) 8%, transparent);
+    --shadow-medium: 0 8px 30px -4px color-mix(in srgb, var(--vm-blue-500) 15%, transparent);
+    --shadow-strong: 0 16px 40px -8px color-mix(in srgb, var(--vm-blue-500) 25%, transparent);
+
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: #fafafa;
+
+    --sidebar-foreground: #3f3f46;
+
+    --sidebar-primary: #18181b;
+
+    --sidebar-primary-foreground: #fafafa;
+
+    --sidebar-accent: #f4f4f5;
+
+    --sidebar-accent-foreground: #18181b;
+
+    --sidebar-border: #d4d4d8;
+
+    --sidebar-ring: #3b82f6;
+  }
+
+  .dark {
+    --background: #0a0a0b;
+    --foreground: #fafafa;
+
+    --card: #0a0a0b;
+    --card-foreground: #fafafa;
+
+    --popover: #0a0a0b;
+    --popover-foreground: #fafafa;
+
+    --primary: #fafafa;
+    --primary-foreground: #18181b;
+
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fafafa;
+
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #d4d4d8;
+    --sidebar-background: #18181b;
+    --sidebar-foreground: #f4f4f5;
+    --sidebar-primary: #3b82f6;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #262626;
+    --sidebar-accent-foreground: #f4f4f5;
+    --sidebar-border: #262626;
+    --sidebar-ring: #3b82f6;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

@@ -4,16 +4,16 @@ on:
   push:
     branches: [ main, development ]
     paths:
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.yml'
-      - '**/*.yaml'
-      - '**/*.prisma'
+      - './apps/momoi/**/*.ts'
+      - './.github/**/*.yml'
+      - './.github/**/*.yaml'
+      - './packages/database/**/*.prisma'
+      - './packages/database/**/*.ts'
   pull_request:
     branches: [ main, development ]
 
 jobs:
-  apps_momoi:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -38,8 +38,6 @@ jobs:
         with:
           path: |
             node_modules
-            apps/**/node_modules
-            packages/**/node_modules
           key: ${{ runner.os }}-bun-modules-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-modules-
@@ -56,5 +54,3 @@ jobs:
           NODE_ENV: test
         working-directory: apps/momoi
         run: bun test --bail
-
-
