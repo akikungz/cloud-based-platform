@@ -146,9 +146,9 @@ export class PrismaMockData {
   };
 
   /**
-   * Generate mock samester data
+   * Generate mock semester data
    */
-  static samesters = {
+  static semesters = {
     current: {
       id: 1,
       name: "1/2568",
@@ -177,7 +177,7 @@ export class PrismaMockData {
       description: "This is a test instance",
       type: "course" as const,
       course_id: 1,
-      samester_id: 1,
+      semester_id: 1,
       template_id: 1,
       cpus: 2,
       memory: 2048,
@@ -254,6 +254,7 @@ export class PrismaMockData {
       instance_requestId: null,
     }
   };
+
 }
 
 /**
@@ -280,7 +281,7 @@ export class PrismaMockSetup {
     await this.db.pve_node.deleteMany();
     await this.db.instance_course.deleteMany();
     await this.db.staff_list.deleteMany();
-    await this.db.samester.deleteMany();
+    await this.db.semester.deleteMany();
     await this.db.user.deleteMany();
     // Note: session, account, verification, and user_public_key tables may not exist in all schemas
     // Only delete them if they exist
@@ -376,11 +377,11 @@ export class PrismaMockSetup {
       skipDuplicates: true,
     });
 
-    // Create samesters
-    await this.db.samester.createMany({
+    // Create semesters
+    await this.db.semester.createMany({
       data: [
-        PrismaMockData.samesters.current,
-        PrismaMockData.samesters.next,
+        PrismaMockData.semesters.current,
+        PrismaMockData.semesters.next,
       ],
       skipDuplicates: true,
     });
@@ -419,6 +420,19 @@ export class PrismaMockSetup {
     await this.db.instance_request_extends.createMany({
       data: [
         PrismaMockData.instanceRequestExtends.basic,
+      ],
+      skipDuplicates: true,
+    });
+  }
+
+  /**
+   * Setup semester data
+   */
+  async setupSemesterData(): Promise<void> {
+    await this.db.semester.createMany({
+      data: [
+        PrismaMockData.semesters.current,
+        PrismaMockData.semesters.next,
       ],
       skipDuplicates: true,
     });

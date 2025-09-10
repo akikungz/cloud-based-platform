@@ -150,7 +150,7 @@ model ip_address {
   instance instance[]
 }
 
-model samester {
+model semester {
   id         Int       @id @default(autoincrement())
   name       String    @unique
   start_at   DateTime
@@ -238,8 +238,8 @@ model instance {
   type                     instance_request_type
   course_id                Int
   course                   instance_course            @relation(fields: [course_id], references: [id], onDelete: Cascade)
-  samester_id              Int?
-  samester                 samester?                  @relation(fields: [samester_id], references: [id], onDelete: Cascade)
+  semester_id              Int?
+  semester                 semester?                  @relation(fields: [semester_id], references: [id], onDelete: Cascade)
   template_id              Int
   template                 instance_template          @relation(fields: [template_id], references: [id], onDelete: Cascade)
   cpus                     Int

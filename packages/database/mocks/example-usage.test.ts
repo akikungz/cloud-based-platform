@@ -161,7 +161,7 @@ describe("Prisma Mock System - Example Usage", () => {
       expect(instance.user).toBeDefined();
       expect(instance.course).toBeDefined();
       expect(instance.template).toBeDefined();
-      expect(instance.samester).toBeDefined();
+      expect(instance.semester).toBeDefined();
       expect(instance.ip_address).toBeDefined();
     });
 
@@ -196,11 +196,11 @@ describe("Prisma Mock System - Example Usage", () => {
       });
     });
 
-    it("should get current active samester", async () => {
-      const currentSamester = await testHelpers.getCurrentSamester();
+    it("should get current active semester", async () => {
+      const currentSemester = await testHelpers.getCurrentSemester();
       
-      expect(currentSamester).toBeDefined();
-      expect(currentSamester.active).toBe(true);
+      expect(currentSemester).toBeDefined();
+      expect(currentSemester.active).toBe(true);
     });
   });
 

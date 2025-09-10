@@ -109,7 +109,7 @@ Utility functions for common test operations.
 - `getPendingInstanceRequests()`: Gets all pending instance requests
 - `getAvailableIpAddresses()`: Gets all available IP addresses
 - `getOnlinePveNodes()`: Gets all online PVE nodes
-- `getCurrentSamester()`: Gets the current active samester
+- `getCurrentSemester()`: Gets the current active semester
 - `countInstancesByStatus(status)`: Counts instances by status
 - `countInstanceRequestsByState(state)`: Counts instance requests by state
 - `getInstanceWithRelations(instanceId)`: Gets instance with all relations
@@ -165,9 +165,9 @@ The system includes pre-defined mock data for all Prisma models:
 - `PrismaMockData.ipAddresses.primary`: Primary network IPs
 - `PrismaMockData.ipAddresses.secondary`: Secondary network IPs
 
-### Samesters
-- `PrismaMockData.samesters.current`: Current active samester
-- `PrismaMockData.samesters.next`: Next samester
+### Semesters
+- `PrismaMockData.semesters.current`: Current active semester
+- `PrismaMockData.semesters.next`: Next semester
 
 ### Instances
 - `PrismaMockData.instances.active`: Active running instance

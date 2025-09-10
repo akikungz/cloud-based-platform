@@ -115,10 +115,10 @@ describe("Prisma Mock System Integration", () => {
       expect(Array.isArray(onlineNodes)).toBe(true);
     });
 
-    it("should get current samester", async () => {
-      const currentSamester = await testHelpers.getCurrentSamester();
-      expect(currentSamester).toBeDefined();
-      expect(currentSamester?.active).toBe(true);
+    it("should get current semester", async () => {
+      const currentSemester = await testHelpers.getCurrentSemester();
+      expect(currentSemester).toBeDefined();
+      expect(currentSemester?.active).toBe(true);
     });
   });
 
@@ -164,9 +164,9 @@ describe("Prisma Mock System Integration", () => {
       expect(ipAddresses.length).toBeGreaterThan(0);
     });
 
-    it("should have samesters created", async () => {
-      const samesters = await db.samester.findMany();
-      expect(samesters.length).toBeGreaterThan(0);
+    it("should have semesters created", async () => {
+      const semesters = await db.semester.findMany();
+      expect(semesters.length).toBeGreaterThan(0);
     });
 
     it("should have instances created", async () => {

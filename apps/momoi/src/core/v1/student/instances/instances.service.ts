@@ -15,7 +15,7 @@ export class InstanceService {
         memory: true,
         disk: true,
         ip_address: true,
-        samester: { select: { name: true } }
+        semester: { select: { name: true } }
       }
     });
     return results.map(r => ({
@@ -23,7 +23,7 @@ export class InstanceService {
       title: r.title,
       description: r.description,
       status: r.status,
-      samester: r.samester?.name ?? null,
+      semester: r.semester?.name ?? null,
       cpus: r.cpus,
       memory: r.memory,
       disk: r.disk,
@@ -34,7 +34,7 @@ export class InstanceService {
   public static async getInstanceById(userId: string, id: number) {
     const result = await this.db.instance.findFirst({
       where: { user_id: userId, id, NOT: { state: "deleted" } },
-      include: { samester: true }
+      include: { semester: true }
     });
     return result ?? null;
   }

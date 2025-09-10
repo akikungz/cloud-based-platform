@@ -91,7 +91,7 @@ export class PrismaTestHelpers {
         user: true,
         course: true,
         template: true,
-        samester: true,
+        semester: true,
         ip_address: true,
       },
     });
@@ -134,7 +134,7 @@ export class PrismaTestHelpers {
         user: true,
         course: true,
         template: true,
-        samester: true,
+        semester: true,
         ip_address: true,
       },
     });
@@ -182,10 +182,10 @@ export class PrismaTestHelpers {
   }
 
   /**
-   * Get current active samester
+   * Get current active semester
    */
-  async getCurrentSamester(): Promise<any> {
-    return await this.db.samester.findFirst({
+  async getCurrentSemester(): Promise<any> {
+    return await this.db.semester.findFirst({
       where: { active: true },
     });
   }
@@ -218,7 +218,7 @@ export class PrismaTestHelpers {
         user: true,
         course: true,
         template: true,
-        samester: true,
+        semester: true,
         ip_address: {
           include: {
             network: true,

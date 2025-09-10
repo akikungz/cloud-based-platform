@@ -96,7 +96,7 @@ export const createMockPrisma = () => {
     instance_template: createModel("instance_template"),
     network: createModel("network"),
     ip_address: createModel("ip_address"),
-    samester: createModel("samester"),
+    semester: createModel("semester"),
     instance: createModel("instance"),
     instance_request: createModel("instance_request"),
     instance_request_extends: createModel("instance_request_extends"),
