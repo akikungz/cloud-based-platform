@@ -10,8 +10,9 @@ import { env } from "@momoi/libs/env";
 
 import { api } from "@momoi/routes/api";
 import { v1 } from "@momoi/routes/api.v1";
-import { OpenAPI } from "./libs/auth";
-import { logger } from "./libs/log";
+
+import { OpenAPI } from "@momoi/libs/auth";
+import { logger } from "@momoi/libs/log";
 
 export const app = new Elysia()
   .trace(({ context, onHandle }) => {
@@ -75,5 +76,3 @@ export const app = new Elysia()
   .use(v1);
 
 export type App = typeof app;
-
-app.listen(env.BACKEND_PORT, () => console.log(`😺 Momoi is running on port ${env.BACKEND_PORT}`));
