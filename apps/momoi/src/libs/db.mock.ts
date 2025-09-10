@@ -21,6 +21,9 @@ const matchWhere = (row: any, where?: Where): boolean => {
     const cond = where[key];
     if (cond && typeof cond === "object" && "in" in cond) {
       if (!cond.in.includes(row[key])) return false;
+    } else if (cond === null) {
+      // Handle null conditions - if cond is null, row[key] should also be null or undefined
+      if (row[key] !== null && row[key] !== undefined) return false;
     } else if (row[key] !== cond) {
       return false;
     }
@@ -75,6 +78,17 @@ const createModel = (name: string) => {
       if (idx === -1) throw new Error(`${name} not found`);
       store[idx] = { ...store[idx], ...data };
       return store[idx];
+    },
+    updateMany: async ({ where, data }: { where?: Where; data: any }) => {
+      const matchingIndices = store
+        .map((r, idx) => matchWhere(r, where) ? idx : -1)
+        .filter(idx => idx !== -1);
+      
+      matchingIndices.forEach(idx => {
+        store[idx] = { ...store[idx], ...data };
+      });
+      
+      return { count: matchingIndices.length };
     },
     count: async (args?: { where?: Where }) => {
       return store.filter((r) => matchWhere(r, args?.where)).length;
