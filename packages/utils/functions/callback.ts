@@ -1,6 +1,6 @@
 export const create_callback =
   async <E, T>(
-    callback: () => T | Promise<T>,
+    callback: () => Promise<T> | T,
   ): Promise<[E | null, T | null]> => {
     try {
       const result = await callback();
