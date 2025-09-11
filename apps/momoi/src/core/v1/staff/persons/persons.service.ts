@@ -9,7 +9,7 @@ export class PersonsService {
 
   static async getPersons() {
     try {
-      const emails = await this.db.staff_list.findMany({ select: { id: true, email: true } });
+      const emails = await this.db.staff_list.findMany({ select: { id: true, email: true, created_at: true, updated_at: true } });
 
       const persons = await this.db.user.findMany({
         where: { email: { in: emails.map(e => e.email) } },
@@ -20,7 +20,9 @@ export class PersonsService {
         const staffEmail = emails.find(e => e.email === p.email);
         return {
           ...p,
-          staff_id: staffEmail?.id
+          staff_id: staffEmail!.id,
+          created_at: staffEmail!.created_at,
+          updated_at: staffEmail!.updated_at,
         };
       }).filter(p => p.staff_id !== undefined);
     } catch (error) {

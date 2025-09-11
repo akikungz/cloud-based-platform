@@ -4,7 +4,7 @@ import env from "@momoi/libs/env";
 import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { auth_service } from "@momoi/core/auth/auth.service";
 
-import { BadRequestError, NotFoundError } from "@momoi/shared/errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@momoi/shared/errors";
 
 import { create_callback } from "utils/functions/callback";
 
@@ -16,8 +16,12 @@ export const ApprovalController = new Elysia({
 })
   .use(env.NODE_ENV === "test" ? mockAuthStaff : auth_service)
   .guard({ auth: true })
-  .onBeforeHandle(async ({ isStaff, status }) => {
-    if (!isStaff) return status(403, { error: "Forbidden" });
+  .onBeforeHandle(async ({ isStaff, user, status }) => {
+    if (!isStaff) {
+      const error = new ForbiddenError("This endpoint is for staff only");
+      console.log(user, isStaff);
+      return status(error.code, { message: error.message });
+    }
   })
   .get("/", async ({ user: { staff_id }, query, status }) => {
     if (!staff_id) return { count: 0, totalPages: 0, data: [] };

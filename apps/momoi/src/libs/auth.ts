@@ -14,6 +14,7 @@ export const auth = auth_server(db, {
     },
   },
   trusted_origins: env.TRUSTED_ORIGINS,
+  NODE_ENV: env.NODE_ENV,
 });
 
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>;

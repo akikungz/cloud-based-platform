@@ -58,7 +58,7 @@ export const auth_service = new Elysia({ name: "auth.service" })
             ["id", "email", "role", "image", "staff_id"]
           ),
           session: pick(session, ["id", "userId", "expiresAt"]),
-          isStaff: false
+          isStaff: user.role === Role.Staff
         }
       }
     },
