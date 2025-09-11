@@ -20,7 +20,7 @@ export interface AuthEnv {
   social_providers: {
     google: {
       client_id: string,
-      client_secret: string
+      client_secret: string,
     },
   },
   trusted_origins: string[],
@@ -44,7 +44,7 @@ export const auth = (db: PrismaDB, env: AuthEnv) => betterAuth({
     google: {
       clientId: env.social_providers.google.client_id,
       clientSecret: env.social_providers.google.client_secret,
-      redirectURI: `${env.base_url}/auth/callback/google`,
+      redirectURI: `${env.base_url}/api/auth/callback/google`,
       prompt: "select_account",
       scope: ["profile", "email"],
     }
