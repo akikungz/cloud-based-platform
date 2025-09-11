@@ -4,11 +4,11 @@ on:
   push:
     branches: [ main, development ]
     paths:
-      - './apps/momoi/**/*.ts'
-      - './.github/**/*.yml'
-      - './.github/**/*.yaml'
-      - './packages/database/**/*.prisma'
-      - './packages/database/**/*.ts'
+      - 'apps/momoi/**/*.ts'
+      - '.github/**/*.yml'
+      - '.github/**/*.yaml'
+      - 'packages/database/**/*.prisma'
+      - 'packages/database/**/*.ts'
   pull_request:
     branches: [ main, development ]
 
