@@ -3,6 +3,7 @@ import { SidebarContext } from "@midori/contexts/sidebar";
 import { UserContext } from "@midori/contexts/user";
 import { auth } from "@midori/libs/auth";
 import { cn } from "@midori/utils/format";
+import { isMenuItemActive, getMenuItemHref } from "@midori/utils/navigation";
 import { Tooltip } from "@mui/material";
 import { Book, ClipboardList, Database, Folder, GraduationCap, LayoutDashboard, LogOut, Server, Settings, User } from "lucide-react";
 import Link from "next/link";
@@ -42,7 +43,7 @@ const ClientMenu: Record<Role, ClientMenuItem[]> = {
 		},
 		{
 			href: "/samesters",
-			label: "Samesters",
+			label: "Semesters",
 			icon: <GraduationCap />,
 		},
 		{
@@ -68,9 +69,14 @@ const ClientMenu: Record<Role, ClientMenuItem[]> = {
 			icon: <LayoutDashboard />,
 		},
 		{
-			href: "/instance",
-			label: "Manage Instances",
+			href: "/instances/student",
+			label: "My Instances",
 			icon: <Database />,
+		},
+		{
+			href: "/requests",
+			label: "My Requests",
+			icon: <ClipboardList />,
 		},
 		{
 			href: "/settings",
@@ -121,7 +127,9 @@ export const Sidebar: React.FC = () => {
 
 			<div className="flex flex-col flex-1 items-center gap-1 p-2">
 				{ClientMenu[user.role].map((item) => {
-					const isActive = pathname === item.href;
+					// Use utility function for active state detection
+					const isActive = isMenuItemActive(item.href, pathname, user.role);
+					const actualHref = getMenuItemHref(item.href, user.role);
 
 					return (
 						<Tooltip
@@ -131,7 +139,7 @@ export const Sidebar: React.FC = () => {
 							arrow
 						>
 							<Link
-								href={!item.disabled ? item.href : "#"}
+								href={!item.disabled ? actualHref : "#"}
 								className={cn(
 									"w-full flex items-center gap-4 py-2.5 text-left transition-colors duration-200 cursor-pointer",
 									"hover:bg-vm-blue-100 hover:text-vm-blue-900",
@@ -139,19 +147,24 @@ export const Sidebar: React.FC = () => {
 									item.disabled ? "cursor-not-allowed opacity-50" : "",
 									isCollapsed ? "px-3" : "px-4",
 									isActive
-										? "bg-vm-blue-100 text-vm-blue-900"
+										? "bg-vm-blue-100 text-vm-blue-900 border-l-4 border-vm-blue-500"
 										: "text-vm-blue-700",
 								)}
 							>
-								{item.icon}
-								<span
-									className={cn(
-										"text-sm font-medium",
-										isCollapsed ? "hidden" : "block",
-									)}
-								>
-									{item.label}
-								</span>
+								<div className={cn(
+									"flex items-center gap-4",
+									isActive ? "text-vm-blue-900" : "text-vm-blue-700"
+								)}>
+									{item.icon}
+									<span
+										className={cn(
+											"text-sm font-medium",
+											isCollapsed ? "hidden" : "block",
+										)}
+									>
+										{item.label}
+									</span>
+								</div>
 							</Link>
 						</Tooltip>
 					);

@@ -14,4 +14,6 @@ export const AccessDenied = () => {
       </Link>
     </div>
   );
-}
+};
+
+export default AccessDenied;

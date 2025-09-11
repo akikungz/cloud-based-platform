@@ -1,0 +1,204 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { SectionCard } from "@midori/components/ui";
+import { momoi_client } from "@midori/libs/momoi";
+import { Database, User, Calendar, Cpu, MemoryStick, HardDrive, ExternalLink } from "lucide-react";
+import { formatDate } from "@midori/utils/format";
+
+interface Instance {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  semester: string;
+  course: string;
+  cpus: number;
+  memory: number;
+  disk: number;
+  ip_address: string | null;
+  created_at: string;
+  updated_at: string;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+  };
+}
+
+interface StaffInstancesProps {
+  limit?: number;
+  dashboard?: boolean;
+}
+
+export function StaffInstances({ limit = 10, dashboard = false }: StaffInstancesProps) {
+  const [instances, setInstances] = useState<Instance[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchInstances = async () => {
+      try {
+        const result = await momoi_client.api.v1.staff.instances.get({
+          query: {
+            take: limit.toString()
+          }
+        });
+
+        if (result.error) {
+          setError(result.error.message || 'Failed to fetch instances');
+        } else if (result.data) {
+          const instancesData = result.data?.data?.instances || result.data?.data || [];
+          setInstances(Array.isArray(instancesData) ? instancesData : []);
+        } else {
+          setError('No data received');
+        }
+      } catch (err) {
+        console.error("Error fetching instances:", err);
+        setError("Failed to fetch instances");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstances();
+  }, [limit]);
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'running':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'stopped':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'running':
+        return '🟢';
+      case 'stopped':
+        return '🔴';
+      case 'pending':
+        return '🟡';
+      default:
+        return '⚪';
+    }
+  };
+
+  if (loading) {
+    return (
+      <SectionCard title="Recent Instances">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vm-blue-500"></div>
+        </div>
+      </SectionCard>
+    );
+  }
+
+  if (error) {
+    return (
+      <SectionCard title="Recent Instances">
+        <div className="text-center py-8 text-red-600">
+          <Database className="h-12 w-12 mx-auto mb-4 text-red-300" />
+          <p>Error loading instances: {error}</p>
+        </div>
+      </SectionCard>
+    );
+  }
+
+  if (instances.length === 0) {
+    return (
+      <SectionCard title="Recent Instances">
+        <div className="text-center py-8 text-gray-500">
+          <Database className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+          <p>No instances found.</p>
+        </div>
+      </SectionCard>
+    );
+  }
+
+  return (
+    <SectionCard 
+      title={dashboard ? "Recent Instances" : "All Instances"}
+      description={dashboard ? "Latest virtual machine instances across the platform" : "Manage all virtual machine instances"}
+    >
+      <div className="space-y-4">
+        {instances.map((instance) => (
+          <div
+            key={instance.id}
+            className="border border-gray-200 rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-3 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {instance.title}
+                  </h3>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(instance.status)}`}>
+                    <span className="mr-1">{getStatusIcon(instance.status)}</span>
+                    {instance.status}
+                  </span>
+                </div>
+                
+                {instance.description && (
+                  <p className="text-gray-600 mb-3">{instance.description}</p>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <User className="h-4 w-4" />
+                    <span>{instance.user.name}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>{instance.semester}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Cpu className="h-4 w-4" />
+                    <span>{instance.cpus} CPU{instance.cpus !== 1 ? 's' : ''}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <MemoryStick className="h-4 w-4" />
+                    <span>{instance.memory}GB RAM</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex items-center space-x-4">
+                    <span>Created: {formatDate(instance.created_at)}</span>
+                    {instance.ip_address && (
+                      <span>IP: {instance.ip_address}</span>
+                    )}
+                  </div>
+                  
+                  {!dashboard && (
+                    <button className="flex items-center space-x-1 text-vm-blue-600 hover:text-vm-blue-700">
+                      <ExternalLink className="h-4 w-4" />
+                      <span>View Details</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        
+        {dashboard && instances.length >= limit && (
+          <div className="text-center pt-4">
+            <button className="text-vm-blue-600 hover:text-vm-blue-700 font-medium">
+              View All Instances →
+            </button>
+          </div>
+        )}
+      </div>
+    </SectionCard>
+  );
+}
