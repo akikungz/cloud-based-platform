@@ -5,7 +5,7 @@ const baseEnvSchema = z.object({
   // Application environment
   NODE_ENV: z.enum(["development", "production", "test"], {
     message: "NODE_ENV must be one of development, production, or test",
-  }),
+  }).default("development"),
   // Logging level
   LOG_LEVEL: z
     .enum(["debug", "info", "warn", "error"], {
@@ -31,10 +31,10 @@ const baseEnvSchema = z.object({
     })
     .default("http://localhost:4317"),
   // OpenTelemetry service names
-  OTEL_BACKEND_SERVICE_NAME: z
+  OTEL_SERVICE_NAME: z
     .string()
     .min(1, {
-      message: "OTEL_BACKEND_SERVICE_NAME is required",
+      message: "OTEL_SERVICE_NAME is required",
     })
     .default("Momoi"),
 
@@ -43,9 +43,9 @@ const baseEnvSchema = z.object({
     message: "DATABASE_URL must be a valid URL",
   }),
   // RabbitMQ configuration
-  RABBITMQ_URI: z
+  RABBITMQ_URL: z
     .url({
-      message: "RABBITMQ_URI must be a valid URL",
+      message: "RABBITMQ_URL must be a valid URL",
     })
     .default("amqp://guest:guest@localhost:5672"),
   RABBITMQ_QUEUE_NAME: z
@@ -74,22 +74,22 @@ const baseEnvSchema = z.object({
     message: "GOOGLE_CLIENT_SECRET is required",
   }),
   // Port for the application to listen on
-  BACKEND_PORT: z.preprocess((val) => {
+  PORT: z.preprocess((val) => {
     const port = parseInt(val as string, 10);
     return Number.isNaN(port) ? 3000 : port;
-  }, z.number().int().positive().default(3000)),
+  }, z.number().int().positive().default(3001)),
 
   // Base URL for the backend and frontend
   API_URL: z
     .url({
       message: "API_URL must be a valid URL",
     })
-    .default("http://localhost:3000"),
+    .default("http://localhost:3001"),
   FRONTEND_BASE_URL: z
     .url({
       message: "FRONTEND_BASE_URL must be a valid URL",
     })
-    .default("http://localhost:3001"),
+    .default("http://localhost:3000"),
 });
 
 // Test schema with all fields optional
