@@ -5,7 +5,7 @@ import { record } from "@elysiajs/opentelemetry"
 
 import type { PrismaDB } from "database";
 import { omit } from "utils/functions/objects";
-import { is_staff, is_student, role_validator } from "./utils/role";
+import { is_staff, is_student, role_validator, Role } from "./utils/role";
 
 const return_null = {
   user: undefined,
@@ -24,6 +24,7 @@ export interface AuthEnv {
     },
   },
   trusted_origins: string[],
+  NODE_ENV?: "development" | "production" | "test",
 }
 
 /**
@@ -61,6 +62,25 @@ export const auth = (db: PrismaDB, env: AuthEnv) => betterAuth({
     customSession(({ user, session }) => record(
       "auth.custom_session",
       async () => {
+        if (["development", "test"].includes(env.NODE_ENV!)) {
+          // Use some email to staff
+          const temp_staffs = [
+            "kolpkung01@gmail.com",
+          ];
+
+          if (temp_staffs.includes(user.email!)) {
+            return {
+              user: {
+                ...omit(user, ["emailVerified", "createdAt", "updatedAt"]),
+                role: Role.Staff,
+                staff_id: temp_staffs.indexOf(user.email!) + 1,
+                isStaff: true,
+              },
+              session
+            }
+          }
+        }
+
         const role = role_validator(user.email!);
 
         if (is_staff(role)) {
