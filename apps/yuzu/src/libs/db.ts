@@ -1,4 +1,3 @@
-import { db as dbModule } from "db";
-import { env } from "./env";
+import { prisma } from "database";
 
-export const db = dbModule(env.DATABASE_URL);
+export const db = prisma();

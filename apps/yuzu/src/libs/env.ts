@@ -31,6 +31,18 @@ export const envSchema = z.object({
 	DATABASE_URL: z.url({
 		message: "DATABASE_URL must be a valid URL.",
 	}),
+	RABBITMQ_URL: z.string().url({
+		message: "RABBITMQ_URL must be a valid URL.",
+	}).optional().default("amqp://localhost:5672"),
+	RABBITMQ_EXCHANGE: z.string().min(1, {
+		message: "RABBITMQ_EXCHANGE is required",
+	}).optional().default("yuzu.exchange"),
+	RABBITMQ_QUEUE: z.string().min(1, {
+		message: "RABBITMQ_QUEUE is required",
+	}).optional().default("yuzu.queue"),
+	RABBITMQ_ROUTING_KEY: z.string().min(1, {
+		message: "RABBITMQ_ROUTING_KEY is required",
+	}).optional().default("yuzu.*"),
 });
 
 export type Env = z.infer<typeof envSchema>;

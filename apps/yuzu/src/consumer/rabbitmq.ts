@@ -1,0 +1,118 @@
+import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
+import { env } from '@yuzu/libs/env';
+
+export interface RabbitMQConfig {
+  url: string;
+  exchange?: string;
+  queue?: string;
+  routingKey?: string;
+}
+
+export class RabbitMQConsumer {
+  private connection: Connection | null = null;
+  private channel: Channel | null = null;
+  private config: RabbitMQConfig;
+
+  constructor(config: RabbitMQConfig) {
+    this.config = config;
+  }
+
+  /**
+   * Establishes connection to RabbitMQ
+   */
+  async connect(): Promise<void> {
+    try {
+      this.connection = await amqp.connect(this.config.url);
+      this.channel = await this.connection.createChannel();
+      
+      console.log('Connected to RabbitMQ');
+      
+      // Handle connection close
+      this.connection.on('close', () => {
+        console.log('RabbitMQ connection closed');
+      });
+      
+      this.connection.on('error', (error: Error) => {
+        console.error('RabbitMQ connection error:', error);
+      });
+    } catch (error) {
+      console.error('Failed to connect to RabbitMQ:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sets up exchange and queue
+   */
+  async setupQueue(exchange: string, queue: string, routingKey: string): Promise<void> {
+    if (!this.channel) {
+      throw new Error('Channel not initialized. Call connect() first.');
+    }
+
+    // Assert exchange
+    await this.channel.assertExchange(exchange, 'topic', { durable: true });
+    
+    // Assert queue
+    await this.channel.assertQueue(queue, { durable: true });
+    
+    // Bind queue to exchange
+    await this.channel.bindQueue(queue, exchange, routingKey);
+    
+    console.log(`Queue ${queue} bound to exchange ${exchange} with routing key ${routingKey}`);
+  }
+
+  /**
+   * Starts consuming messages from the queue
+   */
+  async consume(
+    queue: string, 
+    messageHandler: (message: ConsumeMessage | null) => Promise<void>,
+    options: { noAck?: boolean } = { noAck: false }
+  ): Promise<void> {
+    if (!this.channel) {
+      throw new Error('Channel not initialized. Call connect() first.');
+    }
+
+    await this.channel.consume(queue, messageHandler, options);
+    console.log(`Started consuming messages from queue: ${queue}`);
+  }
+
+  /**
+   * Acknowledges a message
+   */
+  ack(message: ConsumeMessage): void {
+    if (this.channel) {
+      this.channel.ack(message);
+    }
+  }
+
+  /**
+   * Rejects a message and optionally requeues it
+   */
+  nack(message: ConsumeMessage, requeue: boolean = false): void {
+    if (this.channel) {
+      this.channel.nack(message, false, requeue);
+    }
+  }
+
+  /**
+   * Closes the connection
+   */
+  async close(): Promise<void> {
+    if (this.channel) {
+      await this.channel.close();
+    }
+    if (this.connection) {
+      await this.connection.close();
+    }
+    console.log('RabbitMQ connection closed');
+  }
+}
+
+// Default configuration using environment variables
+export const defaultRabbitMQConfig: RabbitMQConfig = {
+  url: env.RABBITMQ_URL,
+  exchange: env.RABBITMQ_EXCHANGE,
+  queue: env.RABBITMQ_QUEUE,
+  routingKey: env.RABBITMQ_ROUTING_KEY
+};
