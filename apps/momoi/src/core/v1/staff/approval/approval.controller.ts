@@ -159,3 +159,32 @@ export const ApprovalController = new Elysia({
       reason: t.String()
     })
   })
+  .put("/edit", async ({ user: { staff_id }, body, status }) => {
+    if (!staff_id) return status(403, { message: "Forbidden" });
+    const { request_id, cpus, memory, disk } = body;
+
+    const [err, updatedRequest] = await create_callback<
+      BadRequestError, ReturnType<typeof ApprovalService.editRequest>
+    >(
+      () => ApprovalService.editRequest({ request_id, cpus, memory, disk }, staff_id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!updatedRequest) {
+      const error = new NotFoundError("Request not found or you don't have permission to edit it");
+      return status(error.code, { message: error.message });
+    }
+
+    return status(200, { message: "Request specification updated successfully", data: updatedRequest });
+  }, {
+    description: "Edit a pending request specification (CPU, memory, disk only)",
+    body: t.Object({
+      request_id: t.Number(),
+      cpus: t.Optional(t.Number({ minimum: 1, maximum: 8 })),
+      memory: t.Optional(t.Number({ minimum: 512, maximum: 16384 })),
+      disk: t.Optional(t.Number({ minimum: 8, maximum: 32 }))
+    })
+  })

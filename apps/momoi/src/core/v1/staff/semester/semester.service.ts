@@ -273,10 +273,7 @@ export class SemesterService {
         }
       });
 
-      if (!activeSemester) {
-        throw new NotFoundError("No active semester found");
-      }
-
+      // Return null instead of throwing error when no active semester found
       return activeSemester;
     } catch (error) {
       if (error instanceof NotFoundError) {

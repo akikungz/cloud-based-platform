@@ -1,6 +1,8 @@
 import { db } from "@momoi/libs/db";
 import { BadRequestError } from "@momoi/shared/errors";
 import { Prisma } from "database/generated/prisma-client/client";
+import { getRabbitMQPublisher } from "@momoi/libs/rabbitmq";
+import { logger } from "@momoi/libs/log";
 
 export class ApprovalService {
   private static db = db;
@@ -59,7 +61,8 @@ export class ApprovalService {
 
   public static async approveRequest({ request_id }: { request_id: number }, staff_id: number) {
     try {
-      return await this.db.instance_request.update({
+      // First, get the request details before updating
+      const request = await this.db.instance_request.findFirst({
         where: {
           id: request_id,
           course: {
@@ -71,8 +74,68 @@ export class ApprovalService {
             ]
           }
         },
+        include: {
+          template: true,
+          user: true,
+          course: true
+        }
+      });
+
+      if (!request) {
+        throw new BadRequestError("Request not found or you don't have permission to approve it");
+      }
+
+      // Update the request state to approved
+      const approvedRequest = await this.db.instance_request.update({
+        where: { id: request_id },
         data: { state: "approved" }
       });
+
+      // Send VM creation message to RabbitMQ queue
+      try {
+        const publisher = await getRabbitMQPublisher();
+        
+        // Generate a unique VM ID (you might want to implement a better ID generation strategy)
+        const vmid = 1000 + request_id; // Simple ID generation for now
+        
+        // Determine the target node (you might want to implement node selection logic)
+        const targetNode = "pve-node-01"; // Default node, should be configurable
+        
+        await publisher.publishVMCreateMessage({
+          vmid,
+          templateId: request.template_id,
+          name: request.hostname,
+          node: targetNode,
+          config: {
+            cores: request.cpus,
+            memory: request.memory,
+            diskSize: `+${request.disk}G`, // Convert disk size to relative format
+            ciuser: request.user.name?.toLowerCase().replace(/\s+/g, '') || 'student',
+            cipassword: 'defaultPassword123', // You might want to generate this
+            // Add network configuration if needed
+            // ipconfig0: `ip=192.168.1.${100 + request_id}/24,gw=192.168.1.1`
+          },
+          requestId: `req-${request_id}`,
+          userId: request.user_id
+        });
+
+        logger.info('VM creation message sent to queue', {
+          requestId: request_id,
+          vmid,
+          templateId: request.template_id,
+          userId: request.user_id
+        });
+
+      } catch (queueError) {
+        logger.error('Failed to send VM creation message to queue', {
+          requestId: request_id,
+          error: queueError
+        });
+        // Don't fail the approval if queue message fails
+        // The request is already approved in the database
+      }
+
+      return approvedRequest;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
@@ -206,6 +269,65 @@ export class ApprovalService {
       }
 
       throw new BadRequestError("Cannot reject this request");
+    }
+  }
+
+  public static async editRequest(
+    { request_id, cpus, memory, disk }: {
+      request_id: number;
+      cpus?: number;
+      memory?: number;
+      disk?: number;
+    },
+    staff_id: number
+  ) {
+    try {
+      // First, verify the request exists and the staff has permission to edit it
+      const request = await this.db.instance_request.findFirst({
+        where: {
+          id: request_id,
+          state: "pending", // Only allow editing pending requests
+          course: {
+            OR: [
+              { main_staff: staff_id },
+              { assistant_staff_1: staff_id },
+              { assistant_staff_2: staff_id },
+              { assistant_staff_3: staff_id },
+            ]
+          }
+        },
+        include: {
+          template: true,
+          user: true,
+          course: true
+        }
+      });
+
+      if (!request) {
+        throw new BadRequestError("Request not found, already processed, or you don't have permission to edit it");
+      }
+
+      // Build update data object with only specification fields
+      const updateData: any = {};
+      if (cpus !== undefined) updateData.cpus = cpus;
+      if (memory !== undefined) updateData.memory = memory;
+      if (disk !== undefined) updateData.disk = disk;
+
+      // Update the request
+      const updatedRequest = await this.db.instance_request.update({
+        where: { id: request_id },
+        data: updateData,
+        include: {
+          template: true,
+          user: true,
+          course: true
+        }
+      });
+
+      return updatedRequest;
+    } catch (error) {
+      console.error("Error editing request specification:", error);
+      throw new BadRequestError("Failed to edit request specification");
     }
   }
 }

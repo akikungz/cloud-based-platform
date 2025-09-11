@@ -631,4 +631,69 @@ describe("Student/Requests Module", () => {
       expect([201, 500]).toContain(response.status);
     });
   });
+
+  describe("Create Instance from Request", () => {
+    it("POST /requests/create-instance", async () => {
+      // First create a request
+      const createResponse = await api.requests.post({
+        type: "course",
+        title: "Test Request for Instance Creation",
+        description: "This is a test request for instance creation",
+        hostname: "test-instance-host",
+        course_id: 1,
+        template_id: 1,
+        cpus: 2,
+        memory: 512,
+        disk: 16,
+      } as any);
+
+      expect(createResponse.status).toBe(201);
+      const requestId = createResponse.data!.data.id;
+
+      // Approve the request (simulate staff approval)
+      await db.instance_request.update({
+        where: { id: requestId },
+        data: { state: 'approved' }
+      });
+
+      // Now test creating an instance from the approved request
+      const response = await api.requests["create-instance"].post({
+        request_id: requestId
+      });
+
+      expect(response.status).toBe(201);
+      expect(response.data).toHaveProperty("data");
+      expect(response.data!.data).toBeDefined();
+      expect(response.data!.data.title).toBe("Test Request for Instance Creation");
+      expect(response.data!.data.hostname).toBe("test-instance-host");
+    });
+
+    it("POST /requests/create-instance should fail for non-approved request", async () => {
+      // First create a request
+      const createResponse = await api.requests.post({
+        type: "course",
+        title: "Test Request for Instance Creation",
+        description: "This is a test request for instance creation",
+        hostname: "test-instance-host-2",
+        course_id: 1,
+        template_id: 1,
+        cpus: 2,
+        memory: 512,
+        disk: 16,
+      } as any);
+
+      expect(createResponse.status).toBe(201);
+      const requestId = createResponse.data!.data.id;
+
+      // Try to create instance from pending request (should fail)
+      const response = await api.requests["create-instance"].post({
+        request_id: requestId
+      });
+
+
+      expect(response.status).toBe(404);
+      expect(response.error).toBeDefined();
+      expect(response.error!.value.message).toContain("Approved request not found");
+    });
+  });
 });

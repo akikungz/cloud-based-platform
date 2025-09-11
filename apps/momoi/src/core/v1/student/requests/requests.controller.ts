@@ -106,3 +106,42 @@ export const RequestsController = new Elysia({
       description: t.String(),
     })
   })
+  .post("/create-instance", async ({ status, user, body }) => {
+    const [err, result] = await create_callback<
+      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof RequestsService.createInstanceFromRequest>>
+    >(
+      () => RequestsService.createInstanceFromRequest(body.request_id, user.id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!result) {
+      const error = new NotFoundError("Instance creation failed");
+      return status(error.code, { message: error.message });
+    }
+
+    // Return the request data in the format expected by the frontend/tests
+    // The actual instance creation is now handled by the yuzu service
+    return status(201, { 
+      message: "Instance creation initiated successfully", 
+      data: {
+        id: result.requestId,
+        title: result.request.title,
+        hostname: result.request.hostname,
+        description: result.request.description,
+        type: result.request.type,
+        cpus: result.request.cpus,
+        memory: result.request.memory,
+        disk: result.request.disk,
+        vmid: result.vmid,
+        node: result.node,
+        status: 'pending' // Instance creation is now asynchronous
+      }
+    });
+  }, {
+    body: t.Object({
+      request_id: t.Number()
+    })
+  })

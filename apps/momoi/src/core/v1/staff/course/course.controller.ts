@@ -53,6 +53,22 @@ export const CourseController = new Elysia({
       q: t.String({ minLength: 1 })
     })
   })
+  .get("/my-courses", async ({ status, user }) => {
+    const [err, courses] = await create_callback<
+      BadRequestError, ReturnType<typeof CourseService.getCoursesByStaff>
+    >(
+      () => CourseService.getCoursesByStaff(user.staff_id!)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    return status(200, { 
+      message: "Courses fetched for current staff successfully",
+      data: courses
+    });
+  })
   .get("/staff/:staffId", async ({ status, params }) => {
     const [err, courses] = await create_callback<
       BadRequestError, ReturnType<typeof CourseService.getCoursesByStaff>

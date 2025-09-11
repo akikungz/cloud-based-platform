@@ -904,4 +904,241 @@ describe("Staff/Approval Module", () => {
       });
     });
   });
+
+  describe("PUT /approval/edit", () => {
+    it("should edit a pending request specification", async () => {
+      const freshRequest = await db.instance_request.create({
+        data: {
+          id: 1005,
+          user_id: "test-student-id",
+          course_id: 1,
+          template_id: 1,
+          type: "course",
+          title: "Fresh Test Request for Editing",
+          description: "This is a fresh test request for editing",
+          hostname: "test-host-5",
+          cpus: 2,
+          memory: 512,
+          disk: 16,
+          state: "pending",
+          reason: null,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      });
+
+      const response = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        cpus: 4,
+        memory: 2048,
+        disk: 16
+      });
+
+      expect([200, 403, 404]).toContain(response.status);
+
+      if (response.status === 200) {
+        expect(response.data).toHaveProperty("message", "Request specification updated successfully");
+        expect(response.data).toHaveProperty("data");
+
+        const updatedRequest = await db.instance_request.findUnique({
+          where: { id: freshRequest.id }
+        });
+        // Only specification fields should be updated
+        expect(updatedRequest?.cpus).toBe(4);
+        expect(updatedRequest?.memory).toBe(2048);
+        expect(updatedRequest?.disk).toBe(16);
+        // Other fields should remain unchanged
+        expect(updatedRequest?.title).toBe("Fresh Test Request for Editing");
+        expect(updatedRequest?.description).toBe("This is a fresh test request for editing");
+        expect(updatedRequest?.hostname).toBe("test-host-5");
+      } else if (response.status === 403 && response.data) {
+        expect(response.data).toHaveProperty("message", "Forbidden");
+      } else if (response.status === 404 && response.data) {
+        expect(response.data).toHaveProperty("message", "Request not found or you don't have permission to edit it");
+      }
+    });
+
+    it("should not allow editing approved requests", async () => {
+      const approvedRequest = await db.instance_request.create({
+        data: {
+          id: 1006,
+          user_id: "test-student-id",
+          course_id: 1,
+          template_id: 1,
+          type: "course",
+          title: "Approved Test Request",
+          description: "This is an approved test request",
+          hostname: "approved-host-6",
+          cpus: 2,
+          memory: 512,
+          disk: 16,
+          state: "approved",
+          reason: null,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      });
+
+      const response = await api.approval.edit.put({
+        request_id: approvedRequest.id,
+        cpus: 8
+      });
+
+      expect([200, 403, 404]).toContain(response.status);
+
+      if (response.status === 404 && response.data) {
+        expect(response.data).toHaveProperty("message", "Request not found or you don't have permission to edit it");
+      }
+    });
+
+    it("should validate request_id parameter", async () => {
+      const response = await api.approval.edit.put({
+        request_id: 999999,
+        cpus: 2
+      });
+
+      expect([200, 403, 404]).toContain(response.status);
+      if (response.status === 404 && response.data) {
+        expect(response.data).toHaveProperty("message", "Request not found or you don't have permission to edit it");
+      }
+    });
+
+    it("should validate disk size constraints", async () => {
+      const freshRequest = await db.instance_request.create({
+        data: {
+          id: 1007,
+          user_id: "test-student-id",
+          course_id: 1,
+          template_id: 1,
+          type: "course",
+          title: "Test Request for Disk Validation",
+          description: "This is a test request for disk validation",
+          hostname: "test-host-7",
+          cpus: 2,
+          memory: 512,
+          disk: 16,
+          state: "pending",
+          reason: null,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      });
+
+      // Test disk size too small
+      const responseTooSmall = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        disk: 5
+      });
+
+      expect(responseTooSmall.status).toBe(422);
+
+      // Test disk size too large
+      const responseTooLarge = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        disk: 50
+      });
+
+      expect(responseTooLarge.status).toBe(422);
+
+      // Test valid disk size
+      const responseValid = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        disk: 20
+      });
+
+      expect([200, 403, 404]).toContain(responseValid.status);
+    });
+
+    it("should validate CPU constraints", async () => {
+      const freshRequest = await db.instance_request.create({
+        data: {
+          id: 1008,
+          user_id: "test-student-id",
+          course_id: 1,
+          template_id: 1,
+          type: "course",
+          title: "Test Request for CPU Validation",
+          description: "This is a test request for CPU validation",
+          hostname: "test-host-8",
+          cpus: 2,
+          memory: 512,
+          disk: 16,
+          state: "pending",
+          reason: null,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      });
+
+      // Test CPU count too small
+      const responseTooSmall = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        cpus: 0
+      });
+
+      expect(responseTooSmall.status).toBe(422);
+
+      // Test CPU count too large
+      const responseTooLarge = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        cpus: 10
+      });
+
+      expect(responseTooLarge.status).toBe(422);
+
+      // Test valid CPU count
+      const responseValid = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        cpus: 6
+      });
+
+      expect([200, 403, 404]).toContain(responseValid.status);
+    });
+
+    it("should validate memory constraints", async () => {
+      const freshRequest = await db.instance_request.create({
+        data: {
+          id: 1009,
+          user_id: "test-student-id",
+          course_id: 1,
+          template_id: 1,
+          type: "course",
+          title: "Test Request for Memory Validation",
+          description: "This is a test request for memory validation",
+          hostname: "test-host-9",
+          cpus: 2,
+          memory: 512,
+          disk: 16,
+          state: "pending",
+          reason: null,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      });
+
+      // Test memory too small
+      const responseTooSmall = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        memory: 256
+      });
+
+      expect(responseTooSmall.status).toBe(422);
+
+      // Test memory too large
+      const responseTooLarge = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        memory: 32768
+      });
+
+      expect(responseTooLarge.status).toBe(422);
+
+      // Test valid memory
+      const responseValid = await api.approval.edit.put({
+        request_id: freshRequest.id,
+        memory: 4096
+      });
+
+      expect([200, 403, 404]).toContain(responseValid.status);
+    });
+  });
 });

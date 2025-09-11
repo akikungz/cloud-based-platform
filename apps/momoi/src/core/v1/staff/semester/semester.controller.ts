@@ -58,13 +58,17 @@ export const SemesterController = new Elysia({
   })
   .get("/active", async ({ status }) => {
     const [err, activeSemester] = await create_callback<
-      BadRequestError | NotFoundError, ReturnType<typeof SemesterService.getActiveSemester>
+      BadRequestError, ReturnType<typeof SemesterService.getActiveSemester>
     >(
       () => SemesterService.getActiveSemester()
     );
 
     if (err) {
       return status(err.code, { message: err.message });
+    }
+
+    if (!activeSemester) {
+      return status(404, { message: "No active semester found" });
     }
 
     return status(200, { 

@@ -48,12 +48,24 @@ const baseEnvSchema = z.object({
       message: "RABBITMQ_URL must be a valid URL",
     })
     .default("amqp://guest:guest@localhost:5672"),
-  RABBITMQ_QUEUE_NAME: z
+  RABBITMQ_EXCHANGE: z
     .string()
     .min(1, {
-      message: "RABBITMQ_QUEUE_NAME is required",
+      message: "RABBITMQ_EXCHANGE is required",
     })
-    .default("task-queue"),
+    .default("yuzu.exchange"),
+  RABBITMQ_QUEUE: z
+    .string()
+    .min(1, {
+      message: "RABBITMQ_QUEUE is required",
+    })
+    .default("yuzu.queue"),
+  RABBITMQ_ROUTING_KEY: z
+    .string()
+    .min(1, {
+      message: "RABBITMQ_ROUTING_KEY is required",
+    })
+    .default("yuzu.create"),
   // CORS trusted origins
   TRUSTED_ORIGINS: z.preprocess(
     (val) => {
