@@ -1,4 +1,23 @@
-import { client, type Client } from "momoi/client";
+"use client";
+import { treaty } from "@elysiajs/eden";
 import { env } from "./env";
 
-export const momoi_client: Client = client(env.FRONTEND_BASE_URL);
+import { Server } from "momoi/client";
+
+export const momoi_client = treaty<Server>(env.API_URL, {
+  fetch: {
+    credentials: "include",
+  }
+});
+
+// Type definitions for API responses
+export interface ApiResponse<T> {
+  message: string;
+  data: T;
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  totalPages: number;
+  data: T[];
+}

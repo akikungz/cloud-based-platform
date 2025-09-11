@@ -6,16 +6,11 @@ const envSchema = z.object({
 		.url({
 			message: "API_URL must be a valid URL",
 		})
-		.default("http://localhost:3000"),
+		.default("http://localhost:3001"),
 	// Base URL for the frontend
 	FRONTEND_BASE_URL: z
 		.url({
 			message: "FRONTEND_BASE_URL must be a valid URL",
-		})
-		.default("http://localhost:3001"),
-	BACKEND_URL: z
-		.url({
-			message: "BACKEND_URL must be a valid URL",
 		})
 		.default("http://localhost:3000"),
 });
