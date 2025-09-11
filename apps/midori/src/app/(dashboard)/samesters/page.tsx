@@ -48,17 +48,25 @@ export default function SemestersPage() {
         momoi_client.api.v1.staff.semester.active.get(),
       ]);
 
-      if (semestersResult.error) throw new Error(semestersResult.error.message || 'Failed to fetch semesters');
-      if (activeResult.error) throw new Error(activeResult.error.message || 'Failed to fetch active semester');
+      if (semestersResult.error) {
+        throw new Error(typeof semestersResult.error === 'string' ? semestersResult.error : semestersResult.error.message || 'Failed to fetch semesters');
+      }
+      if (activeResult.error) {
+        throw new Error(typeof activeResult.error === 'string' ? activeResult.error : activeResult.error.message || 'Failed to fetch active semester');
+      }
 
       // Handle the API response structure: { message: string, data: Semester[] }
       const semestersData = semestersResult.data?.data || semestersResult.data;
       const activeData = activeResult.data?.data || activeResult.data;
 
       setSemesters(Array.isArray(semestersData) ? semestersData : []);
-      setActiveSemester(activeData as Semester | null);
+      // Only set activeSemester if we have valid data with an id
+      setActiveSemester(activeData && typeof activeData === 'object' && 'id' in activeData ? activeData as Semester : null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch semesters");
+      const errorMessage = err instanceof Error ? err.message : 
+                          typeof err === 'string' ? err : 
+                          JSON.stringify(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -114,7 +122,7 @@ export default function SemestersPage() {
   // Activate semester
   const handleActivateSemester = async (semesterId: number) => {
     try {
-      const result = await momoi_client.api.v1.staff.semester.id.activate.post({ params: { id: semesterId } });
+      const result = await momoi_client.api.v1.staff.semester({ id: semesterId }).activate.post();
       if (result.error) {
         throw new Error(result.error.message || 'Failed to activate semester');
       }
@@ -171,6 +179,7 @@ export default function SemestersPage() {
     fetchSemesters();
   }, []);
 
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -192,8 +201,8 @@ export default function SemestersPage() {
         </div>
       )}
 
-      {/* Active Semester */}
-      {activeSemester && (
+      {/* Active Semester - Only show if we have a valid active semester */}
+      {activeSemester && activeSemester.id && (
         <SectionCard title="Active Semester">
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center justify-between">

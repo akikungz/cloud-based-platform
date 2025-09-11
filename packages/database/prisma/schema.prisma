@@ -194,6 +194,7 @@ model instance_template {
   vm_template_host String
   host             pve_node  @relation("template_host", fields: [vm_template_host], references: [name], onDelete: Cascade)
   vm_type          vm_type
+  based_size       Int
   created_at       DateTime  @default(now())
   updated_at       DateTime  @default(now())
   deleted_at       DateTime?

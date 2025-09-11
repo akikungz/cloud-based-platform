@@ -29,7 +29,6 @@ interface CreateCourseData {
   main_staff: number;
   assistant_staff_1?: number;
   assistant_staff_2?: number;
-  assistant_staff_3?: number;
 }
 
 interface StaffMember {
@@ -48,6 +47,7 @@ export default function CoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [showInlineEditForm, setShowInlineEditForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [staffLoading, setStaffLoading] = useState(false);
@@ -134,6 +134,7 @@ export default function CoursesPage() {
       }
       setSuccessMessage('Course updated successfully');
       setShowEditForm(false);
+      setShowInlineEditForm(false);
       setEditingCourse(null);
       fetchCourses();
     } catch (err) {
@@ -184,6 +185,12 @@ export default function CoursesPage() {
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
+
+  // Helper function to get staff member name by ID
+  const getStaffName = (staffId: number) => {
+    const staff = staffMembers.find(member => member.staff_id === staffId);
+    return staff ? staff.name : `Staff ID: ${staffId}`;
+  };
 
   if (loading) {
     return (
@@ -252,13 +259,26 @@ export default function CoursesPage() {
         </div>
       </SectionCard>
 
-      {/* Create Course Form */}
-      <SectionCard title="Add New Course">
-        <CreateCourseFormInline
-          staffMembers={staffMembers}
-          staffLoading={staffLoading}
-          onSubmit={createCourse}
-        />
+      {/* Create/Edit Course Form */}
+      <SectionCard title={showInlineEditForm && editingCourse ? "Edit Course" : "Add New Course"}>
+        {showInlineEditForm && editingCourse ? (
+          <EditCourseFormInline
+            course={editingCourse}
+            staffMembers={staffMembers}
+            staffLoading={staffLoading}
+            onSubmit={(data) => updateCourse(editingCourse.id, data)}
+            onCancel={() => {
+              setShowInlineEditForm(false);
+              setEditingCourse(null);
+            }}
+          />
+        ) : (
+          <CreateCourseFormInline
+            staffMembers={staffMembers}
+            staffLoading={staffLoading}
+            onSubmit={createCourse}
+          />
+        )}
       </SectionCard>
 
       {/* Courses List */}
@@ -284,6 +304,32 @@ export default function CoursesPage() {
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">{course.course_title}</h3>
                     <p className="text-gray-600">Course Code: {course.course_id}</p>
+                    
+                    {/* Staff Members */}
+                    <div className="mt-2">
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        <div className="flex items-center space-x-1">
+                          <User className="h-4 w-4 text-blue-500" />
+                          <span className="font-medium">Main:</span>
+                          <span>{getStaffName(course.main_staff)}</span>
+                        </div>
+                        {course.assistant_staff_1 && (
+                          <div className="flex items-center space-x-1">
+                            <Users className="h-4 w-4 text-green-500" />
+                            <span className="font-medium">Asst 1:</span>
+                            <span>{getStaffName(course.assistant_staff_1)}</span>
+                          </div>
+                        )}
+                        {course.assistant_staff_2 && (
+                          <div className="flex items-center space-x-1">
+                            <Users className="h-4 w-4 text-green-500" />
+                            <span className="font-medium">Asst 2:</span>
+                            <span>{getStaffName(course.assistant_staff_2)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     {course._count && (
                       <div className="flex space-x-4 mt-2 text-sm text-gray-500">
                         <span>{course._count.instance_request} requests</span>
@@ -298,7 +344,7 @@ export default function CoursesPage() {
                     <button 
                       onClick={() => {
                         setEditingCourse(course);
-                        setShowEditForm(true);
+                        setShowInlineEditForm(true);
                       }}
                       className="p-2 text-gray-400 hover:text-vm-blue-600 transition-colors"
                       title="Edit Course"
@@ -393,7 +439,6 @@ function CreateCourseFormInline({
     main_staff: 0,
     assistant_staff_1: undefined,
     assistant_staff_2: undefined,
-    assistant_staff_3: undefined,
   });
   const [loading, setLoading] = useState(false);
 
@@ -406,8 +451,7 @@ function CreateCourseFormInline({
   const getMainStaffOptions = () => {
     const excludedIds = [
       formData.assistant_staff_1,
-      formData.assistant_staff_2,
-      formData.assistant_staff_3
+      formData.assistant_staff_2
     ].filter(Boolean) as number[];
     return getAvailableStaff(excludedIds);
   };
@@ -415,8 +459,7 @@ function CreateCourseFormInline({
   const getAssistant1Options = () => {
     const excludedIds = [
       formData.main_staff,
-      formData.assistant_staff_2,
-      formData.assistant_staff_3
+      formData.assistant_staff_2
     ].filter(Boolean) as number[];
     return getAvailableStaff(excludedIds);
   };
@@ -424,17 +467,7 @@ function CreateCourseFormInline({
   const getAssistant2Options = () => {
     const excludedIds = [
       formData.main_staff,
-      formData.assistant_staff_1,
-      formData.assistant_staff_3
-    ].filter(Boolean) as number[];
-    return getAvailableStaff(excludedIds);
-  };
-
-  const getAssistant3Options = () => {
-    const excludedIds = [
-      formData.main_staff,
-      formData.assistant_staff_1,
-      formData.assistant_staff_2
+      formData.assistant_staff_1
     ].filter(Boolean) as number[];
     return getAvailableStaff(excludedIds);
   };
@@ -455,7 +488,6 @@ function CreateCourseFormInline({
         main_staff: 0,
         assistant_staff_1: undefined,
         assistant_staff_2: undefined,
-        assistant_staff_3: undefined,
       });
     } finally {
       setLoading(false);
@@ -494,7 +526,7 @@ function CreateCourseFormInline({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Main Staff *
@@ -513,7 +545,7 @@ function CreateCourseFormInline({
               <option value="">Select main staff</option>
               {getMainStaffOptions().map((staff) => (
                 <option key={staff.staff_id} value={staff.staff_id}>
-                  {staff.name} (ID: {staff.staff_id})
+                  {staff.name}
                 </option>
               ))}
             </select>
@@ -537,7 +569,7 @@ function CreateCourseFormInline({
               <option value="">Select assistant</option>
               {getAssistant1Options().map((staff) => (
                 <option key={staff.staff_id} value={staff.staff_id}>
-                  {staff.name} (ID: {staff.staff_id})
+                  {staff.name}
                 </option>
               ))}
             </select>
@@ -561,31 +593,7 @@ function CreateCourseFormInline({
               <option value="">Select assistant</option>
               {getAssistant2Options().map((staff) => (
                 <option key={staff.staff_id} value={staff.staff_id}>
-                  {staff.name} (ID: {staff.staff_id})
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Assistant Staff 3
-          </label>
-          {staffLoading ? (
-            <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-              Loading staff members...
-            </div>
-          ) : (
-            <select
-              value={formData.assistant_staff_3 || ''}
-              onChange={(e) => setFormData({ ...formData, assistant_staff_3: parseInt(e.target.value) || undefined })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
-            >
-              <option value="">Select assistant</option>
-              {getAssistant3Options().map((staff) => (
-                <option key={staff.staff_id} value={staff.staff_id}>
-                  {staff.name} (ID: {staff.staff_id})
+                  {staff.name}
                 </option>
               ))}
             </select>
@@ -601,6 +609,208 @@ function CreateCourseFormInline({
         >
           <Plus className="h-4 w-4" />
           <span>{loading ? 'Creating...' : 'Create Course'}</span>
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// Edit Course Form Component (Inline)
+function EditCourseFormInline({ 
+  course, 
+  staffMembers, 
+  staffLoading, 
+  onSubmit, 
+  onCancel 
+}: { 
+  course: Course; 
+  staffMembers: StaffMember[]; 
+  staffLoading: boolean; 
+  onSubmit: (data: Partial<CreateCourseData>) => void; 
+  onCancel: () => void; 
+}) {
+  const [formData, setFormData] = useState<CreateCourseData>({
+    course_id: course.course_id,
+    course_title: course.course_title,
+    main_staff: course.main_staff,
+    assistant_staff_1: course.assistant_staff_1,
+    assistant_staff_2: course.assistant_staff_2,
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Helper function to get available staff for a specific field
+  const getAvailableStaff = (excludeStaffIds: number[]) => {
+    return staffMembers.filter(staff => !excludeStaffIds.includes(staff.staff_id));
+  };
+
+  // Get available staff for each field
+  const getMainStaffOptions = () => {
+    const excludedIds = [
+      formData.assistant_staff_1,
+      formData.assistant_staff_2,
+    ].filter(Boolean) as number[];
+    return getAvailableStaff(excludedIds);
+  };
+
+  const getAssistant1Options = () => {
+    const excludedIds = [
+      formData.main_staff,
+      formData.assistant_staff_2,
+    ].filter(Boolean) as number[];
+    return getAvailableStaff(excludedIds);
+  };
+
+  const getAssistant2Options = () => {
+    const excludedIds = [
+      formData.main_staff,
+      formData.assistant_staff_1,
+    ].filter(Boolean) as number[];
+    return getAvailableStaff(excludedIds);
+  };
+
+  const getAssistant3Options = () => {
+    const excludedIds = [
+      formData.main_staff,
+      formData.assistant_staff_1,
+      formData.assistant_staff_2
+    ].filter(Boolean) as number[];
+    return getAvailableStaff(excludedIds);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.course_id || !formData.course_title || !formData.main_staff) {
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Course ID *
+          </label>
+          <input
+            type="text"
+            value={formData.course_id}
+            onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Course Title *
+          </label>
+          <input
+            type="text"
+            value={formData.course_title}
+            onChange={(e) => setFormData({ ...formData, course_title: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Main Staff *
+          </label>
+          {staffLoading ? (
+            <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+              Loading staff members...
+            </div>
+          ) : (
+            <select
+              value={formData.main_staff || ''}
+              onChange={(e) => setFormData({ ...formData, main_staff: parseInt(e.target.value) || 0 })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
+              required
+            >
+              <option value="">Select main staff</option>
+              {getMainStaffOptions().map((staff) => (
+                <option key={staff.staff_id} value={staff.staff_id}>
+                  {staff.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Assistant Staff 1
+          </label>
+          {staffLoading ? (
+            <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+              Loading staff members...
+            </div>
+          ) : (
+            <select
+              value={formData.assistant_staff_1 || ''}
+              onChange={(e) => setFormData({ ...formData, assistant_staff_1: parseInt(e.target.value) || undefined })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
+            >
+              <option value="">Select assistant</option>
+              {getAssistant1Options().map((staff) => (
+                <option key={staff.staff_id} value={staff.staff_id}>
+                  {staff.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Assistant Staff 2
+          </label>
+          {staffLoading ? (
+            <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+              Loading staff members...
+            </div>
+          ) : (
+            <select
+              value={formData.assistant_staff_2 || ''}
+              onChange={(e) => setFormData({ ...formData, assistant_staff_2: parseInt(e.target.value) || undefined })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
+            >
+              <option value="">Select assistant</option>
+              {getAssistant2Options().map((staff) => (
+                <option key={staff.staff_id} value={staff.staff_id}>
+                  {staff.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-3 pt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-6 py-2 bg-vm-blue-600 text-white rounded-md hover:bg-vm-blue-700 focus:outline-none focus:ring-2 focus:ring-vm-blue-500 disabled:opacity-50 flex items-center space-x-2"
+        >
+          <Edit className="h-4 w-4" />
+          <span>{loading ? 'Updating...' : 'Update Course'}</span>
         </button>
       </div>
     </form>
@@ -627,7 +837,6 @@ function EditCourseForm({
     main_staff: course.main_staff,
     assistant_staff_1: course.assistant_staff_1,
     assistant_staff_2: course.assistant_staff_2,
-    assistant_staff_3: course.assistant_staff_3,
   });
   const [loading, setLoading] = useState(false);
 
@@ -641,7 +850,6 @@ function EditCourseForm({
     const excludedIds = [
       formData.assistant_staff_1,
       formData.assistant_staff_2,
-      formData.assistant_staff_3
     ].filter(Boolean) as number[];
     return getAvailableStaff(excludedIds);
   };
@@ -650,7 +858,6 @@ function EditCourseForm({
     const excludedIds = [
       formData.main_staff,
       formData.assistant_staff_2,
-      formData.assistant_staff_3
     ].filter(Boolean) as number[];
     return getAvailableStaff(excludedIds);
   };
@@ -659,7 +866,6 @@ function EditCourseForm({
     const excludedIds = [
       formData.main_staff,
       formData.assistant_staff_1,
-      formData.assistant_staff_3
     ].filter(Boolean) as number[];
     return getAvailableStaff(excludedIds);
   };
@@ -736,7 +942,7 @@ function EditCourseForm({
                 <option value="">Select main staff member</option>
                 {getMainStaffOptions().map((staff) => (
                   <option key={staff.staff_id} value={staff.staff_id}>
-                    {staff.name} ({staff.email}) - ID: {staff.staff_id}
+                    {staff.name}
                   </option>
                 ))}
               </select>
@@ -760,7 +966,7 @@ function EditCourseForm({
                 <option value="">Select assistant staff member</option>
                 {getAssistant1Options().map((staff) => (
                   <option key={staff.staff_id} value={staff.staff_id}>
-                    {staff.name} ({staff.email}) - ID: {staff.staff_id}
+                    {staff.name}
                   </option>
                 ))}
               </select>
@@ -784,31 +990,7 @@ function EditCourseForm({
                 <option value="">Select assistant staff member</option>
                 {getAssistant2Options().map((staff) => (
                   <option key={staff.staff_id} value={staff.staff_id}>
-                    {staff.name} ({staff.email}) - ID: {staff.staff_id}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Assistant Staff 3
-            </label>
-            {staffLoading ? (
-              <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                Loading staff members...
-              </div>
-            ) : (
-              <select
-                value={formData.assistant_staff_3 || ''}
-                onChange={(e) => setFormData({ ...formData, assistant_staff_3: parseInt(e.target.value) || undefined })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
-              >
-                <option value="">Select assistant staff member</option>
-                {getAssistant3Options().map((staff) => (
-                  <option key={staff.staff_id} value={staff.staff_id}>
-                    {staff.name} ({staff.email}) - ID: {staff.staff_id}
+                    {staff.name}
                   </option>
                 ))}
               </select>

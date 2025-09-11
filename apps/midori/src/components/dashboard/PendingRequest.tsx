@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@midori/utils/format";
-import { Button } from "@mui/material";
-import { ClipboardList, SearchX } from "lucide-react";
+import { Button, Pagination, Box, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { ClipboardList, SearchX, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -18,6 +18,7 @@ interface PendingRequestProps {
 	course?: string; // Optional course filter
 	searchQuery?: string;
 	dashboard?: boolean; // Optional prop to indicate if this is used in the dashboard
+	showPagination?: boolean; // Optional prop to show/hide pagination
 }
 
 export const PendingRequest: React.FC<PendingRequestProps> = ({
@@ -26,58 +27,73 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 	searchQuery = "",
 	course = "",
 	dashboard = false, // Default to false if not provided
+	showPagination = true, // Default to true for pagination
 }) => {
 	const [isLoading, setIsLoading] = useState(true);
+	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [requests, setRequests] = useState<PendingRequestItemProps[]>([]);
 	const [error, setError] = useState<string | null>(null);
+	const [currentPage, setCurrentPage] = useState(page);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalCount, setTotalCount] = useState(0);
+	const [pageSize, setPageSize] = useState(limit);
 
 	// Fetch real requests from API
-	useEffect(() => {
-		const fetchRequests = async () => {
+	const fetchRequests = async (isRefresh = false) => {
+		if (isRefresh) {
+			setIsRefreshing(true);
+		} else {
 			setIsLoading(true);
-			setError(null);
-			
-			try {
-				const response = await fetch(`${env.API_URL}/api/v1/staff/approval?skip=${page}&take=${limit}`, {
-					method: 'GET',
-					credentials: 'include',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				});
+		}
+		setError(null);
+		
+		try {
+			const response = await fetch(`${env.API_URL}/api/v1/staff/approval?skip=${currentPage}&take=${pageSize}`, {
+				method: 'GET',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
 
-				if (response.ok) {
-					const data = await response.json();
-					const apiRequests = data.data?.data || [];
-					
-					// Transform API data to component props format
-					const transformedRequests: PendingRequestItemProps[] = apiRequests.map((req: any) => ({
-						id: req.id.toString(),
-						title: req.title,
-						description: req.description,
-						requestedBy: {
-							id: req.user_id,
-							name: req.user?.name || "Unknown User",
-							email: req.user?.email || "unknown@example.com",
-						},
-						course: {
-							id: req.course_id.toString(),
-							name: req.course?.course_title || "Unknown Course",
-							code: req.course?.course_id || "N/A",
-						},
-						spec: {
-							os: "Ubuntu 20.04 (LXC)", // This would come from template data
-							cpu: req.cpus,
-							memory: req.memory,
-							storage: req.disk,
-						},
-					}));
+			if (response.ok) {
+				const data = await response.json();
+				const apiRequests = data.data?.data || [];
+				const paginationInfo = data.data;
+				
+				// Update pagination info
+				setTotalPages(paginationInfo?.totalPages || 1);
+				setTotalCount(paginationInfo?.count || 0);
+				
+				// Transform API data to component props format
+				const transformedRequests: PendingRequestItemProps[] = apiRequests.map((req: any) => ({
+					id: req.id.toString(),
+					title: req.title,
+					description: req.description,
+					hostname: req.hostname, // Add hostname from API
+					requestedBy: {
+						id: req.user_id,
+						name: req.user?.name || "Unknown User",
+						email: req.user?.email || "unknown@example.com",
+					},
+					course: {
+						id: req.course_id.toString(),
+						name: req.course?.course_title || "Unknown Course",
+						code: req.course?.course_id || "N/A",
+					},
+					spec: {
+						os: "Ubuntu 20.04 (LXC)", // This would come from template data
+						cpu: req.cpus,
+						memory: req.memory,
+						storage: req.disk,
+					},
+				}));
 
 					// Apply filters
 					const filteredRequests = transformedRequests
 						.filter((data) => {
 							if (course.length > 0 && course !== "All") {
-								return data.course.code.toLowerCase().includes(course.toLowerCase());
+								return data.course.code === course;
 							}
 							return true;
 						})
@@ -86,22 +102,45 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 								|| data.requestedBy.name.toLowerCase().includes(searchQuery.toLowerCase());
 						});
 
-					setRequests(filteredRequests);
-				} else {
-					setError(`Failed to fetch requests: ${response.status}`);
-					setRequests([]);
-				}
-			} catch (err) {
-				console.error("Error fetching requests:", err);
-				setError("Failed to fetch requests");
+				setRequests(filteredRequests);
+			} else {
+				setError(`Failed to fetch requests: ${response.status}`);
 				setRequests([]);
-			} finally {
+			}
+		} catch (err) {
+			console.error("Error fetching requests:", err);
+			setError("Failed to fetch requests");
+			setRequests([]);
+		} finally {
+			if (isRefresh) {
+				setIsRefreshing(false);
+			} else {
 				setIsLoading(false);
 			}
-		};
+		}
+	};
 
+	// Handle refresh
+	const handleRefresh = () => {
+		fetchRequests(true);
+	};
+
+	// Handle page change
+	const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+		setCurrentPage(value);
+	};
+
+	// Handle page size change
+	const handlePageSizeChange = (event: any) => {
+		const newPageSize = event.target.value;
+		setPageSize(newPageSize);
+		setCurrentPage(1); // Reset to first page when changing page size
+	};
+
+
+	useEffect(() => {
 		fetchRequests();
-	}, [limit, page, course, searchQuery]);
+	}, [pageSize, currentPage, course, searchQuery]);
 
 	return (
 		<div className={
@@ -117,11 +156,23 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 					<h3 className="text-2xl font-semibold">Pending Requests</h3>
 				</div>
 
-				<Link href="/approvals" passHref>
-					<Button variant="outlined" color="secondary" size="small">
-						View All
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outlined"
+						color="secondary"
+						size="small"
+						onClick={handleRefresh}
+						disabled={isRefreshing}
+						startIcon={<RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />}
+					>
+						{isRefreshing ? "Refreshing..." : "Refresh"}
 					</Button>
-				</Link>
+					<Link href="/approvals" passHref>
+						<Button variant="outlined" color="secondary" size="small">
+							View All
+						</Button>
+					</Link>
+				</div>
 			</div>
 			{
 				isLoading ? (
@@ -136,9 +187,57 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 						description={error}
 					/>
 				) : requests.length > 0 ? (
-					requests.map((request) => (
-						<PendingRequestItem key={request.id} {...request} />
-					))
+					<>
+						{requests.map((request) => (
+							<PendingRequestItem 
+								key={request.id} 
+								{...request} 
+								onRequestUpdate={fetchRequests}
+							/>
+						))}
+						
+						{/* Material-UI Pagination */}
+						{showPagination && (
+							<Box className="mt-6 space-y-4">
+								{/* Pagination Controls */}
+								<Box className="flex items-center justify-between w-full">
+									{/* Page Size Selector */}
+									<FormControl size="small" className="max-w-[120px]" fullWidth>
+										<InputLabel>Per page</InputLabel>
+										<Select
+											value={pageSize}
+											label="Per page"
+											onChange={handlePageSizeChange}
+										>
+											<MenuItem value={5}>5</MenuItem>
+											<MenuItem value={10}>10</MenuItem>
+											<MenuItem value={20}>20</MenuItem>
+											<MenuItem value={50}>50</MenuItem>
+										</Select>
+									</FormControl>
+
+									{/* Results info */}
+									<Box className="text-center text-sm text-gray-600">
+										Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} requests
+									</Box>
+
+									{/* Material-UI Pagination Component */}
+									<Pagination
+										count={totalPages}
+										page={currentPage}
+										onChange={handlePageChange}
+										color="primary"
+										size="small"
+										showFirstButton
+										showLastButton
+										siblingCount={1}
+										boundaryCount={1}
+									/>
+								</Box>
+							
+							</Box>
+						)}
+					</>
 				) : (
 					<EmptyState
 						icon={SearchX}

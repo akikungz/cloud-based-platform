@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Chip, Alert } from "@mui/material";
-import { Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, ClipboardList } from "lucide-react";
+import { Chip, Alert, Button, Snackbar } from "@mui/material";
+import { Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, ClipboardList, Plus } from "lucide-react";
 import { momoi_client } from "@midori/libs/momoi";
 import { formatRelativeDate, formatDate } from "@midori/utils/format";
 import { ClientOnly } from "@midori/components/ui/ClientOnly";
@@ -18,6 +18,7 @@ interface InstanceRequest {
 	type: string;
 	state: string;
 	reason?: string;
+	hostname?: string;
 	created_at: string;
 	updated_at: string;
 }
@@ -37,61 +38,101 @@ export function StudentRequestHistory({ maxItems = 5, showOnlyRecent = true }: R
 	const [extendRequests, setExtendRequests] = useState<ExtensionRequest[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [creatingInstance, setCreatingInstance] = useState<number | null>(null);
+	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
+		open: false,
+		message: "",
+		severity: "success"
+	});
 
 	useEffect(() => {
-		const fetchRequestHistory = async () => {
-			try {
-				const result = await momoi_client.api.v1.student.requests.get();
-				
-				if (result.error) {
-					setError(result.error.message || 'Failed to fetch request history');
-				} else if (result.data) {
-					const requestsData = result.data?.data || result.data;
-					let allRequests = requestsData.requests || [];
-					let allExtendRequests = requestsData.extend_requests || [];
-
-					// Sort by creation date (newest first)
-					allRequests.sort((a: InstanceRequest, b: InstanceRequest) => 
-						new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-					);
-					allExtendRequests.sort((a: ExtensionRequest, b: ExtensionRequest) => 
-						new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-					);
-
-					// Limit items if specified
-					if (maxItems > 0) {
-						allRequests = allRequests.slice(0, maxItems);
-						allExtendRequests = allExtendRequests.slice(0, maxItems);
-					}
-
-					// Filter to recent items if specified (last 30 days)
-					if (showOnlyRecent) {
-						const thirtyDaysAgo = new Date();
-						thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-						
-						allRequests = allRequests.filter((req: InstanceRequest) => 
-							new Date(req.created_at) >= thirtyDaysAgo
-						);
-						allExtendRequests = allExtendRequests.filter((req: ExtensionRequest) => 
-							new Date(req.created_at) >= thirtyDaysAgo
-						);
-					}
-
-					setRequests(allRequests);
-					setExtendRequests(allExtendRequests);
-				} else {
-					setError('No data received');
-				}
-			} catch (err) {
-				console.error("Error fetching request history:", err);
-				setError("Failed to fetch request history");
-			} finally {
-				setLoading(false);
-			}
-		};
-
 		fetchRequestHistory();
 	}, [maxItems, showOnlyRecent]);
+
+	const handleCreateInstance = async (requestId: number) => {
+		setCreatingInstance(requestId);
+		try {
+			const result = await momoi_client.api.v1.student.requests["create-instance"].post({
+				request_id: requestId
+			});
+			
+			if (result.error) {
+				setSnackbar({
+					open: true,
+					message: result.error.value?.message || 'Failed to create instance',
+					severity: "error"
+				});
+			} else {
+				setSnackbar({
+					open: true,
+					message: "Instance created successfully! It may take a few minutes to be ready.",
+					severity: "success"
+				});
+				// Refresh the request history to update the UI
+				fetchRequestHistory();
+			}
+		} catch (err) {
+			console.error("Error creating instance:", err);
+			setSnackbar({
+				open: true,
+				message: "Failed to create instance",
+				severity: "error"
+			});
+		} finally {
+			setCreatingInstance(null);
+		}
+	};
+
+	const fetchRequestHistory = async () => {
+		try {
+			const result = await momoi_client.api.v1.student.requests.get();
+			
+			if (result.error) {
+				setError(result.error.message || 'Failed to fetch request history');
+			} else if (result.data) {
+				const requestsData = result.data?.data || result.data;
+				let allRequests = requestsData.requests || [];
+				let allExtendRequests = requestsData.extend_requests || [];
+
+				// Sort by creation date (newest first)
+				allRequests.sort((a: InstanceRequest, b: InstanceRequest) => 
+					new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+				);
+				allExtendRequests.sort((a: ExtensionRequest, b: ExtensionRequest) => 
+					new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+				);
+
+				// Limit items if specified
+				if (maxItems > 0) {
+					allRequests = allRequests.slice(0, maxItems);
+					allExtendRequests = allExtendRequests.slice(0, maxItems);
+				}
+
+				// Filter to recent items if specified (last 30 days)
+				if (showOnlyRecent) {
+					const thirtyDaysAgo = new Date();
+					thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+					
+					allRequests = allRequests.filter((req: InstanceRequest) => 
+						new Date(req.created_at) >= thirtyDaysAgo
+					);
+					allExtendRequests = allExtendRequests.filter((req: ExtensionRequest) => 
+						new Date(req.created_at) >= thirtyDaysAgo
+					);
+				}
+
+				setRequests(allRequests);
+				setExtendRequests(allExtendRequests);
+			} else {
+				setError('No data received');
+			}
+		} catch (err) {
+			console.error("Error fetching request history:", err);
+			setError("Failed to fetch request history");
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const getStateIcon = (state: string) => {
 		switch (state.toLowerCase()) {
@@ -185,7 +226,7 @@ export function StudentRequestHistory({ maxItems = 5, showOnlyRecent = true }: R
 									</div>
 								</div>
 								
-								<div className="flex items-center gap-2">
+								<div className="flex items-center gap-4">
 									<Chip
 										label={request.state}
 										color={getStateColor(request.state) as any}
@@ -201,6 +242,20 @@ export function StudentRequestHistory({ maxItems = 5, showOnlyRecent = true }: R
 						))}
 					</div>
 				)}
+
+			{/* Snackbar for notifications */}
+			<Snackbar
+				open={snackbar.open}
+				autoHideDuration={6000}
+				onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+			>
+				<Alert 
+					onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+					severity={snackbar.severity}
+				>
+					{snackbar.message}
+				</Alert>
+			</Snackbar>
 		</div>
 	);
 }

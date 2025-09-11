@@ -1,15 +1,17 @@
 "use client";
 import { Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from "@mui/material";
-import { Calendar, Clock, User, Book, Cpu, HardDrive, MemoryStick } from "lucide-react";
+import { Calendar, Clock, User, Book, Cpu, HardDrive, MemoryStick, Edit } from "lucide-react";
 import { cn } from "@midori/utils/format";
 import { SpecBadge } from "@midori/components/ui";
 import { env } from "@midori/libs/env";
 import { useState } from "react";
+import { EditRequestDialog, type EditRequestData } from "./EditRequestDialog";
 
 export interface PendingRequestItemProps {
 	id: string;
 	title: string;
 	description: string;
+	hostname?: string;
 	requestedBy: {
 		id: string;
 		name: string;
@@ -26,18 +28,24 @@ export interface PendingRequestItemProps {
 		memory: number;
 		storage: number;
 	};
+	onRequestUpdate?: () => void;
 }
 
 export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 	id,
 	title,
 	description,
+	hostname,
 	requestedBy,
 	course,
 	spec,
+	onRequestUpdate,
 }) => {
 	const [isApproving, setIsApproving] = useState(false);
 	const [isRejecting, setIsRejecting] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [isApprovingFromEdit, setIsApprovingFromEdit] = useState(false);
+	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
 	const [rejectReason, setRejectReason] = useState("");
 	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
@@ -66,8 +74,8 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 					message: "Request approved successfully",
 					severity: "success"
 				});
-				// Optionally refresh the parent component or remove this item
-				window.location.reload(); // Simple refresh for now
+				// Trigger parent component refresh
+				onRequestUpdate?.();
 			} else {
 				throw new Error("Failed to approve request");
 			}
@@ -115,8 +123,8 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				});
 				setRejectDialogOpen(false);
 				setRejectReason("");
-				// Optionally refresh the parent component or remove this item
-				window.location.reload(); // Simple refresh for now
+				// Trigger parent component refresh
+				onRequestUpdate?.();
 			} else {
 				throw new Error("Failed to reject request");
 			}
@@ -131,9 +139,95 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 			setIsRejecting(false);
 		}
 	};
+
+	const handleEdit = async (editData: EditRequestData) => {
+		setIsEditing(true);
+		try {
+			const response = await fetch(`${env.API_URL}/api/v1/staff/approval/edit`, {
+				method: 'PUT',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					request_id: parseInt(id),
+					...editData
+				})
+			});
+
+			if (response.ok) {
+				setSnackbar({
+					open: true,
+					message: "Request updated successfully",
+					severity: "success"
+				});
+				setEditDialogOpen(false);
+				// Trigger parent component refresh
+				onRequestUpdate?.();
+			} else {
+				const errorData = await response.json();
+				throw new Error(errorData.message || "Failed to update request");
+			}
+		} catch (error) {
+			console.error("Error updating request:", error);
+			setSnackbar({
+				open: true,
+				message: error instanceof Error ? error.message : "Failed to update request",
+				severity: "error"
+			});
+		} finally {
+			setIsEditing(false);
+		}
+	};
+
+	const handleApproveFromEdit = async () => {
+		setIsApprovingFromEdit(true);
+		try {
+			const response = await fetch(`${env.API_URL}/api/v1/staff/approval/approve`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					request_id: parseInt(id)
+				})
+			});
+
+			if (response.ok) {
+				setSnackbar({
+					open: true,
+					message: "Request approved successfully",
+					severity: "success"
+				});
+				setEditDialogOpen(false);
+				// Trigger parent component refresh
+				onRequestUpdate?.();
+			} else {
+				throw new Error("Failed to approve request");
+			}
+		} catch (error) {
+			console.error("Error approving request:", error);
+			setSnackbar({
+				open: true,
+				message: error instanceof Error ? error.message : "Failed to approve request",
+				severity: "error"
+			});
+		} finally {
+			setIsApprovingFromEdit(false);
+		}
+	};
 	return (
 		<>
-		<div className="bg-white p-4 rounded-lg border border-vm-blue-200 hover:shadow-md transition-shadow">
+		{/* Backdrop overlay when modals are open */}
+		{(rejectDialogOpen || editDialogOpen) && (
+			<div className="fixed inset-0 bg-black bg-opacity-50 z-40" />
+		)}
+		
+		<div className={cn(
+			"bg-white p-4 rounded-lg border border-vm-blue-200 hover:shadow-md transition-shadow",
+			(rejectDialogOpen || editDialogOpen) && "opacity-50"
+		)}>
 			<div className="flex flex-col gap-3">
 				{/* Header */}
 				<div className="flex items-start justify-between">
@@ -205,10 +299,20 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 					<div className="flex gap-2">
 						<Button
 							variant="outlined"
+							color="primary"
+							size="small"
+							onClick={() => setEditDialogOpen(true)}
+							disabled={isApproving || isRejecting || isEditing}
+							startIcon={<Edit className="w-4 h-4" />}
+						>
+							Edit
+						</Button>
+						<Button
+							variant="outlined"
 							color="error"
 							size="small"
 							onClick={() => setRejectDialogOpen(true)}
-							disabled={isApproving || isRejecting}
+							disabled={isApproving || isRejecting || isEditing}
 						>
 							{isRejecting ? "Rejecting..." : "Reject"}
 						</Button>
@@ -217,7 +321,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 							color="success"
 							size="small"
 							onClick={handleApprove}
-							disabled={isApproving || isRejecting}
+							disabled={isApproving || isRejecting || isEditing}
 						>
 							{isApproving ? "Approving..." : "Approve"}
 						</Button>
@@ -227,7 +331,11 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 		</div>
 
 		{/* Reject Dialog */}
-		<Dialog open={rejectDialogOpen} onClose={() => setRejectDialogOpen(false)}>
+		<Dialog 
+			open={rejectDialogOpen} 
+			onClose={() => setRejectDialogOpen(false)}
+			sx={{ zIndex: 50 }}
+		>
 			<DialogTitle>Reject Request</DialogTitle>
 			<DialogContent>
 				<TextField
@@ -253,6 +361,24 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				</Button>
 			</DialogActions>
 		</Dialog>
+
+		{/* Edit Dialog */}
+		<EditRequestDialog
+			open={editDialogOpen}
+			onClose={() => setEditDialogOpen(false)}
+			onSave={handleEdit}
+			onApprove={handleApproveFromEdit}
+			initialData={{
+				title,
+				description,
+				hostname: hostname || "vm-" + id,
+				cpus: spec.cpu,
+				memory: spec.memory,
+				disk: spec.storage,
+			}}
+			loading={isEditing}
+			approveLoading={isApprovingFromEdit}
+		/>
 
 		{/* Snackbar for notifications */}
 		<Snackbar

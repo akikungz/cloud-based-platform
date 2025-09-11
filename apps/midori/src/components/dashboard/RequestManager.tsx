@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { momoi_client } from '@midori/libs/momoi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@midori/components/ui/card';
-import { Loader2, Clock, CheckCircle, XCircle, AlertCircle, Eye, Trash2, ClipboardList } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, AlertCircle, Eye, Trash2, ClipboardList, Plus } from 'lucide-react';
+import { Button, Snackbar, Alert } from '@mui/material';
 import { formatRelativeDate, formatDate } from '@midori/utils/format';
 
 interface InstanceRequest {
@@ -46,6 +47,12 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<RequestWithType | ExtensionRequestWithType | null>(null);
+  const [creatingInstance, setCreatingInstance] = useState<number | null>(null);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
+    open: false,
+    message: "",
+    severity: "success"
+  });
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -74,6 +81,41 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
   useEffect(() => {
     fetchRequests();
   }, [refreshTrigger]);
+
+  const handleCreateInstance = async (requestId: number) => {
+    setCreatingInstance(requestId);
+    try {
+      const result = await momoi_client.api.v1.student.requests["create-instance"].post({
+        request_id: requestId
+      });
+      
+      if (result.error) {
+        setSnackbar({
+          open: true,
+          message: result.error.value?.message || 'Failed to create instance',
+          severity: "error"
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: "Instance created successfully! It may take a few minutes to be ready.",
+          severity: "success"
+        });
+        // Refresh the requests to update the UI
+        fetchRequests();
+        onRefresh?.();
+      }
+    } catch (err) {
+      console.error("Error creating instance:", err);
+      setSnackbar({
+        open: true,
+        message: "Failed to create instance",
+        severity: "error"
+      });
+    } finally {
+      setCreatingInstance(null);
+    }
+  };
 
   const getStateIcon = (state: string) => {
     switch (state.toLowerCase()) {
@@ -206,6 +248,20 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
                   </div>
 
                   <div className="flex items-center space-x-3">
+                    {/* Show Create Instance button for approved instance requests */}
+                    {request.requestType === 'instance' && request.state === 'approved' && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleCreateInstance(request.id)}
+                        disabled={creatingInstance === request.id}
+                        startIcon={<Plus className="w-4 h-4" />}
+                        style={{ marginRight: "4px" }}
+                      >
+                        {creatingInstance === request.id ? "Creating..." : "Create Instance"}
+                      </Button>
+                    )}
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStateColor(request.state)}`}>
                       {request.state}
                     </span>
@@ -230,7 +286,7 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
 
       {/* Request Detail Modal */}
       {selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -295,6 +351,20 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
           </div>
         </div>
       )}
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+      >
+        <Alert 
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+          severity={snackbar.severity}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
