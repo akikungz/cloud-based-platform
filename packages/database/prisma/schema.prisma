@@ -54,59 +54,71 @@ enum node_status {
   unknown
 }
 
-model user {
-  id             String   @id
-  name           String
-  email          String   @unique
-  email_verified Boolean  @default(false)
-  image          String?
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-
-  session          session[]
-  account          account[]
+// Start of existing BetterAuth models
+model User {
+  id               String             @id
+  name             String
+  email            String
+  emailVerified    Boolean            @default(false)
+  image            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  user_public_key  user_public_key[]
   instance_request instance_request[]
   instance         instance[]
-  user_public_key  user_public_key[]
+
+  @@unique([email])
+  @@map("user")
 }
 
-model session {
-  id         String   @id
-  expires_at DateTime
-  token      String   @unique
-  created_at DateTime
-  updated_at DateTime
-  ip_address String?
-  user_agent String?
-  user_id    String
-  user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
 }
 
-model account {
-  id                       String    @id
-  account_id               String
-  provider_id              String
-  user_id                  String
-  user                     user      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  access_token             String?
-  refresh_token            String?
-  id_token                 String?
-  access_token_expires_at  DateTime?
-  refresh_token_expires_at DateTime?
-  scope                    String?
-  password                 String?
-  created_at               DateTime
-  updated_at               DateTime
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
 }
 
-model verification {
+model Verification {
   id         String   @id
   identifier String
   value      String
-  expires_at DateTime
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
 }
+
+// End of existing BetterAuth models
 
 model staff_list {
   id         Int       @id @default(autoincrement())
@@ -119,7 +131,7 @@ model staff_list {
 model user_public_key {
   id         Int       @id @default(autoincrement())
   user_id    String
-  user       user      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   public_key String
   created_at DateTime  @default(now())
   deleted_at DateTime?
@@ -208,7 +220,7 @@ model instance_course {
 model instance_request {
   id          Int                   @id @default(autoincrement())
   user_id     String
-  user        user                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        User                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   title       String
   hostname    String
   description String
@@ -231,7 +243,7 @@ model instance_request {
 model instance {
   id                       Int                        @id @default(autoincrement())
   user_id                  String
-  user                     user                       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user                     User                       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   title                    String
   hostname                 String
   description              String
