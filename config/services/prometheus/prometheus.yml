@@ -33,7 +33,7 @@ scrape_configs:
 
   - job_name: 'momoi'
     static_configs:
-      - targets: ['host.docker.internal:3000']
+      - targets: ['host.docker.internal:3001']
 
 alerting:
   alertmanagers:
