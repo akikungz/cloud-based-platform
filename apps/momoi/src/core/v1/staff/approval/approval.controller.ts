@@ -3,6 +3,11 @@ import { Elysia, t } from "elysia";
 import env from "@momoi/libs/env";
 import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { auth_service } from "@momoi/core/auth/auth.service";
+
+import { BadRequestError, NotFoundError } from "@momoi/shared/errors";
+
+import { create_callback } from "utils/functions/callback";
+
 import { ApprovalService } from "./approval.service";
 
 export const ApprovalController = new Elysia({
@@ -49,10 +54,22 @@ export const ApprovalController = new Elysia({
     if (!staff_id) return status(403, { message: "Forbidden" });
     const { request_id } = body;
 
-    const approval = await ApprovalService.approveRequest({ request_id }, staff_id);
-    if (!approval) {
-      return status(404, { message: "Request not found or you don't have permission to approve it" });
+    const [err, approval] = await create_callback<
+      BadRequestError, ReturnType<typeof ApprovalService.approveRequest>
+    >(
+      () => ApprovalService.approveRequest({ request_id }, staff_id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
     }
+
+    if (!approval) {
+      const error = new NotFoundError("Request not found or you don't have permission to approve it");
+
+      return status(error.code, { message: error.message });
+    }
+
     return status(200, { message: "Request approved", data: approval });
   }, {
     description: "Approve a request",
@@ -62,10 +79,22 @@ export const ApprovalController = new Elysia({
   })
   .post("/extends/approve", async ({ body, status }) => {
     const { request_id } = body;
-    const approval = await ApprovalService.approveExtendsRequest({ request_id });
-    if (!approval) {
-      return status(404, { message: "Extension request not found" });
+
+    const [err, approval] = await create_callback<
+      BadRequestError, ReturnType<typeof ApprovalService.approveExtendsRequest>
+    >(
+      () => ApprovalService.approveExtendsRequest({ request_id })
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
     }
+
+    if (!approval) {
+      const error = new NotFoundError("Extension request not found");
+      return status(error.code, { message: error.message });
+    }
+
     return status(200, { message: "Extension request approved", data: approval });
   }, {
     description: "Approve an extension request",
@@ -77,10 +106,21 @@ export const ApprovalController = new Elysia({
     if (!staff_id) return status(403, { message: "Forbidden" });
     const { request_id, reason } = body;
 
-    const rejection = await ApprovalService.rejectRequest({ request_id, reason }, staff_id);
-    if (!rejection) {
-      return status(404, { message: "Request not found or you don't have permission to reject it" });
+    const [err, rejection] = await create_callback<
+      BadRequestError, ReturnType<typeof ApprovalService.rejectRequest>
+    >(
+      () => ApprovalService.rejectRequest({ request_id, reason }, staff_id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
     }
+
+    if (!rejection) {
+      const error = new NotFoundError("Request not found or you don't have permission to reject it");
+      return status(error.code, { message: error.message });
+    }
+
     return status(200, { message: "Request rejected", data: rejection });
   }, {
     description: "Reject a request",
@@ -91,10 +131,22 @@ export const ApprovalController = new Elysia({
   })
   .post("/extends/reject", async ({ body, status }) => {
     const { request_id, reason } = body;
-    const rejection = await ApprovalService.rejectExtendsRequest({ request_id, reason });
-    if (!rejection) {
-      return status(404, { message: "Extension request not found" });
+
+    const [err, rejection] = await create_callback<
+      BadRequestError, ReturnType<typeof ApprovalService.rejectExtendsRequest>
+    >(
+      () => ApprovalService.rejectExtendsRequest({ request_id, reason })
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
     }
+
+    if (!rejection) {
+      const error = new NotFoundError("Extension request not found");
+      return status(error.code, { message: error.message });
+    }
+
     return status(200, { message: "Extension request rejected", data: rejection });
   }, {
     description: "Reject an extension request",

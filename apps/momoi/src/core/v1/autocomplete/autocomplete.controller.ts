@@ -1,12 +1,28 @@
 import { Elysia } from "elysia";
 import { AutoCompleteService } from "./autocomplete..service";
 
+import { BadRequestError } from "@momoi/shared/errors";
+import { create_callback } from "utils/functions/callback";
+
 export const AutocompleteController = new Elysia({
   name: "autocomplete.controller",
   prefix: "/autocomplete"
 })
   .get("/course", async ({ status }) => {
-    const result = await AutoCompleteService.getCourse();
+    const [err, result] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getCourse>>
+    >(
+      () => AutoCompleteService.getCourse()
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!result) {
+      const error = new BadRequestError("Course not found");
+      return status(error.code, { message: error.message });
+    }
 
     return status(200, {
       message: "Get course autocomplete",
@@ -14,7 +30,20 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/staff", async ({ status }) => {
-    const result = await AutoCompleteService.getStaff();
+    const [err, result] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getStaff>>
+    >(
+      () => AutoCompleteService.getStaff()
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!result) {
+      const error = new BadRequestError("Staff not found");
+      return status(error.code, { message: error.message });
+    }
 
     return status(200, {
       message: "Get staff autocomplete",
@@ -22,7 +51,20 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/staff/emails", async ({ status }) => {
-    const result = await AutoCompleteService.getStaffEmails();
+    const [err, result] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getStaffEmails>>
+    >(
+      () => AutoCompleteService.getStaffEmails()
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!result) {
+      const error = new BadRequestError("Staff emails not found");
+      return status(error.code, { message: error.message });
+    }
 
     return status(200, {
       message: "Get staff emails autocomplete",
@@ -30,7 +72,20 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/template", async ({ status }) => {
-    const result = await AutoCompleteService.getTemplate();
+    const [err, result] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getTemplate>>
+    >(
+      () => AutoCompleteService.getTemplate()
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!result) {
+      const error = new BadRequestError("Template not found");
+      return status(error.code, { message: error.message });
+    }
 
     return status(200, {
       message: "Get template autocomplete",

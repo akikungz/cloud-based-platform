@@ -1,4 +1,6 @@
 import { db } from "@momoi/libs/db";
+import { BadRequestError } from "@momoi/shared/errors";
+import { Prisma } from "database/generated/prisma-client/client";
 
 export class ApprovalService {
   private static db = db;
@@ -72,7 +74,23 @@ export class ApprovalService {
         data: { state: "approved" }
       });
     } catch (error) {
-      return null;
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new BadRequestError("Request not found or you don't have permission to approve it");
+        }
+
+        if (error.code === "P2002") {
+          throw new BadRequestError("Request already processed");
+        }
+
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Cannot approve this request");
     }
   }
 
@@ -96,7 +114,23 @@ export class ApprovalService {
         }
       });
     } catch (error) {
-      return null;
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new BadRequestError("Request not found or you don't have permission to reject it");
+        }
+
+        if (error.code === "P2002") {
+          throw new BadRequestError("Request already processed");
+        }
+
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Cannot reject this request");
     }
   }
 
@@ -128,7 +162,23 @@ export class ApprovalService {
         data: { state: "approved" }
       });
     } catch (error) {
-      return null;
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new BadRequestError("Request not found");
+        }
+
+        if (error.code === "P2002") {
+          throw new BadRequestError("Request already processed");
+        }
+
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Cannot approve this request");
     }
   }
 
@@ -139,7 +189,23 @@ export class ApprovalService {
         data: { state: "rejected", reason }
       });
     } catch (error) {
-      return null;
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new BadRequestError("Request not found");
+        }
+
+        if (error.code === "P2002") {
+          throw new BadRequestError("Request already processed");
+        }
+
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Cannot reject this request");
     }
   }
 }

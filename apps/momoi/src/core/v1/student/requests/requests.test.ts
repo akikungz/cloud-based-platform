@@ -2,8 +2,7 @@ import { describe, expect, it, beforeEach } from "bun:test";
 
 import { treaty } from "@elysiajs/eden";
 
-import { db } from "@momoi/libs/db";
-import { createPrismaMockSetup, createPrismaTestHelpers } from "database";
+import { db, createPrismaMockSetup, createPrismaTestHelpers } from "@momoi/libs/db";
 
 import { RequestsController } from "./requests.controller";
 
@@ -247,7 +246,7 @@ describe("Student/Requests Module", () => {
 
     it("should handle very long string values", async () => {
       const longString = "a".repeat(10000);
-      
+
       const response = await api.requests.post({
         type: "course",
         title: longString,
@@ -443,7 +442,7 @@ describe("Student/Requests Module", () => {
         disk: 16,
       }));
 
-      const promises = requests.map(request => 
+      const promises = requests.map(request =>
         api.requests.post(request as any)
       );
 
@@ -461,7 +460,7 @@ describe("Student/Requests Module", () => {
         description: `This is concurrent extends request ${i}`,
       }));
 
-      const promises = extendsRequests.map(request => 
+      const promises = extendsRequests.map(request =>
         api.requests.extends.post(request as any)
       );
 
@@ -474,7 +473,7 @@ describe("Student/Requests Module", () => {
 
     it("should handle database connection errors gracefully", async () => {
       const response = await api.requests.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(response.data!.data).toHaveProperty("requests");
@@ -484,9 +483,9 @@ describe("Student/Requests Module", () => {
     it("should handle empty database gracefully", async () => {
       // Reset database to test empty state
       await mockSetup.resetDatabase();
-      
+
       const response = await api.requests.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(response.data!.data.requests).toEqual([]);
@@ -559,7 +558,7 @@ describe("Student/Requests Module", () => {
 
     it("should handle memory pressure scenarios", async () => {
       // Test multiple rapid requests
-      const rapidRequests = Array.from({ length: 10 }, () => 
+      const rapidRequests = Array.from({ length: 10 }, () =>
         api.requests.get()
       );
 

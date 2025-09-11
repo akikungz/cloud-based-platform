@@ -7,6 +7,9 @@ import { mockAuthStudent } from "@momoi/core/auth/auth.service-test";
 
 import { RequestsService } from "./requests.service";
 
+import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
+import { create_callback } from "utils/functions/callback";
+
 export const RequestsController = new Elysia({
   name: "student.requests.controller",
   prefix: "/requests"
@@ -17,19 +20,55 @@ export const RequestsController = new Elysia({
     if (isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, user }) => {
-    const requests = await RequestsService.getRequests(user.id);
-    const extend_requests = await RequestsService.getExtendRequests(user.id);
+    const [err1, requests] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof RequestsService.getRequests>>
+    >(
+      () => RequestsService.getRequests(user.id)
+    );
+
+    if (err1) {
+      return status(err1.code, { message: err1.message });
+    }
+
+    if (!requests) {
+      const error = new NotFoundError("Requests not found");
+      return status(error.code, { message: error.message });
+    }
+
+    const [err2, extend_requests] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof RequestsService.getExtendRequests>>
+    >(
+      () => RequestsService.getExtendRequests(user.id)
+    );
+
+    if (err2) {
+      return status(err2.code, { message: err2.message });
+    }
+
+    if (!extend_requests) {
+      const error = new NotFoundError("Requests not found");
+      return status(error.code, { message: error.message });
+    }
 
     return status(200, { message: "Student requests controller", data: { requests, extend_requests } });
   })
   .post("/", async ({ status, user, body }) => {
-    try {
-      const result = await RequestsService.createRequest(user.id, body);
-      return status(201, { message: "Create a new request", data: result });
-    } catch (error) {
-      console.error("Error creating request:", error);
-      return status(500, { message: "Failed to create request", error });
+    const [err, result] = await create_callback<
+      BadRequestError | ConflictError, Awaited<ReturnType<typeof RequestsService.createRequest>>
+    >(
+      () => RequestsService.createRequest(user.id, body)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
     }
+
+    if (!result) {
+      const error = new NotFoundError("Request creation failed");
+      return status(error.code, { message: error.message });
+    }
+
+    return status(201, { message: "Create a new request", data: result });
   }, {
     body: t.Object({
       title: t.String(),
@@ -44,10 +83,19 @@ export const RequestsController = new Elysia({
     })
   })
   .post("/extends", async ({ status, body, user }) => {
-    const result = await RequestsService.createRequestExtends(body, user.id);
+    const [err, result] = await create_callback<
+      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof RequestsService.createRequestExtends>>
+    >(
+      () => RequestsService.createRequestExtends(body, user.id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
 
     if (!result) {
-      return status(404, { message: "Instance not found or does not belong to the user" });
+      const error = new NotFoundError("Request creation failed");
+      return status(error.code, { message: error.message });
     }
 
     return status(201, { message: "Create a new extends request", data: result });

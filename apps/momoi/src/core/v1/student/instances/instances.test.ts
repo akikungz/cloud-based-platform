@@ -2,8 +2,7 @@ import { describe, expect, it, beforeEach } from "bun:test";
 
 import { treaty } from "@elysiajs/eden";
 
-import { db } from "@momoi/libs/db";
-import { createPrismaMockSetup, createPrismaTestHelpers } from "database";
+import { db, createPrismaMockSetup, createPrismaTestHelpers } from "@momoi/libs/db";
 
 import { InstancesController } from "./instances.controller";
 
@@ -160,9 +159,9 @@ describe("Student/Instances Module", () => {
     it("should handle empty database gracefully", async () => {
       // Reset database to test empty state
       await mockSetup.resetDatabase();
-      
+
       const response = await api.instances.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(response.data!.data).toEqual([]);
@@ -174,9 +173,9 @@ describe("Student/Instances Module", () => {
         api.instances({ id: 1 }).get(),
         api.instances({ id: 2 }).get()
       ];
-      
+
       const responses = await Promise.all(promises);
-      
+
       responses.forEach(response => {
         expect([200, 404, 500]).toContain(response.status);
       });
@@ -185,7 +184,7 @@ describe("Student/Instances Module", () => {
     it("should handle rapid successive operations", async () => {
       // Get instance, then try to delete it
       const getResponse = await api.instances({ id: 1 }).get();
-      
+
       if (getResponse.status === 200) {
         const deleteResponse = await api.instances({ id: 1 }).delete();
         expect(deleteResponse.status).toBe(200);
@@ -200,7 +199,7 @@ describe("Student/Instances Module", () => {
       // This test would require mocking a staff user
       // For now, we test the normal student user case
       const response = await api.instances.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
     });
@@ -219,7 +218,7 @@ describe("Student/Instances Module", () => {
 
     it("should handle special characters in instance data", async () => {
       const response = await api.instances.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(Array.isArray(response.data!.data)).toBe(true);
@@ -227,7 +226,7 @@ describe("Student/Instances Module", () => {
 
     it("should handle Unicode characters in instance data", async () => {
       const response = await api.instances.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(Array.isArray(response.data!.data)).toBe(true);
@@ -235,12 +234,12 @@ describe("Student/Instances Module", () => {
 
     it("should handle memory pressure scenarios", async () => {
       // Test multiple rapid requests
-      const rapidRequests = Array.from({ length: 10 }, () => 
+      const rapidRequests = Array.from({ length: 10 }, () =>
         api.instances.get()
       );
-      
+
       const responses = await Promise.all(rapidRequests);
-      
+
       responses.forEach(response => {
         expect(response.status).toBe(200);
         expect(response.data).toHaveProperty("data");
@@ -251,7 +250,7 @@ describe("Student/Instances Module", () => {
       const startTime = Date.now();
       const response = await api.instances.get();
       const endTime = Date.now();
-      
+
       expect(response.status).toBe(200);
       expect(endTime - startTime).toBeLessThan(5000); // Should complete within 5 seconds
     });
@@ -260,20 +259,20 @@ describe("Student/Instances Module", () => {
       // Get initial state
       const initialResponse = await api.instances.get();
       const initialCount = initialResponse.data!.data.length;
-      
+
       // Try to delete non-existent instance
       await api.instances({ id: 999999 }).delete();
-      
+
       // Verify data hasn't changed
       const finalResponse = await api.instances.get();
       const finalCount = finalResponse.data!.data.length;
-      
+
       expect(finalCount).toBe(initialCount);
     });
 
     it("should handle large datasets efficiently", async () => {
       const response = await api.instances.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(Array.isArray(response.data!.data)).toBe(true);
@@ -282,10 +281,10 @@ describe("Student/Instances Module", () => {
     it("should handle instance deletion of already deleted instance", async () => {
       // First delete an instance
       const firstDelete = await api.instances({ id: 1 }).delete();
-      
+
       // Try to delete the same instance again
       const secondDelete = await api.instances({ id: 1 }).delete();
-      
+
       // First delete might succeed (200) or fail (404), second should fail (404)
       expect([200, 404]).toContain(firstDelete.status);
       expect(secondDelete.status).toBe(404);
@@ -294,10 +293,10 @@ describe("Student/Instances Module", () => {
     it("should handle instance access after deletion", async () => {
       // Delete an instance
       await api.instances({ id: 1 }).delete();
-      
+
       // Try to get the deleted instance
       const response = await api.instances({ id: 1 }).get();
-      
+
       expect(response.status).toBe(404);
       if (response.data) {
         expect(response.data).toHaveProperty("message", "Instance not found");
@@ -307,14 +306,14 @@ describe("Student/Instances Module", () => {
     it("should handle network interruption scenarios", async () => {
       // Test with a reasonable timeout expectation
       const response = await api.instances.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
     });
 
     it("should handle malformed response data", async () => {
       const response = await api.instances.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(Array.isArray(response.data!.data)).toBe(true);
@@ -326,9 +325,9 @@ describe("Student/Instances Module", () => {
         api.instances({ id: 1 }).delete(),
         api.instances({ id: 1 }).delete()
       ];
-      
+
       const responses = await Promise.all(promises);
-      
+
       responses.forEach(response => {
         // First deletion might succeed (200), subsequent ones should fail (500)
         expect([200, 500]).toContain(response.status);

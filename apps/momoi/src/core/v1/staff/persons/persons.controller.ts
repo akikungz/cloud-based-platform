@@ -6,6 +6,9 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 
 import { PersonsService } from "./persons.service";
 
+import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
+import { create_callback } from "utils/functions/callback";
+
 export const PersonsController = new Elysia({
   name: "persons.controller",
   prefix: "/persons"
@@ -16,14 +19,39 @@ export const PersonsController = new Elysia({
     if (!isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status }) => {
-    const persons = await PersonsService.getPersons();
+    const [err, persons] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof PersonsService.getPersons>>
+    >(
+      () => PersonsService.getPersons()
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!persons) {
+      const error = new NotFoundError("Persons not found");
+      return status(error.code, { message: error.message });
+    }
+
     return status(200, { message: "Get all persons", data: persons });
   })
   .get("/search", async ({ status, query }) => {
-    const person = await PersonsService.getPersonsByEmail(query.email);
-    if (!person) {
-      return status(404, { message: "Person not found" });
+    const [err, person] = await create_callback<
+      BadRequestError | NotFoundError, Awaited<ReturnType<typeof PersonsService.getPersonsByEmail>>
+    >(
+      () => PersonsService.getPersonsByEmail(query.email)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
     }
+
+    if (!person) {
+      const error = new NotFoundError("Person not found");
+      return status(error.code, { message: error.message });
+    }
+
     return status(200, { message: "Get person by email", data: person });
   }, {
     query: t.Object({
@@ -31,7 +59,16 @@ export const PersonsController = new Elysia({
     })
   })
   .post("/", async ({ status, body }) => {
-    const person = await PersonsService.createPerson(body.email);
+    const [err, person] = await create_callback<
+      BadRequestError | ConflictError, Awaited<ReturnType<typeof PersonsService.createPerson>>
+    >(
+      () => PersonsService.createPerson(body.email)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
     return status(201, { message: "Create a new person", data: person });
   }, {
     body: t.Object({
@@ -39,10 +76,16 @@ export const PersonsController = new Elysia({
     })
   })
   .delete("/", async ({ status, body }) => {
-    const person = await PersonsService.deletePerson(body.email);
-    if (!person) {
-      return status(404, { message: "Person not found" });
+    const [err, person] = await create_callback<
+      BadRequestError | NotFoundError, ReturnType<typeof PersonsService.deletePerson>
+    >(
+      () => PersonsService.deletePerson(body.email)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
     }
+
     return status(200, { message: "Delete a person", data: person });
   }, {
     body: t.Object({

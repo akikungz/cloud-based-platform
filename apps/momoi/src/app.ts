@@ -50,10 +50,14 @@ export const app = new Elysia()
       info: {
         title: "Momoi API",
         description: "API documentation for Momoi",
-        version: "1.0.0"
+        version: "1.0.0",
       },
       components: await OpenAPI.components,
       paths: await OpenAPI.getPaths(),
+      servers: [
+        { url: env.FRONTEND_BASE_URL, description: "Frontend proxy" },
+        { url: env.API_URL, description: "Development server" },
+      ]
     },
     references: env.NODE_ENV === "development" ?
       fromTypes("src/index.ts") : undefined

@@ -3,6 +3,7 @@ import { describe, expect, it, beforeEach } from "bun:test";
 import { treaty } from "@elysiajs/eden";
 
 import { db, createPrismaMockSetup, createPrismaTestHelpers } from "@momoi/libs/db";
+
 import { SemesterController } from "./semester.controller";
 
 describe("Staff/Semester Module", () => {
@@ -35,9 +36,9 @@ describe("Staff/Semester Module", () => {
     it("should return empty array when no semesters exist", async () => {
       // Reset database to test empty state
       await mockSetup.resetDatabase();
-      
+
       const response = await api.semester.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect((response.data as any)!.data).toEqual([]);
@@ -100,7 +101,7 @@ describe("Staff/Semester Module", () => {
       // Try to create duplicate
       const response = await api.semester.post(semesterData);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(response.error?.value).toHaveProperty("message");
     });
   });
@@ -159,7 +160,7 @@ describe("Staff/Semester Module", () => {
         name: "2024/1"
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(response.error?.value).toHaveProperty("message");
     });
   });
@@ -222,15 +223,14 @@ describe("Staff/Semester Module", () => {
       expect((response.data as any)!.data).toHaveProperty("active", true);
     });
 
-    it("should return null when no active semester exists", async () => {
+    it("should return 404 when no active semester exists", async () => {
       // Reset database to ensure no active semesters
       await mockSetup.resetDatabase();
-      
+
       const response = await api.semester.active.get();
 
-      expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty("data");
-      expect((response.data as any)!.data).toBeNull();
+      expect(response.status).toBe(404);
+      expect(response.error?.value).toHaveProperty("message");
     });
   });
 
@@ -297,7 +297,7 @@ describe("Staff/Semester Module", () => {
 
     it("should handle very long semester names", async () => {
       const longName = "A".repeat(255);
-      
+
       const response = await api.semester.post({
         name: longName,
         start_at: new Date("2024-01-01"),
@@ -324,13 +324,13 @@ describe("Staff/Semester Module", () => {
         { name: "2024/2", start_at: new Date("2024-07-01"), end_at: new Date("2024-12-31") },
         { name: "2025/1", start_at: new Date("2025-01-01"), end_at: new Date("2025-06-30") }
       ];
-      
-      const promises = semesters.map(semester => 
+
+      const promises = semesters.map(semester =>
         api.semester.post(semester)
       );
-      
+
       const responses = await Promise.all(promises);
-      
+
       responses.forEach(response => {
         expect([201, 400, 409, 422]).toContain(response.status);
       });
@@ -367,7 +367,7 @@ describe("Staff/Semester Module", () => {
       });
 
       const deleteResponse = await api.semester({ id: semesterId }).delete();
-      
+
       expect(createResponse.status).toBe(201);
       expect(updateResponse.status).toBe(200);
       expect(deleteResponse.status).toBe(200);
@@ -382,12 +382,12 @@ describe("Staff/Semester Module", () => {
       });
 
       const semesterId = (createResponse.data as any)!.data.id;
-      
+
       // Try to update with invalid data (should fail)
       await api.semester({ id: semesterId }).put({
         name: "" // Invalid empty name
       });
-      
+
       // Verify original semester still exists
       const response = await api.semester.get();
       const originalSemester = (response.data as any)!.data.find((s: any) => s.id === semesterId);
@@ -397,7 +397,7 @@ describe("Staff/Semester Module", () => {
 
     it("should handle database connection errors gracefully", async () => {
       const response = await api.semester.get();
-      
+
       // Should still return a response
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");

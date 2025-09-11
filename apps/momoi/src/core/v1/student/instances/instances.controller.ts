@@ -6,6 +6,9 @@ import { mockAuthStudent } from "@momoi/core/auth/auth.service-test";
 
 import { InstanceService } from "./instances.service";
 
+import { BadRequestError, NotFoundError } from "@momoi/shared/errors";
+import { create_callback } from "utils/functions/callback";
+
 export const InstancesController = new Elysia({
   name: "student.instances.controller",
   prefix: "/instances"
@@ -16,15 +19,37 @@ export const InstancesController = new Elysia({
     if (isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, user }) => {
-    const instances = await InstanceService.getInstances(user.id);
+    const [err, instances] = await create_callback<
+      BadRequestError, Awaited<ReturnType<typeof InstanceService.getInstances>>
+    >(
+      () => InstanceService.getInstances(user.id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!instances) {
+      const error = new NotFoundError("Instances not found");
+      return status(error.code, { message: error.message });
+    }
 
     return status(200, { message: "Instances fetched successfully", data: instances });
   })
   .get("/:id", async ({ status, user, params }) => {
-    const instance = await InstanceService.getInstanceById(user.id, params.id);
+    const [err, instance] = await create_callback<
+      BadRequestError | NotFoundError, Awaited<ReturnType<typeof InstanceService.getInstanceById>>
+    >(
+      () => InstanceService.getInstanceById(user.id, params.id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
 
     if (!instance) {
-      return status(404, { message: "Instance not found" });
+      const error = new NotFoundError("Instance not found");
+      return status(error.code, { message: error.message });
     }
 
     return status(200, { message: "Instance fetched successfully", data: instance });
@@ -34,10 +59,19 @@ export const InstancesController = new Elysia({
     })
   })
   .delete("/:id", async ({ status, user, params }) => {
-    const result = await InstanceService.deleteInstance(user.id, params.id);
+    const [err, result] = await create_callback<
+      BadRequestError | NotFoundError, Awaited<ReturnType<typeof InstanceService.deleteInstance>>
+    >(
+      () => InstanceService.deleteInstance(user.id, params.id)
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
 
     if (!result) {
-      return status(404, { message: "Instance not found or already deleted/archived" });
+      const error = new NotFoundError("Instance not found");
+      return status(error.code, { message: error.message });
     }
 
     return status(200, { message: "Instance deleted successfully", data: result });
