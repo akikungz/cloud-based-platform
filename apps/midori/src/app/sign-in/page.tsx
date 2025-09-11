@@ -14,7 +14,7 @@ import {
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { auth } from "@midori/libs/auth";
+import { auth, useSession } from "@midori/libs/auth";
 import { env } from "@midori/libs/env";
 import { cn } from "@midori/utils/format";
 import { studentValidationFromId } from "@midori/utils/validation";
@@ -25,7 +25,7 @@ export default function SignIn() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [studentId, setStudentId] = useState("");
 	const [isStudentIdValid, setIsStudentIdValid] = useState(false);
-	const session = auth.useSession();
+	const session = useSession();
 
 	const handleSignIn = async () => {
 		const signin = await auth.signIn.social({
