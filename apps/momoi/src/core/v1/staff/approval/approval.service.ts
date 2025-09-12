@@ -116,21 +116,13 @@ export class ApprovalService {
             // ipconfig0: `ip=192.168.1.${100 + request_id}/24,gw=192.168.1.1`
           },
           requestId: `req-${request_id}`,
-          userId: request.user_id
+          userId: request.user_id.toString()
         });
 
-        logger.info('VM creation message sent to queue', {
-          requestId: request_id,
-          vmid,
-          templateId: request.template_id,
-          userId: request.user_id
-        });
+        logger.info(`VM creation message sent to queue - RequestId: ${request_id}, VmId: ${vmid}, TemplateId: ${request.template_id}, UserId: ${request.user_id}`);
 
       } catch (queueError) {
-        logger.error('Failed to send VM creation message to queue', {
-          requestId: request_id,
-          error: queueError
-        });
+        logger.error(`Failed to send VM creation message to queue - RequestId: ${request_id}, Error: ${queueError}`);
         // Don't fail the approval if queue message fails
         // The request is already approved in the database
       }

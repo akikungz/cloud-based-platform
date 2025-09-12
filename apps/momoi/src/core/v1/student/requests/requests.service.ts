@@ -56,6 +56,19 @@ export class RequestsService {
       "id" | "user_id" | "state" | "reason" | "created_at" | "updated_at">
   ) {
     try {
+      // Check if there's an active semester before allowing new instance requests
+      const activeSemester = await this.db.semester.findFirst({
+        where: { 
+          active: true,
+          deleted_at: null
+        },
+        orderBy: { created_at: 'desc' }
+      });
+
+      if (!activeSemester) {
+        throw new BadRequestError("Cannot create new instance request: No active semester found. Please contact an administrator to activate a semester.");
+      }
+
       return await this.db.instance_request.create({
         data: {
           user_id: userId,
@@ -63,6 +76,10 @@ export class RequestsService {
         }
       });
     } catch (error) {
+      if (error instanceof BadRequestError) {
+        throw error;
+      }
+
       if (error instanceof PrismaClient.PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
           throw new ConflictError("Request with similar data already exists");

@@ -632,6 +632,89 @@ describe("Student/Requests Module", () => {
     });
   });
 
+  describe("Semester Validation", () => {
+    it("should block new instance requests when no active semester exists", async () => {
+      // Deactivate all semesters to simulate no active semester
+      await db.semester.updateMany({
+        where: { active: true },
+        data: { active: false }
+      });
+
+      const response = await api.requests.post({
+        type: "course",
+        title: "Test Request Without Active Semester",
+        description: "This request should be blocked",
+        hostname: "test-host-no-semester",
+        course_id: 1,
+        template_id: 1,
+        cpus: 2,
+        memory: 512,
+        disk: 16,
+      } as any);
+
+      expect(response.status).toBe(400);
+      expect(response.error).toBeDefined();
+      expect(response.error!.value.message).toContain("No active semester found");
+    });
+
+    it("should allow new instance requests when active semester exists", async () => {
+      // Ensure there's an active semester
+      await db.semester.updateMany({
+        where: { active: false },
+        data: { active: true }
+      });
+
+      const response = await api.requests.post({
+        type: "course",
+        title: "Test Request With Active Semester",
+        description: "This request should be allowed",
+        hostname: "test-host-with-semester",
+        course_id: 1,
+        template_id: 1,
+        cpus: 2,
+        memory: 512,
+        disk: 16,
+      } as any);
+
+      expect(response.status).toBe(201);
+      expect(response.data).toHaveProperty("message", "Create a new request");
+    });
+
+    it("should allow extension requests even when no active semester exists", async () => {
+      // Deactivate all semesters to simulate no active semester
+      await db.semester.updateMany({
+        where: { active: true },
+        data: { active: false }
+      });
+
+      const response = await api.requests.extends.post({
+        instance_id: 1,
+        title: "Extension Request Without Active Semester",
+        description: "This extension request should be allowed even without active semester",
+      } as any);
+
+      expect(response.status).toBe(201);
+      expect(response.data).toHaveProperty("message", "Create a new extends request");
+    });
+
+    it("should allow extension requests when active semester exists", async () => {
+      // Ensure there's an active semester
+      await db.semester.updateMany({
+        where: { active: false },
+        data: { active: true }
+      });
+
+      const response = await api.requests.extends.post({
+        instance_id: 1,
+        title: "Extension Request With Active Semester",
+        description: "This extension request should be allowed with active semester",
+      } as any);
+
+      expect(response.status).toBe(201);
+      expect(response.data).toHaveProperty("message", "Create a new extends request");
+    });
+  });
+
   describe("Create Instance from Request", () => {
     it("POST /requests/create-instance", async () => {
       // First create a request
@@ -648,7 +731,7 @@ describe("Student/Requests Module", () => {
       } as any);
 
       expect(createResponse.status).toBe(201);
-      const requestId = createResponse.data!.data.id;
+      const requestId = (createResponse.data as any).data.id;
 
       // Approve the request (simulate staff approval)
       await db.instance_request.update({
@@ -663,9 +746,9 @@ describe("Student/Requests Module", () => {
 
       expect(response.status).toBe(201);
       expect(response.data).toHaveProperty("data");
-      expect(response.data!.data).toBeDefined();
-      expect(response.data!.data.title).toBe("Test Request for Instance Creation");
-      expect(response.data!.data.hostname).toBe("test-instance-host");
+      expect((response.data as any).data).toBeDefined();
+      expect((response.data as any).data.title).toBe("Test Request for Instance Creation");
+      expect((response.data as any).data.hostname).toBe("test-instance-host");
     });
 
     it("POST /requests/create-instance should fail for non-approved request", async () => {
@@ -683,7 +766,7 @@ describe("Student/Requests Module", () => {
       } as any);
 
       expect(createResponse.status).toBe(201);
-      const requestId = createResponse.data!.data.id;
+      const requestId = (createResponse.data as any).data.id;
 
       // Try to create instance from pending request (should fail)
       const response = await api.requests["create-instance"].post({

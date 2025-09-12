@@ -67,32 +67,36 @@ export class RabbitMQPublisher {
    */
   async connect(): Promise<void> {
     try {
-      logger.info('Connecting to RabbitMQ...', { url: env.RABBITMQ_URL });
-      
+      logger.info(`Connecting to RabbitMQ... URL: ${env.RABBITMQ_URL}`);
+
       this.connection = await amqp.connect(env.RABBITMQ_URL);
       this.channel = await this.connection.createChannel();
-      
+
       // Assert the exchange exists
       await this.channel.assertExchange(env.RABBITMQ_EXCHANGE, 'topic', {
         durable: true
       });
-      
+
       this.isConnected = true;
       logger.info('Successfully connected to RabbitMQ');
-      
+
       // Handle connection close
       this.connection.on('close', () => {
         logger.warn('RabbitMQ connection closed');
         this.isConnected = false;
       });
-      
+
       this.connection.on('error', (error) => {
         logger.error('RabbitMQ connection error:', error);
         this.isConnected = false;
       });
-      
+
     } catch (error) {
-      logger.error('Failed to connect to RabbitMQ:', error);
+      if (error instanceof Error) {
+        logger.error(`Failed to connect to RabbitMQ: ${error.message}`);
+      }
+
+      this.isConnected = false;
       throw error;
     }
   }
@@ -108,7 +112,7 @@ export class RabbitMQPublisher {
     try {
       const messageBuffer = Buffer.from(JSON.stringify(message));
       const routingKey = this.getRoutingKey(message.type);
-      
+
       const published = this.channel.publish(
         env.RABBITMQ_EXCHANGE,
         routingKey,
@@ -128,15 +132,12 @@ export class RabbitMQPublisher {
         throw new Error('Failed to publish message to RabbitMQ');
       }
 
-      logger.info('Message published to RabbitMQ', {
-        type: message.type,
-        requestId: message.requestId,
-        userId: message.userId,
-        routingKey
-      });
-      
+      logger.info(`Message published to RabbitMQ - Type: ${message.type}, RequestId: ${message.requestId}, UserId: ${message.userId}, RoutingKey: ${routingKey}`);
+
     } catch (error) {
-      logger.error('Failed to publish message to RabbitMQ:', error);
+      logger.error('Failed to publish message to RabbitMQ', {
+        error: error instanceof Error ? error.message : String(error)
+      } as any); 
       throw error;
     }
   }
@@ -274,17 +275,19 @@ export class RabbitMQPublisher {
         await this.channel.close();
         this.channel = null;
       }
-      
+
       if (this.connection) {
         await this.connection.close();
         this.connection = null;
       }
-      
+
       this.isConnected = false;
       logger.info('RabbitMQ connection closed');
-      
+
     } catch (error) {
-      logger.error('Error closing RabbitMQ connection:', error);
+      logger.error('Error closing RabbitMQ connection', {
+        error: error instanceof Error ? error.message : String(error)
+      } as any);
       throw error;
     }
   }
@@ -308,11 +311,11 @@ export async function getRabbitMQPublisher(): Promise<RabbitMQPublisher> {
     publisherInstance = new RabbitMQPublisher();
     await publisherInstance.connect();
   }
-  
+
   if (!publisherInstance.isPublisherConnected()) {
     await publisherInstance.connect();
   }
-  
+
   return publisherInstance;
 }
 

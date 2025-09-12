@@ -12,6 +12,7 @@ declare module 'amqplib' {
     consume(queue: string, onMessage: (msg: ConsumeMessage | null) => void, options?: any): Promise<void>;
     ack(message: ConsumeMessage): void;
     nack(message: ConsumeMessage, allUpTo?: boolean, requeue?: boolean): void;
+    publish(exchange: string, routingKey: string, content: Buffer, options?: any): boolean;
     close(): Promise<void>;
   }
 
