@@ -197,6 +197,11 @@ export class VMMessageHandler implements MessageHandler {
     let instance: any = null;
 
     try {
+      // Check if this is a staff-created instance or regular request
+      if (message.requestId.startsWith('staff-')) {
+        return await this.handleStaffVMCreate(message);
+      }
+
       // Extract request ID from the message
       const requestId = parseInt(message.requestId.replace('req-', ''));
 
@@ -249,6 +254,18 @@ export class VMMessageHandler implements MessageHandler {
 
       // Validate required fields before creating instance
       this.validateInstanceCreationData(request, activeSemester, message);
+
+      // Validate that the PVE node exists in the database
+      const pveNode = await db.pve_node.findFirst({
+        where: {
+          name: message.data.node,
+          deleted_at: null
+        }
+      });
+
+      if (!pveNode) {
+        throw new Error(`PVE node '${message.data.node}' not found in database. Available nodes: ${(await db.pve_node.findMany({ where: { deleted_at: null }, select: { name: true } })).map(n => n.name).join(', ')}`);
+      }
 
       // Create the instance record in the database first
       instance = await db.instance.create({
@@ -313,25 +330,15 @@ export class VMMessageHandler implements MessageHandler {
         throw new Error(`Template ${message.data.templateId} not found`);
       }
 
-      // Get all pve-nodes
-      const pveNodes = await db.pve_node.findMany({
-        where: { deleted_at: null }
-      });
-
-      if (pveNodes.length === 0) {
-        throw new Error('No PVE nodes available');
-      }
-
-      // Randomly select a PVE node
-      const selectedNode = pveNodes[Math.floor(Math.random() * pveNodes.length)];
-      console.log(`Selected PVE node: ${selectedNode.name}`);
+      // Use the node specified in the message (already validated in handleVMCreate)
+      console.log(`Using PVE node: ${message.data.node}`);
 
       // Step 1: Clone from template
       console.log(`Cloning VM from template ${template.vm_template_id} to ${message.data.vmid}`);
       const cloneTask = await qemu.clone({
         node: template.vm_template_host,
         vmid: parseInt(template.vm_template_id),
-        target: selectedNode.name, // Default storage target
+        target: message.data.node, // PVE node target
         newid: message.data.vmid,
         name: message.data.name,
         full: true // Full clone
@@ -339,8 +346,8 @@ export class VMMessageHandler implements MessageHandler {
 
       console.log(`Clone task started: ${cloneTask.data}`);
 
-      // Wait for clone to complete
-      await task_status(message.data.node, cloneTask.data);
+      // Wait for clone to complete (task runs on the template host node)
+      await task_status(template.vm_template_host, cloneTask.data);
       console.log('VM clone completed successfully');
 
       // Step 2: Assign IP address before VM configuration
@@ -375,43 +382,79 @@ export class VMMessageHandler implements MessageHandler {
         console.warn('No IP address assigned, VM will be created without network configuration');
       }
 
-      // Check instance 
+      // Check instance user
+      const instanceUser = await db.instance.findFirst({
+        where: {
+          vm_id: message.data.vmid,
+          pve_node: message.data.node,
+          state: { not: 'deleted' },
+          user_id: message.userId,
+        },
+        include: {
+          user: true,
+        }
+      });
+
+      if (!instanceUser) {
+        throw new Error(`Instance user not found for VM ${message.data.vmid}`);
+      }
 
       // Step 3: Configure VM settings (including network and IP if assigned)
       console.log('Configuring VM settings...');
       const configTask = await qemu.config({
-        node: selectedNode.name,
-        vmid: message.data.vmid,
+        node: instanceUser.pve_node,
+        vmid: instanceUser.vm_id,
         cores: message.data.config?.cores || request.cpus,
         memory: message.data.config?.memory || request.memory,
-        net0: message.data.config?.net0 || networkConfig.net0,
-        ipconfig0: message.data.config?.ipconfig0 || networkConfig.ipconfig0,
-        ciuser: message.data.config?.ciuser || request.user.email.split('@')[0],
-        cipassword: message.data.config?.cipassword,
+        net0: networkConfig.net0,
+        ipconfig0: networkConfig.ipconfig0,
+        ciuser: instanceUser.user.email.split('@')[0],
+        cipassword: "password",
         sshkeys: message.data.config?.sshkeys
       });
 
       console.log(`Config task started: ${configTask.data}`);
 
       // Wait for configuration to complete
-      await task_status(selectedNode.name, configTask.data);
+      await task_status(instanceUser.pve_node, configTask.data);
       console.log('VM configuration completed successfully');
 
-      // Step 4: Start the VM
+      // Step 4: Resize disk if specified
+      if (message.data.config?.diskSize) {
+        console.log(`Resizing disk for VM ${message.data.vmid} to ${message.data.config.diskSize}GB`);
+        // Get based size from template
+        const basedSize = template.based_size;
+        // Calculate the new disk size based on resize type and template base size
+        const newDiskSize = this.calculateNewDiskSize(message.data.config.diskSize, 'total', basedSize, basedSize);
+
+        const resizeTask = await qemu.resize({
+          node: instanceUser.pve_node,
+          vmid: instanceUser.vm_id,
+          size: newDiskSize.pveResizeSize as any // Type assertion for PVE_Disk_Resize
+        });
+        
+        console.log(`Resize task started: ${resizeTask.data}`);
+        
+        // Wait for resize to complete
+        await task_status(instanceUser.pve_node, resizeTask.data);
+        console.log('VM disk resized successfully');
+      }
+
+      // Step 5: Start the VM
       console.log('Starting VM...');
       const startTask = await qemu.setStatusQEMU({
-        node: selectedNode.name,
-        vmid: message.data.vmid,
+        node: instanceUser.pve_node,
+        vmid: instanceUser.vm_id,
         state: 'start'
       });
 
       console.log(`Start task started: ${startTask.data}`);
 
       // Wait for VM to start
-      await task_status(message.data.node, startTask.data);
+      await task_status(instanceUser.pve_node, startTask.data);
       console.log('VM started successfully');
 
-      // Step 5: Update database with success status
+      // Step 6: Update database with success status
       await db.instance.update({
         where: { id: instance.id },
         data: {
@@ -450,6 +493,12 @@ export class VMMessageHandler implements MessageHandler {
           vm_id: message.data.vmid,
           pve_node: message.data.node,
           state: { not: 'deleted' }
+        },
+        select: {
+          id: true,
+          ip_address: {
+            select: { id: true }
+          }
         }
       });
 
@@ -485,8 +534,8 @@ export class VMMessageHandler implements MessageHandler {
       console.log('VM deleted from PVE successfully');
 
       // Step 3: Release IP address if assigned
-      if (instance.ip_address_id) {
-        await this.releaseIPAddress(instance.ip_address_id);
+      if (instance.ip_address?.id) {
+        await this.releaseIPAddress(instance.ip_address.id);
         console.log(`Released IP address for instance ${instance.id}`);
       }
 
@@ -669,8 +718,8 @@ export class VMMessageHandler implements MessageHandler {
         const ipStillAvailable = await tx.ip_address.findFirst({
           where: {
             id: availableIP.id,
-            is_used: false,
-            deleted_at: null
+            // @ts-ignore - Prisma types seem incorrect for this relation
+            instance: null
           }
         });
 
@@ -682,7 +731,9 @@ export class VMMessageHandler implements MessageHandler {
         await tx.ip_address.update({
           where: { id: availableIP.id },
           data: {
-            is_used: true,
+            instance: {
+              connect: { id: instance.id }
+            },
             updated_at: new Date()
           }
         });
@@ -691,7 +742,11 @@ export class VMMessageHandler implements MessageHandler {
         await tx.instance.update({
           where: { id: instance.id },
           data: {
-            ip_address_id: availableIP.id,
+            ip_address: {
+              connect: {
+                id: availableIP.id
+              }
+            },
             updated_at: new Date()
           }
         });
@@ -715,7 +770,11 @@ export class VMMessageHandler implements MessageHandler {
       await db.ip_address.update({
         where: { id: ipAddressId },
         data: {
-          is_used: false,
+          instance: {
+            disconnect: {
+              id: ipAddressId
+            }
+          },
           updated_at: new Date()
         }
       });
@@ -848,19 +907,15 @@ export class VMMessageHandler implements MessageHandler {
    */
   private async selectRandomAvailableIP(networkId?: number): Promise<IPAddressWithNetwork | null> {
     try {
-      // Build the where clause
-      const whereClause: any = {
-        is_used: false,
-        deleted_at: null
-      };
-
-      if (networkId) {
-        whereClause.network_id = networkId;
-      }
 
       // First, get the count of available IPs
       const availableCount = await db.ip_address.count({
-        where: whereClause
+        where: {
+          ...(networkId ? { network_id: networkId } : {}),
+          // @ts-ignore - Prisma types seem incorrect for this relation
+          instance: null,
+          deleted_at: null
+        }
       });
 
       if (availableCount === 0) {
@@ -873,7 +928,12 @@ export class VMMessageHandler implements MessageHandler {
 
       // Get a random IP address using skip and take
       const randomIP = await db.ip_address.findFirst({
-        where: whereClause,
+        where: {
+          ...(networkId ? { network_id: networkId } : {}),
+          // @ts-ignore - Prisma types seem incorrect for this relation
+          instance: null,
+          deleted_at: null
+        },
         include: {
           network: true
         },
@@ -882,13 +942,125 @@ export class VMMessageHandler implements MessageHandler {
       });
 
       if (randomIP) {
-        console.log(`Selected random IP: ${randomIP.ip} from network: ${randomIP.network.name} (offset: ${randomOffset}/${availableCount})`);
+        console.log(`Selected random IP: ${randomIP.ip} from network: ${(randomIP as IPAddressWithNetwork).network.name} (offset: ${randomOffset}/${availableCount})`);
       }
 
-      return randomIP;
+      return randomIP as IPAddressWithNetwork | null;
     } catch (error) {
       console.error('Error selecting random available IP address:', error);
       return null;
+    }
+  }
+
+  /**
+   * Handle VM creation for staff-created instances (bypasses request and semester locks)
+   */
+  private async handleStaffVMCreate(message: VMCreateMessage): Promise<void> {
+    console.log(`Creating staff VM ${message.data.vmid} from template ${message.data.templateId}`);
+
+    let instance: any = null;
+
+    try {
+      // Extract instance ID from the message
+      const instanceId = parseInt(message.requestId.replace('staff-', ''));
+
+      // Get the instance data directly from the database
+      const instanceData = await db.instance.findFirst({
+        where: {
+          id: instanceId,
+          user_id: message.userId,
+          state: 'active'
+        },
+        include: {
+          user: true,
+          course: true,
+          template: true,
+          semester: true
+        }
+      });
+
+      if (!instanceData) {
+        throw new Error(`Staff instance ${instanceId} not found or not active`);
+      }
+
+      console.log(`Processing staff-created instance: ${instanceData.title} (ID: ${instanceData.id})`);
+
+      // Validate that the PVE node exists in the database
+      const pveNode = await db.pve_node.findFirst({
+        where: {
+          name: message.data.node,
+          deleted_at: null
+        }
+      });
+
+      if (!pveNode) {
+        throw new Error(`PVE node '${message.data.node}' not found in database. Available nodes: ${(await db.pve_node.findMany({ where: { deleted_at: null }, select: { name: true } })).map(n => n.name).join(', ')}`);
+      }
+
+      // Check if instance already exists with same hostname
+      const existingInstance = await db.instance.findFirst({
+        where: {
+          user_id: message.userId,
+          hostname: instanceData.hostname,
+          state: { not: 'deleted' },
+          id: { not: instanceId }
+        }
+      });
+
+      if (existingInstance) {
+        console.log(`Instance already exists for hostname ${instanceData.hostname}`);
+        return;
+      }
+
+      // Update instance status to pending
+      instance = await db.instance.update({
+        where: { id: instanceId },
+        data: { status: 'pending' }
+      });
+
+      console.log(`Staff instance updated in database with ID: ${instance.id}`);
+
+      // Now create the actual VM in PVE
+      // Convert instanceData to the expected format for createVMInPVE
+      const requestData = {
+        id: instanceData.id,
+        user_id: instanceData.user_id,
+        title: instanceData.title,
+        hostname: instanceData.hostname,
+        description: instanceData.description,
+        type: instanceData.type,
+        course_id: instanceData.course_id,
+        template_id: instanceData.template_id,
+        cpus: instanceData.cpus,
+        memory: instanceData.memory,
+        disk: instanceData.disk,
+        state: 'approved' as any,
+        reason: null, // Staff-created instances don't have a reason
+        created_at: instanceData.created_at,
+        updated_at: instanceData.updated_at,
+        user: instanceData.user,
+        course: instanceData.course,
+        template: instanceData.template
+      };
+      
+      await this.createVMInPVE(message, requestData, instance);
+
+    } catch (error) {
+      console.error(`Error creating staff VM ${message.data.vmid}:`, error);
+      
+      // Update instance status to failed if it exists
+      if (instance) {
+        try {
+          await db.instance.update({
+            where: { id: instance.id },
+            data: { status: 'stopped' }
+          });
+        } catch (updateError) {
+          console.error('Failed to update instance status to failed:', updateError);
+        }
+      }
+      
+      throw error;
     }
   }
 }

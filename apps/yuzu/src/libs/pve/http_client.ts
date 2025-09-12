@@ -9,6 +9,7 @@ import type {
 } from "@yuzu/libs/pve/types";
 
 import { AxiosError } from "axios";
+import { ErrorHandler, PVEAPIError, ErrorContext } from "@yuzu/libs/errors";
 
 export const pve_instance = http_instance.create({
 	baseURL: env.PVE_API_URL,
@@ -19,6 +20,7 @@ export const pve_instance = http_instance.create({
 
 pve_instance.interceptors.response.use(
 	(response) => {
+		// Skip logging for task status requests to reduce noise
 		if(response.config.url?.includes("tasks")) return Promise.resolve(response);
 
 		console.info(
@@ -40,10 +42,35 @@ pve_instance.interceptors.response.use(
 		return Promise.resolve(response);
 	},
 	(error) => {
-		// console.error("PVE API error:", error);
-		return Promise.reject(error);
+		// Enhanced error logging with context
+		const context: Partial<ErrorContext> = {
+			operation: 'pve_api_request',
+			node: extractNodeFromUrl(error.config?.url),
+			timestamp: new Date(),
+			additional: {
+				url: error.config?.url,
+				method: error.config?.method,
+				status: error.response?.status,
+				statusText: error.response?.statusText
+			}
+		};
+
+		// Convert to YuzuError and log
+		const yuzuError = ErrorHandler.fromAxiosError(error, context);
+		ErrorHandler.logError(ErrorHandler.createErrorInfo(yuzuError, context));
+
+		return Promise.reject(yuzuError);
 	},
 );
+
+/**
+ * Extracts node name from PVE API URL
+ */
+function extractNodeFromUrl(url?: string): string | undefined {
+	if (!url) return undefined;
+	const match = url.match(/\/nodes\/([^\/]+)/);
+	return match ? match[1] : undefined;
+}
 
 export interface InstanceArgs<
 	Path extends PVE_PATH,
@@ -81,6 +108,19 @@ export const instance = async <
 	// biome-ignore lint/suspicious/noExplicitAny: <any> is used to allow flexibility in request body and response types
 	const pre_path = replace_params(path, params as any);
 
+	const context: Partial<ErrorContext> = {
+		operation: `pve_${String(method).toLowerCase()}`,
+		node: (params as any)?.node,
+		vmid: (params as any)?.vmid,
+		timestamp: new Date(),
+		additional: {
+			path,
+			pre_path,
+			params,
+			body
+		}
+	};
+
 	try {
 		const request = await pve_instance<Response>({
 			url: pre_path,
@@ -90,11 +130,13 @@ export const instance = async <
 
 		return { status: request.status, data: request.data };
 	} catch (error) {
-		if (error instanceof AxiosError) {
-			console.error("Axios error:", error.response?.data);
-		} else {
-			console.error("Unknown error:", error);
+		// Error is already converted to YuzuError by the interceptor
+		// Just re-throw it with additional context
+		if (error instanceof PVEAPIError) {
+			throw error;
 		}
-		throw error;
+		
+		// Fallback for any other errors
+		throw ErrorHandler.handleError(error, context);
 	}
 };

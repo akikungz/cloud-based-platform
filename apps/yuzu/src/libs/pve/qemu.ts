@@ -5,6 +5,7 @@ import type {
 	PVE_Interface_Config,
 	PVE_Network_Config,
 } from "./types";
+import { RetryHandler, PVEAPIError, ValidationError } from "@yuzu/libs/errors";
 
 export interface CloneQEMUProps {
 	node: string;
@@ -33,18 +34,51 @@ export const clone = async ({
 	name,
 	full,
 }: CloneQEMUProps) => {
-	const task = await instance({
-		path: "/nodes/:node/qemu/:vmid/clone",
-		method: "POST",
-		params: { node, vmid },
-		body: { target, newid, name, full },
-	});
-
-	if (task.status !== 200) {
-		throw new Error(`Failed to clone QEMU: ${task.status}`);
+	// Validate input parameters
+	if (!node?.trim()) {
+		throw new ValidationError('Node name is required', 'node', node);
+	}
+	if (!vmid || vmid <= 0) {
+		throw new ValidationError('Valid VM ID is required', 'vmid', vmid);
+	}
+	if (!target?.trim()) {
+		throw new ValidationError('Target storage is required', 'target', target);
+	}
+	if (!newid || newid <= 0) {
+		throw new ValidationError('Valid new VM ID is required', 'newid', newid);
+	}
+	if (!name?.trim()) {
+		throw new ValidationError('VM name is required', 'name', name);
 	}
 
-	return task.data;
+	const context = {
+		operation: 'qemu_clone',
+		node,
+		vmid,
+		requestId: `clone-${vmid}-${newid}`,
+		additional: { target, newid, name, full }
+	};
+
+	return RetryHandler.executeWithRetry(async () => {
+		const task = await instance({
+			path: "/nodes/:node/qemu/:vmid/clone",
+			method: "POST",
+			params: { node, vmid },
+			body: { target, newid, name, full },
+		});
+
+		if (task.status !== 200) {
+			throw new PVEAPIError(
+				`Failed to clone QEMU ${vmid} to ${newid}`,
+				task.status,
+				`/nodes/${node}/qemu/${vmid}/clone`,
+				'POST',
+				{ target, newid, name, full }
+			);
+		}
+
+		return task.data;
+	}, context);
 };
 
 export interface ResizeQEMUProps {
@@ -62,18 +96,45 @@ export interface ResizeQEMUProps {
  * @throws An error if the resize operation fails.
  */
 export const resize = async ({ node, vmid, size }: ResizeQEMUProps) => {
-	const task = await instance({
-		path: "/nodes/:node/qemu/:vmid/resize",
-		method: "PUT",
-		params: { node, vmid },
-		body: { disk: "scsi0", size },
-	});
-
-	if (task.status !== 200) {
-		throw new Error(`Failed to resize QEMU: ${task.status}`);
+	// Validate input parameters
+	if (!node?.trim()) {
+		throw new ValidationError('Node name is required', 'node', node);
+	}
+	if (!vmid || vmid <= 0) {
+		throw new ValidationError('Valid VM ID is required', 'vmid', vmid);
+	}
+	if (!size || !size.match(/^\+\d+[GMK]$/)) {
+		throw new ValidationError('Valid size format is required (e.g., +10G, +512M)', 'size', size);
 	}
 
-	return task.data;
+	const context = {
+		operation: 'qemu_resize',
+		node,
+		vmid,
+		requestId: `resize-${vmid}`,
+		additional: { size }
+	};
+
+	return RetryHandler.executeWithRetry(async () => {
+		const task = await instance({
+			path: "/nodes/:node/qemu/:vmid/resize",
+			method: "PUT",
+			params: { node, vmid },
+			body: { disk: "scsi0", size },
+		});
+
+		if (task.status !== 200) {
+			throw new PVEAPIError(
+				`Failed to resize QEMU ${vmid} disk by ${size}`,
+				task.status,
+				`/nodes/${node}/qemu/${vmid}/resize`,
+				'PUT',
+				{ size }
+			);
+		}
+
+		return task.data;
+	}, context);
 };
 
 export interface ConfigQEMUProps {
@@ -107,22 +168,46 @@ export interface ConfigQEMUProps {
 export const config = async (spec: ConfigQEMUProps) => {
 	const { node, vmid, ...body } = spec;
 
-	const task = await instance({
-		path: "/nodes/:node/qemu/:vmid/config",
-		method: "POST",
-		params: { node, vmid },
-		body: {
-			...body,
-			sshkeys: body.sshkeys && encodeURIComponent(body.sshkeys),
-			cicustom: "user=cephfs:snippets/allow_ssh.yaml", // Use the SSH password authentication configuration snippet
-		},
-	});
-
-	if (task.status !== 200) {
-		throw new Error(`Failed to configure QEMU: ${task.status}`);
+	// Validate input parameters
+	if (!node?.trim()) {
+		throw new ValidationError('Node name is required', 'node', node);
+	}
+	if (!vmid || vmid <= 0) {
+		throw new ValidationError('Valid VM ID is required', 'vmid', vmid);
 	}
 
-	return task.data;
+	const context = {
+		operation: 'qemu_config',
+		node,
+		vmid,
+		requestId: `config-${vmid}`,
+		additional: { configKeys: Object.keys(body) }
+	};
+
+	return RetryHandler.executeWithRetry(async () => {
+		const task = await instance({
+			path: "/nodes/:node/qemu/:vmid/config",
+			method: "POST",
+			params: { node, vmid },
+			body: {
+				...body,
+				sshkeys: body.sshkeys && encodeURIComponent(body.sshkeys),
+				cicustom: "user=cephfs:snippets/allow_ssh.yaml", // Use the SSH password authentication configuration snippet
+			},
+		});
+
+		if (task.status !== 200) {
+			throw new PVEAPIError(
+				`Failed to configure QEMU ${vmid}`,
+				task.status,
+				`/nodes/${node}/qemu/${vmid}/config`,
+				'POST',
+				{ configKeys: Object.keys(body) }
+			);
+		}
+
+		return task.data;
+	}, context);
 };
 
 export interface DeleteQEMUProps {
@@ -138,47 +223,124 @@ export interface DeleteQEMUProps {
  * @throws An error if the delete operation fails.
  */
 export const deleteQEMU = async (params: DeleteQEMUProps) => {
-	const task = await instance({
-		path: "/nodes/:node/qemu/:vmid",
-		method: "DELETE",
-		params,
-	});
+	const { node, vmid } = params;
 
-	if (task.status !== 200) {
-		throw new Error(`Failed to delete QEMU: ${task.status}`);
+	// Validate input parameters
+	if (!node?.trim()) {
+		throw new ValidationError('Node name is required', 'node', node);
+	}
+	if (!vmid || vmid <= 0) {
+		throw new ValidationError('Valid VM ID is required', 'vmid', vmid);
 	}
 
-	return task.data;
+	const context = {
+		operation: 'qemu_delete',
+		node,
+		vmid,
+		requestId: `delete-${vmid}`
+	};
+
+	return RetryHandler.executeWithRetry(async () => {
+		const task = await instance({
+			path: "/nodes/:node/qemu/:vmid",
+			method: "DELETE",
+			params,
+		});
+
+		if (task.status !== 200) {
+			throw new PVEAPIError(
+				`Failed to delete QEMU ${vmid}`,
+				task.status,
+				`/nodes/${node}/qemu/${vmid}`,
+				'DELETE'
+			);
+		}
+
+		return task.data;
+	}, context);
 };
 
 export type GetStatusQEMUProps = NonNullable<PVE_API_Template["/nodes/:node/qemu/:vmid/status/current"]["GET"]["params"]>;
 
 export const getStatusQEMU = async (params: GetStatusQEMUProps) => {
-	const task = await instance({
-		path: "/nodes/:node/qemu/:vmid/status/current",
-		method: "GET",
-		params,
-	});
+	const { node, vmid } = params;
 
-	if (task.status !== 200) {
-		throw new Error(`Failed to get status for QEMU: ${task.status}`);
+	// Validate input parameters
+	if (!node?.trim()) {
+		throw new ValidationError('Node name is required', 'node', node);
+	}
+	if (!vmid || vmid <= 0) {
+		throw new ValidationError('Valid VM ID is required', 'vmid', vmid);
 	}
 
-	return task.data;
+	const context = {
+		operation: 'qemu_get_status',
+		node,
+		vmid,
+		requestId: `status-${vmid}`
+	};
+
+	return RetryHandler.executeWithRetry(async () => {
+		const task = await instance({
+			path: "/nodes/:node/qemu/:vmid/status/current",
+			method: "GET",
+			params,
+		});
+
+		if (task.status !== 200) {
+			throw new PVEAPIError(
+				`Failed to get status for QEMU ${vmid}`,
+				task.status,
+				`/nodes/${node}/qemu/${vmid}/status/current`,
+				'GET'
+			);
+		}
+
+		return task.data;
+	}, context);
 }
 
 export type SetStatusQEMUProps = NonNullable<PVE_API_Template["/nodes/:node/qemu/:vmid/status/:state"]["POST"]["params"]>;
 
 export const setStatusQEMU = async (params: SetStatusQEMUProps) => {
-	const task = await instance({
-		path: "/nodes/:node/qemu/:vmid/status/:state",
-		method: "POST",
-		params,
-	});
+	const { node, vmid, state } = params;
 
-	if (task.status !== 200) {
-		throw new Error(`Failed to set status for QEMU: ${task.status}`);
+	// Validate input parameters
+	if (!node?.trim()) {
+		throw new ValidationError('Node name is required', 'node', node);
+	}
+	if (!vmid || vmid <= 0) {
+		throw new ValidationError('Valid VM ID is required', 'vmid', vmid);
+	}
+	if (!state?.trim()) {
+		throw new ValidationError('State is required', 'state', state);
 	}
 
-	return task.data;
+	const context = {
+		operation: 'qemu_set_status',
+		node,
+		vmid,
+		requestId: `set-status-${vmid}-${state}`,
+		additional: { state }
+	};
+
+	return RetryHandler.executeWithRetry(async () => {
+		const task = await instance({
+			path: "/nodes/:node/qemu/:vmid/status/:state",
+			method: "POST",
+			params,
+		});
+
+		if (task.status !== 200) {
+			throw new PVEAPIError(
+				`Failed to set status for QEMU ${vmid} to ${state}`,
+				task.status,
+				`/nodes/${node}/qemu/${vmid}/status/${state}`,
+				'POST',
+				{ state }
+			);
+		}
+
+		return task.data;
+	}, context);
 };
