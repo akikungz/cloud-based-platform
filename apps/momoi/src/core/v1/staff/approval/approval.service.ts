@@ -94,24 +94,30 @@ export class ApprovalService {
       // Send VM creation message to RabbitMQ queue
       try {
         const publisher = await getRabbitMQPublisher();
-        
+
         // Generate a unique VM ID (you might want to implement a better ID generation strategy)
         const vmid = 1000 + request_id; // Simple ID generation for now
-        
-        // Determine the target node (you might want to implement node selection logic)
-        const targetNode = "pve-node-01"; // Default node, should be configurable
-        
+
+        // Get random available PVE node
+        const availableNode = await this.db.pve_node.findMany({
+          where: { status: 'online' }
+        });
+
+        if (availableNode.length === 0) {
+          throw new BadRequestError("No available PVE nodes found");
+        }
+
+        const randomNode = availableNode[Math.floor(Math.random() * availableNode.length)];
+
         await publisher.publishVMCreateMessage({
           vmid,
           templateId: request.template_id,
           name: request.hostname,
-          node: targetNode,
+          node: randomNode.name,
           config: {
             cores: request.cpus,
             memory: request.memory,
             diskSize: `+${request.disk}G`, // Convert disk size to relative format
-            ciuser: request.user.name?.toLowerCase().replace(/\s+/g, '') || 'student',
-            cipassword: 'defaultPassword123', // You might want to generate this
             // Add network configuration if needed
             // ipconfig0: `ip=192.168.1.${100 + request_id}/24,gw=192.168.1.1`
           },

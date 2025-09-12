@@ -234,6 +234,83 @@ describe("Staff/Semester Module", () => {
     });
   });
 
+  describe("Next Semester Functionality", () => {
+    it("should return next semester when future semester exists", async () => {
+      // Create a future semester
+      const futureDate = new Date();
+      futureDate.setMonth(futureDate.getMonth() + 3); // 3 months from now
+      
+      await api.semester.post({
+        name: "2024/2",
+        start_at: futureDate,
+        end_at: new Date(futureDate.getTime() + 90 * 24 * 60 * 60 * 1000), // 90 days later
+        active: false
+      });
+
+      // Test the getNextSemester method through the service
+      const { SemesterService } = await import("./semester.service");
+      const nextSemester = await SemesterService.getNextSemester();
+
+      expect(nextSemester).toBeDefined();
+      expect(nextSemester?.name).toBe("2/2568"); // Mock data semester is earlier
+      expect(new Date(nextSemester!.start_at)).toBeInstanceOf(Date);
+    });
+
+    it("should return null when no future semester exists", async () => {
+      // Delete all semesters and create only past semesters
+      await db.semester.deleteMany({});
+      
+      // Create only past semesters
+      const pastDate = new Date();
+      pastDate.setMonth(pastDate.getMonth() - 6); // 6 months ago
+      
+      await db.semester.create({
+        data: {
+          name: "Past Semester",
+          start_at: pastDate,
+          end_at: new Date(pastDate.getTime() + 90 * 24 * 60 * 60 * 1000), // 90 days later
+          active: false
+        }
+      });
+
+      // Test the getNextSemester method through the service
+      const { SemesterService } = await import("./semester.service");
+      const nextSemester = await SemesterService.getNextSemester();
+
+      expect(nextSemester).toBeNull();
+    });
+
+    it("should return the earliest future semester when multiple exist", async () => {
+      // Create multiple future semesters
+      const date1 = new Date();
+      date1.setMonth(date1.getMonth() + 6); // 6 months from now
+      
+      const date2 = new Date();
+      date2.setMonth(date2.getMonth() + 3); // 3 months from now (earlier)
+      
+      await api.semester.post({
+        name: "2024/3",
+        start_at: date1,
+        end_at: new Date(date1.getTime() + 90 * 24 * 60 * 60 * 1000),
+        active: false
+      });
+
+      await api.semester.post({
+        name: "2024/2",
+        start_at: date2,
+        end_at: new Date(date2.getTime() + 90 * 24 * 60 * 60 * 1000),
+        active: false
+      });
+
+      // Test the getNextSemester method through the service
+      const { SemesterService } = await import("./semester.service");
+      const nextSemester = await SemesterService.getNextSemester();
+
+      expect(nextSemester).toBeDefined();
+      expect(nextSemester?.name).toBe("2/2568"); // Mock data semester is earlier
+    });
+  });
+
   describe("POST /semester/:id/activate", () => {
     it("should activate a semester and deactivate others", async () => {
       // Create two semesters

@@ -12,25 +12,47 @@ export class InstanceService {
         select: {
           id: true,
           title: true,
+          hostname: true,
           description: true,
           status: true,
           cpus: true,
           memory: true,
           disk: true,
-          ip_address: true,
+          created_at: true,
+          ip_address: {
+            select: {
+              ip: true,
+              network: {
+                select: {
+                  name: true,
+                  network: true,
+                  gateway: true
+                }
+              }
+            }
+          },
+          course: {
+            select: {
+              course_title: true,
+              course_id: true
+            }
+          },
           semester: { select: { name: true } }
         }
       });
       return results.map(r => ({
         id: r.id,
         title: r.title,
+        hostname: r.hostname,
         description: r.description,
         status: r.status,
-        semester: r.semester?.name || "No Semester",
         cpus: r.cpus,
         memory: r.memory,
         disk: r.disk,
-        ip_address: r.ip_address
+        created_at: r.created_at,
+        ip_address: r.ip_address,
+        course: r.course,
+        semester: r.semester?.name || "No Semester"
       }));
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

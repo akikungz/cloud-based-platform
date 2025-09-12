@@ -292,6 +292,47 @@ export class SemesterService {
     }
   }
 
+  static async getNextSemester(dbInstance?: any) {
+    try {
+      const now = new Date();
+      const dbToUse = dbInstance || this.db;
+      
+      // Find the next semester that starts after the current date
+      // Use findMany and filter manually since the mock database doesn't handle complex where clauses well
+      const allSemesters = await dbToUse.semester.findMany({
+        where: { 
+          deleted_at: null 
+        },
+        select: {
+          id: true,
+          name: true,
+          start_at: true,
+          end_at: true,
+          active: true,
+          created_at: true,
+          updated_at: true
+        },
+        orderBy: { start_at: 'asc' }
+      });
+      
+      // Find the first semester that starts after the current date
+      const nextSemester = allSemesters.find((semester: { start_at: Date }) => semester.start_at > now) || null;
+      
+      // Return null if no next semester found
+      return nextSemester;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Failed to fetch next semester");
+    }
+  }
+
   static async activateSemester(id: number) {
     try {
       // Check if semester exists

@@ -24,17 +24,37 @@ describe("Staff/Persons Module", () => {
     await mockSetup.setupCompleteTestEnvironment();
   });
 
-  it("GET /persons - should return list of persons", async () => {
+  it("GET /persons - should return list of persons with both active and pending status", async () => {
     const response = await api.persons.get();
 
     expect(response.status).toBe(200);
     expect(response.data).toHaveProperty("data");
     expect(Array.isArray(response.data!.data)).toBe(true);
     expect(response.data!.data.length).toBeGreaterThan(0);
+    
     // Check that at least one person has the expected staff email
     const staffPerson = response.data!.data.find((p: any) => p.email === "staff.t@itm.kmutnb.ac.th");
     expect(staffPerson).toBeDefined();
     expect(staffPerson).toHaveProperty("staff_id", 1);
+    expect(staffPerson).toHaveProperty("status", "active");
+    
+    // Check that all persons have the required fields
+    response.data!.data.forEach((person: any) => {
+      expect(person).toHaveProperty("email");
+      expect(person).toHaveProperty("staff_id");
+      expect(person).toHaveProperty("status");
+      expect(person).toHaveProperty("created_at");
+      expect(person).toHaveProperty("updated_at");
+      expect(["active", "pending"]).toContain(person.status);
+      
+      if (person.status === "active") {
+        expect(person).toHaveProperty("id");
+        expect(person).toHaveProperty("name");
+      } else if (person.status === "pending") {
+        expect(person.id).toBeNull();
+        expect(person.name).toBeNull();
+      }
+    });
   });
 
   it("GET /persons/search - should return a person by email", async () => {
@@ -51,6 +71,26 @@ describe("Staff/Persons Module", () => {
 
     expect(response.status).toBe(201);
     expect(response.data).toHaveProperty("data");
+  });
+
+  it("GET /persons - should include pending staff members who haven't logged in", async () => {
+    // Create a staff member who hasn't logged in yet
+    const pendingEmail = "pending.staff@itm.kmutnb.ac.th";
+    await api.persons.post({ email: pendingEmail });
+
+    const response = await api.persons.get();
+
+    expect(response.status).toBe(200);
+    expect(response.data).toHaveProperty("data");
+    
+    // Find the pending staff member
+    const pendingPerson = response.data!.data.find((p: any) => p.email === pendingEmail);
+    expect(pendingPerson).toBeDefined();
+    expect(pendingPerson).toHaveProperty("status", "pending");
+    expect(pendingPerson).toHaveProperty("id", null);
+    expect(pendingPerson).toHaveProperty("name", null);
+    expect(pendingPerson).toHaveProperty("email", pendingEmail);
+    expect(pendingPerson).toHaveProperty("staff_id");
   });
 
   it("DELETE /persons - should delete a person", async () => {

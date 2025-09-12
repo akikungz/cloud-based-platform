@@ -9,22 +9,50 @@ export class PersonsService {
 
   static async getPersons() {
     try {
-      const emails = await this.db.staff_list.findMany({ select: { id: true, email: true, created_at: true, updated_at: true } });
+      // Get all staff emails from staff_list table
+      const staffEmails = await this.db.staff_list.findMany({ 
+        select: { id: true, email: true, created_at: true, updated_at: true } 
+      });
 
-      const persons = await this.db.user.findMany({
-        where: { email: { in: emails.map(e => e.email) } },
+      // Get users who have logged in and are in staff_list
+      const loggedInUsers = await this.db.user.findMany({
+        where: { email: { in: staffEmails.map(e => e.email) } },
         select: { id: true, email: true, name: true }
       });
 
-      return persons.map(p => {
-        const staffEmail = emails.find(e => e.email === p.email);
-        return {
-          ...p,
-          staff_id: staffEmail!.id,
-          created_at: staffEmail!.created_at,
-          updated_at: staffEmail!.updated_at,
-        };
-      }).filter(p => p.staff_id !== undefined);
+      // Create a map of logged in users for quick lookup
+      const loggedInUserMap = new Map(loggedInUsers.map(user => [user.email, user]));
+
+      // Combine both logged in and pending staff members
+      const allPersons = staffEmails.map(staffEmail => {
+        const loggedInUser = loggedInUserMap.get(staffEmail.email);
+        
+        if (loggedInUser) {
+          // User has logged in - return full user data
+          return {
+            id: loggedInUser.id,
+            email: loggedInUser.email,
+            name: loggedInUser.name,
+            staff_id: staffEmail.id,
+            created_at: staffEmail.created_at,
+            updated_at: staffEmail.updated_at,
+            status: 'active' as const
+          };
+        } else {
+          // User hasn't logged in yet - return pending status
+          return {
+            id: null,
+            email: staffEmail.email,
+            name: null,
+            staff_id: staffEmail.id,
+            created_at: staffEmail.created_at,
+            updated_at: staffEmail.updated_at,
+            status: 'pending' as const
+          };
+        }
+      });
+
+      return allPersons;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         throw new BadRequestError(error.message);

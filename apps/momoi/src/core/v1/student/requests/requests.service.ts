@@ -4,6 +4,7 @@ import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/err
 import { Prisma as PrismaClient } from "database/generated/prisma-client/client";
 import { getRabbitMQPublisher } from "@momoi/libs/rabbitmq";
 import { logger } from "@momoi/libs/log";
+import { SemesterService } from "@momoi/core/v1/staff/semester/semester.service";
 
 export class RequestsService {
   private static db = db;
@@ -58,7 +59,7 @@ export class RequestsService {
     try {
       // Check if there's an active semester before allowing new instance requests
       const activeSemester = await this.db.semester.findFirst({
-        where: { 
+        where: {
           active: true,
           deleted_at: null
         },
@@ -100,22 +101,32 @@ export class RequestsService {
 
   public static async createRequestExtends(
     data: Pick<Prisma.instance_request_extendsUncheckedCreateInput, "title" | "description" | "instance_id">,
-    userId: string
+    userId: string,
+    dbInstance?: any
   ) {
     try {
-      const userInstance = await this.db.instance.findFirst({
+      const dbToUse = dbInstance || this.db;
+
+      const userInstance = await dbToUse.instance.findFirst({
         where: { id: data.instance_id, user_id: userId }
       });
-      
+
       if (!userInstance) {
         throw new NotFoundError("Instance not found or does not belong to the user");
       }
 
-      return await this.db.instance_request_extends.create({
+      // Check if there's a next semester available for extension
+      const nextSemester = await SemesterService.getNextSemester(dbInstance);
+
+      if (!nextSemester) {
+        throw new BadRequestError("Cannot create extension request: No next semester is available. Please contact an administrator to set up the next semester.");
+      }
+
+      return await dbToUse.instance_request_extends.create({
         data
       });
     } catch (error) {
-      if (error instanceof NotFoundError) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
 
@@ -184,10 +195,10 @@ export class RequestsService {
       if (process.env.NODE_ENV !== 'test') {
         try {
           const publisher = await getRabbitMQPublisher();
-          
+
           // Generate a unique VM ID
           const vmid = 1000 + requestId;
-          
+
           await publisher.publishVMCreateMessage({
             vmid,
             templateId: request.template_id,
@@ -197,8 +208,6 @@ export class RequestsService {
               cores: request.cpus,
               memory: request.memory,
               diskSize: `+${request.disk}G`,
-              ciuser: request.user.name?.toLowerCase().replace(/\s+/g, '') || 'student',
-              cipassword: 'defaultPassword123',
             },
             requestId: `req-${requestId}`,
             userId: request.user_id

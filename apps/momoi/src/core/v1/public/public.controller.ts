@@ -27,4 +27,24 @@ export const PublicController = new Elysia({
       message: "Active semester fetched successfully",
       data: activeSemester
     });
+  })
+  .get("/next-semester", async ({ status }) => {
+    const [err, nextSemester] = await create_callback<
+      BadRequestError, ReturnType<typeof SemesterService.getNextSemester>
+    >(
+      () => SemesterService.getNextSemester()
+    );
+
+    if (err) {
+      return status(err.code, { message: err.message });
+    }
+
+    if (!nextSemester) {
+      return status(404, { message: "No next semester found" });
+    }
+
+    return status(200, { 
+      message: "Next semester fetched successfully",
+      data: nextSemester
+    });
   });

@@ -4,6 +4,7 @@ import { instance_request_type } from "database/generated/prismabox/barrel";
 import env from "@momoi/libs/env";
 import { auth_service } from "@momoi/core/auth/auth.service";
 import { mockAuthStudent } from "@momoi/core/auth/auth.service-test";
+import { db } from "@momoi/libs/db";
 
 import { RequestsService } from "./requests.service";
 
@@ -86,7 +87,7 @@ export const RequestsController = new Elysia({
     const [err, result] = await create_callback<
       BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof RequestsService.createRequestExtends>>
     >(
-      () => RequestsService.createRequestExtends(body, user.id)
+      () => RequestsService.createRequestExtends(body, user.id, db)
     );
 
     if (err) {
