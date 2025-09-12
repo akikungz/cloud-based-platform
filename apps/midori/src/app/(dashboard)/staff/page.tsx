@@ -7,12 +7,14 @@ import { Plus, Users, User, Trash2, UserPlus, Mail, Search } from "lucide-react"
 import { formatDate } from "@midori/utils/format";
 
 interface Person {
-  id: number;
+  id: string | null;
   email: string;
-  name?: string;
+  name?: string | null;
   role?: string;
+  staff_id: number;
   created_at: string;
   updated_at: string;
+  status: 'active' | 'pending';
 }
 
 interface CreatePersonForm {
@@ -54,7 +56,8 @@ export default function StaffPage() {
     const query = searchQuery.toLowerCase();
     return (
       person.email.toLowerCase().includes(query) ||
-      (person.name && person.name.toLowerCase().includes(query))
+      (person.name && person.name.toLowerCase().includes(query)) ||
+      person.status.toLowerCase().includes(query)
     );
   });
 
@@ -211,18 +214,37 @@ export default function StaffPage() {
           <div className="space-y-3">
             {filteredPersons.map((person) => (
               <div
-                key={person.id}
-                className="border border-gray-200 rounded-lg p-4 bg-white hover:bg-gray-50"
+                key={person.staff_id}
+                className={`border rounded-lg p-4 hover:bg-gray-50 ${
+                  person.status === 'pending' 
+                    ? 'border-yellow-200 bg-yellow-50' 
+                    : 'border-gray-200 bg-white'
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {person.name || 'No name provided'}
-                    </h3>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {person.status === 'pending' ? 'Pending Staff Member' : (person.name || 'No name provided')}
+                      </h3>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        person.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {person.status === 'pending' ? 'Pending' : 'Active'}
+                      </span>
+                    </div>
                     <p className="text-gray-600 flex items-center">
                       <Mail className="h-4 w-4 mr-1" />
                       {person.email}
                     </p>
+                    {person.status === 'pending' && (
+                      <p className="text-sm text-yellow-600 mt-1">
+                        <User className="h-3 w-3 inline mr-1" />
+                        Staff member has not logged in yet
+                      </p>
+                    )}
                     <p className="text-sm text-gray-500">
                       Added: {formatDate(person.created_at)}
                     </p>
@@ -251,7 +273,7 @@ export default function StaffPage() {
 
       {/* Statistics */}
       <SectionCard title="Statistics">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center">
               <Users className="h-8 w-8 text-blue-600" />
@@ -264,13 +286,23 @@ export default function StaffPage() {
 
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center">
-              <Search className="h-8 w-8 text-green-600" />
+              <User className="h-8 w-8 text-green-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-600">
-                  {searchQuery ? 'Filtered Results' : 'Active Members'}
-                </p>
+                <p className="text-sm font-medium text-green-600">Active Members</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {searchQuery ? filteredPersons.length : persons.length}
+                  {persons.filter(p => p.status === 'active').length}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <UserPlus className="h-8 w-8 text-yellow-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-yellow-600">Pending Members</p>
+                <p className="text-2xl font-bold text-yellow-900">
+                  {persons.filter(p => p.status === 'pending').length}
                 </p>
               </div>
             </div>
@@ -278,11 +310,13 @@ export default function StaffPage() {
 
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
             <div className="flex items-center">
-              <UserPlus className="h-8 w-8 text-purple-600" />
+              <Search className="h-8 w-8 text-purple-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-purple-600">Recently Added</p>
+                <p className="text-sm font-medium text-purple-600">
+                  {searchQuery ? 'Filtered Results' : 'Recently Added'}
+                </p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {persons.filter(p => {
+                  {searchQuery ? filteredPersons.length : persons.filter(p => {
                     const createdDate = new Date(p.created_at);
                     const weekAgo = new Date();
                     weekAgo.setDate(weekAgo.getDate() - 7);

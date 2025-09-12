@@ -75,7 +75,7 @@ export default function CoursesPage() {
       fetchCourses();
       return;
     }
-    
+
     setLoading(true);
     setError(null);
     try {
@@ -147,7 +147,7 @@ export default function CoursesPage() {
     if (!confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
       return;
     }
-    
+
     try {
       const result = await momoi_client.api.v1.staff.course({ id: courseId }).delete();
       if (result.error) {
@@ -160,18 +160,14 @@ export default function CoursesPage() {
     }
   };
 
-  // Handle search with debouncing
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchQuery) {
-        searchCourses(searchQuery);
-      } else {
-        fetchCourses();
-      }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  // Handle search when search button is clicked or Enter is pressed
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      searchCourses(searchQuery);
+    } else {
+      fetchCourses();
+    }
+  };
 
   useEffect(() => {
     fetchCourses();
@@ -208,8 +204,8 @@ export default function CoursesPage() {
       />
 
       {error && (
-        <AlertMessage 
-          type="error" 
+        <AlertMessage
+          type="error"
           message={error}
           dismissible
           onDismiss={() => setError(null)}
@@ -217,8 +213,8 @@ export default function CoursesPage() {
       )}
 
       {successMessage && (
-        <AlertMessage 
-          type="success" 
+        <AlertMessage
+          type="success"
           message={successMessage}
           dismissible
           onDismiss={() => setSuccessMessage(null)}
@@ -226,21 +222,23 @@ export default function CoursesPage() {
       )}
 
       {/* Search Section */}
-      <SectionCard title="Search Courses">
+      {/* <SectionCard title="Search Courses">
         <div className="space-y-4">
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
+            onSearch={handleSearch}
+            showSearchButton={true}
             placeholder="Search courses by title or code..."
           />
-          
+
           {searchQuery && (
             <p className="text-sm text-gray-600">
               Found {courses.length} course{courses.length !== 1 ? 's' : ''} matching "{searchQuery}"
             </p>
           )}
         </div>
-      </SectionCard>
+      </SectionCard> */}
 
       {/* Create/Edit Course Form */}
       <SectionCard title={showInlineEditForm && editingCourse ? "Edit Course" : "Add New Course"}>
@@ -271,8 +269,8 @@ export default function CoursesPage() {
             <div className="text-center py-8 text-gray-500">
               <Book className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>
-                {searchQuery ? 
-                  `No courses found matching "${searchQuery}"` : 
+                {searchQuery ?
+                  `No courses found matching "${searchQuery}"` :
                   "No courses available"
                 }
               </p>
@@ -287,7 +285,7 @@ export default function CoursesPage() {
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">{course.course_title}</h3>
                     <p className="text-gray-600">Course Code: {course.course_id}</p>
-                    
+
                     {/* Staff Members */}
                     <div className="mt-2">
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -324,7 +322,7 @@ export default function CoursesPage() {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       ID: {course.id}
                     </span>
-                    <button 
+                    <button
                       onClick={() => {
                         setEditingCourse(course);
                         setShowInlineEditForm(true);
@@ -334,7 +332,7 @@ export default function CoursesPage() {
                     >
                       <Edit className="h-4 w-4" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => deleteCourse(course.id)}
                       className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                       title="Delete Course"
@@ -361,7 +359,7 @@ export default function CoursesPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center">
               <Users className="h-8 w-8 text-green-600" />
@@ -373,7 +371,7 @@ export default function CoursesPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
             <div className="flex items-center">
               <UserCheck className="h-8 w-8 text-purple-600" />
@@ -407,14 +405,14 @@ export default function CoursesPage() {
 }
 
 // Create Course Form Component (Inline)
-function CreateCourseFormInline({ 
-  staffMembers, 
-  staffLoading, 
-  onSubmit 
-}: { 
-  staffMembers: StaffMember[]; 
-  staffLoading: boolean; 
-  onSubmit: (data: CreateCourseData) => void; 
+function CreateCourseFormInline({
+  staffMembers,
+  staffLoading,
+  onSubmit
+}: {
+  staffMembers: StaffMember[];
+  staffLoading: boolean;
+  onSubmit: (data: CreateCourseData) => void;
 }) {
   const [formData, setFormData] = useState<CreateCourseData>({
     course_id: '',
@@ -460,7 +458,7 @@ function CreateCourseFormInline({
     if (!formData.course_id || !formData.course_title || !formData.main_staff) {
       return;
     }
-    
+
     setLoading(true);
     try {
       await onSubmit(formData);
@@ -493,7 +491,7 @@ function CreateCourseFormInline({
             required
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Course Title *
@@ -508,7 +506,7 @@ function CreateCourseFormInline({
           />
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -528,13 +526,13 @@ function CreateCourseFormInline({
               <option value="">Select main staff</option>
               {getMainStaffOptions().map((staff) => (
                 <option key={staff.staff_id} value={staff.staff_id}>
-                  {staff.name}
+                  {staff.name || staff.email}
                 </option>
               ))}
             </select>
           )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Assistant Staff 1
@@ -552,13 +550,13 @@ function CreateCourseFormInline({
               <option value="">Select assistant</option>
               {getAssistant1Options().map((staff) => (
                 <option key={staff.staff_id} value={staff.staff_id}>
-                  {staff.name}
+                  {staff.name || staff.email}
                 </option>
               ))}
             </select>
           )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Assistant Staff 2
@@ -576,14 +574,14 @@ function CreateCourseFormInline({
               <option value="">Select assistant</option>
               {getAssistant2Options().map((staff) => (
                 <option key={staff.staff_id} value={staff.staff_id}>
-                  {staff.name}
+                  {staff.name || staff.email}
                 </option>
               ))}
             </select>
           )}
         </div>
       </div>
-      
+
       <div className="flex justify-end pt-4">
         <button
           type="submit"
@@ -599,18 +597,18 @@ function CreateCourseFormInline({
 }
 
 // Edit Course Form Component (Inline)
-function EditCourseFormInline({ 
-  course, 
-  staffMembers, 
-  staffLoading, 
-  onSubmit, 
-  onCancel 
-}: { 
-  course: Course; 
-  staffMembers: StaffMember[]; 
-  staffLoading: boolean; 
-  onSubmit: (data: Partial<CreateCourseData>) => void; 
-  onCancel: () => void; 
+function EditCourseFormInline({
+  course,
+  staffMembers,
+  staffLoading,
+  onSubmit,
+  onCancel
+}: {
+  course: Course;
+  staffMembers: StaffMember[];
+  staffLoading: boolean;
+  onSubmit: (data: Partial<CreateCourseData>) => void;
+  onCancel: () => void;
 }) {
   const [formData, setFormData] = useState<CreateCourseData>({
     course_id: course.course_id,
@@ -665,7 +663,7 @@ function EditCourseFormInline({
     if (!formData.course_id || !formData.course_title || !formData.main_staff) {
       return;
     }
-    
+
     setLoading(true);
     try {
       await onSubmit(formData);
@@ -689,7 +687,7 @@ function EditCourseFormInline({
             required
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Course Title *
@@ -703,7 +701,7 @@ function EditCourseFormInline({
           />
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -729,7 +727,7 @@ function EditCourseFormInline({
             </select>
           )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Assistant Staff 1
@@ -753,7 +751,7 @@ function EditCourseFormInline({
             </select>
           )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Assistant Staff 2
@@ -778,7 +776,7 @@ function EditCourseFormInline({
           )}
         </div>
       </div>
-      
+
       <div className="flex justify-end space-x-3 pt-4">
         <button
           type="button"
@@ -801,18 +799,18 @@ function EditCourseFormInline({
 }
 
 // Edit Course Form Component
-function EditCourseForm({ 
-  course, 
-  staffMembers, 
-  staffLoading, 
-  onClose, 
-  onSubmit 
-}: { 
-  course: Course; 
-  staffMembers: StaffMember[]; 
-  staffLoading: boolean; 
-  onClose: () => void; 
-  onSubmit: (data: Partial<CreateCourseData>) => void; 
+function EditCourseForm({
+  course,
+  staffMembers,
+  staffLoading,
+  onClose,
+  onSubmit
+}: {
+  course: Course;
+  staffMembers: StaffMember[];
+  staffLoading: boolean;
+  onClose: () => void;
+  onSubmit: (data: Partial<CreateCourseData>) => void;
 }) {
   const [formData, setFormData] = useState<CreateCourseData>({
     course_id: course.course_id,
@@ -867,7 +865,7 @@ function EditCourseForm({
     if (!formData.course_id || !formData.course_title || !formData.main_staff) {
       return;
     }
-    
+
     setLoading(true);
     try {
       await onSubmit(formData);
@@ -893,7 +891,7 @@ function EditCourseForm({
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Course Title *
@@ -906,7 +904,7 @@ function EditCourseForm({
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Main Staff *
@@ -931,7 +929,7 @@ function EditCourseForm({
               </select>
             )}
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Assistant Staff 1
@@ -955,7 +953,7 @@ function EditCourseForm({
               </select>
             )}
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Assistant Staff 2
@@ -979,7 +977,7 @@ function EditCourseForm({
               </select>
             )}
           </div>
-          
+
           <div className="flex space-x-3 pt-4">
             <button
               type="button"

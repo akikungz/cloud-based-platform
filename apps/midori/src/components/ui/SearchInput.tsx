@@ -5,22 +5,32 @@ import { Search, X } from "lucide-react";
 export interface SearchInputProps {
 	value: string;
 	onChange: (value: string) => void;
+	onSearch?: () => void;
 	placeholder?: string;
 	className?: string;
 	showClearButton?: boolean;
+	showSearchButton?: boolean;
 	disabled?: boolean;
 }
 
 export const SearchInput: React.FC<SearchInputProps> = ({
 	value,
 	onChange,
+	onSearch,
 	placeholder = "Search...",
 	className,
 	showClearButton = true,
+	showSearchButton = false,
 	disabled = false,
 }) => {
 	const handleClear = () => {
 		onChange("");
+	};
+
+	const handleKeyPress = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter' && onSearch) {
+			onSearch();
+		}
 	};
 
 	return (
@@ -32,16 +42,32 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 				type="text"
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
+				onKeyPress={handleKeyPress}
 				placeholder={placeholder}
 				disabled={disabled}
 				className={cn(
-					"w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md",
+					"w-full pl-10 py-2 border border-gray-300 rounded-md",
 					"focus:outline-none focus:ring-2 focus:ring-vm-blue-500 focus:border-transparent",
 					"disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed",
+					showSearchButton ? "pr-20" : "pr-10",
 					className
 				)}
 			/>
-			{showClearButton && value && (
+			{showSearchButton && onSearch && (
+				<div className="absolute inset-y-0 right-0 pr-1 flex items-center">
+					<button
+						type="button"
+						onClick={onSearch}
+						disabled={disabled}
+						className="px-3 py-1 bg-vm-blue-600 text-white rounded-md hover:bg-vm-blue-700 focus:outline-none focus:ring-2 focus:ring-vm-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+						aria-label="Search"
+					>
+						<Search className="h-3 w-3" />
+						<span className="text-sm">Search</span>
+					</button>
+				</div>
+			)}
+			{showClearButton && value && !showSearchButton && (
 				<div className="absolute inset-y-0 right-0 pr-3 flex items-center">
 					<button
 						type="button"

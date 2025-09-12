@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@midori/components/ui/card';
-import { Loader2, RefreshCw, Server, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, RefreshCw, Server, Clock, CheckCircle, XCircle, AlertTriangle, Shuffle } from 'lucide-react';
 import { useStudentRequests } from '@midori/hooks/useStudentRequests';
+import { useNextSemester } from '@midori/hooks/useNextSemester';
 
 interface Course {
   id: number;
@@ -77,6 +78,8 @@ export function StudentRequestForm({ onRequestSubmitted }: StudentRequestFormPro
     createExtensionRequest,
     clearMessages,
   } = useStudentRequests();
+
+  const { nextSemester, loading: nextSemesterLoading } = useNextSemester();
 
   // Form data for regular requests
   const [requestData, setRequestData] = useState<RequestFormData>({
@@ -364,9 +367,9 @@ export function StudentRequestForm({ onRequestSubmitted }: StudentRequestFormPro
                       <button
                         type="button"
                         onClick={generateHostname}
-                        className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                        className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
                       >
-                        Generate
+                        <Shuffle className="h-4 w-4" />
                       </button>
                     </div>
                     {errors.hostname && <p className="text-sm text-red-500">{errors.hostname}</p>}
@@ -518,6 +521,40 @@ export function StudentRequestForm({ onRequestSubmitted }: StudentRequestFormPro
               <p className="text-sm text-gray-600">
                 Request an extension for an existing instance
               </p>
+              
+              {/* Next Semester Availability Warning */}
+              {!nextSemesterLoading && !nextSemester && (
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-medium text-yellow-800">
+                        No Next Semester Available
+                      </h4>
+                      <p className="text-sm text-yellow-700 mt-1">
+                        Extension requests cannot be created at this time because no next semester has been configured. 
+                        Please contact an administrator to set up the next semester.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {!nextSemesterLoading && nextSemester && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 mr-2 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-medium text-green-800">
+                        Next Semester Available
+                      </h4>
+                      <p className="text-sm text-green-700 mt-1">
+                        Extension requests can be created for the next semester: <strong>{nextSemester.name}</strong>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <form onSubmit={handleExtensionSubmit} className="space-y-6">
@@ -579,7 +616,7 @@ export function StudentRequestForm({ onRequestSubmitted }: StudentRequestFormPro
                 <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !nextSemester}
                     className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 min-w-[180px] justify-center"
                   >
                     {loading ? (
@@ -587,6 +624,8 @@ export function StudentRequestForm({ onRequestSubmitted }: StudentRequestFormPro
                         <Loader2 className="h-4 w-4 animate-spin" />
                         <span>Creating...</span>
                       </>
+                    ) : !nextSemester ? (
+                      'No Next Semester Available'
                     ) : (
                       'Create Extension Request'
                     )}

@@ -44,6 +44,7 @@ interface ExtensionRequestWithType extends ExtensionRequest {
 export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProps) {
   const [requests, setRequests] = useState<InstanceRequest[]>([]);
   const [extendRequests, setExtendRequests] = useState<ExtensionRequest[]>([]);
+  const [instances, setInstances] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<RequestWithType | ExtensionRequestWithType | null>(null);
@@ -59,16 +60,29 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
     setError(null);
 
     try {
-      const result = await momoi_client.api.v1.student.requests.get();
+      const [requestsResult, instancesResult] = await Promise.all([
+        momoi_client.api.v1.student.requests.get(),
+        momoi_client.api.v1.student.instances.get()
+      ]);
 
-      if (result.error) {
-        throw new Error(result.error.message || 'Failed to fetch requests');
+      if (requestsResult.error) {
+        throw new Error(requestsResult.error.message || 'Failed to fetch requests');
       }
 
-      const requestsData = result.data?.data || result.data;
+      if (instancesResult.error) {
+        throw new Error(instancesResult.error.message || 'Failed to fetch instances');
+      }
+
+      const requestsData = requestsResult.data?.data || requestsResult.data;
+      const instancesData = instancesResult.data?.data || instancesResult.data;
+      
       if (requestsData) {
         setRequests(requestsData.requests || []);
         setExtendRequests(requestsData.extend_requests || []);
+      }
+      
+      if (instancesData) {
+        setInstances(Array.isArray(instancesData) ? instancesData : []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch requests');
@@ -149,6 +163,14 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
 
   const handleCloseModal = () => {
     setSelectedRequest(null);
+  };
+
+  // Helper function to check if an instance exists for a request
+  const hasInstanceForRequest = (request: InstanceRequest): boolean => {
+    return instances.some(instance => 
+      instance.hostname === request.hostname && 
+      instance.state !== 'deleted'
+    );
   };
 
   if (loading) {
@@ -248,8 +270,10 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    {/* Show Create Instance button for approved instance requests */}
-                    {request.requestType === 'instance' && request.state === 'approved' && (
+                    {/* Show Create Instance button for approved instance requests that don't have an instance yet */}
+                    {request.requestType === 'instance' && 
+                     request.state === 'approved' && 
+                     !hasInstanceForRequest(request as InstanceRequest) && (
                       <Button
                         variant="contained"
                         color="primary"

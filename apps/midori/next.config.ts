@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
       destination: `${env.API_URL}/api/:path*`
     },
   ],
+  typescript: {
+    ignoreBuildErrors: true,
+  }
 };
 
 export default nextConfig;

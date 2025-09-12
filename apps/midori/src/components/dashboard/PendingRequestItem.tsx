@@ -3,7 +3,7 @@ import { Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextFi
 import { Calendar, Clock, User, Book, Cpu, HardDrive, MemoryStick, Edit } from "lucide-react";
 import { cn } from "@midori/utils/format";
 import { SpecBadge } from "@midori/components/ui";
-import { env } from "@midori/libs/env";
+import { momoi_client } from "@midori/libs/momoi";
 import { useState } from "react";
 import { EditRequestDialog, type EditRequestData } from "./EditRequestDialog";
 
@@ -57,18 +57,11 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 	const handleApprove = async () => {
 		setIsApproving(true);
 		try {
-			const response = await fetch(`${env.API_URL}/api/v1/staff/approval/approve`, {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					request_id: parseInt(id)
-				})
+			const result = await momoi_client.api.v1.staff.approval.approve.post({
+				request_id: parseInt(id)
 			});
 
-			if (response.ok) {
+			if (!result.error) {
 				setSnackbar({
 					open: true,
 					message: "Request approved successfully",
@@ -77,13 +70,13 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				throw new Error("Failed to approve request");
+				throw new Error(result.error.message || "Failed to approve request");
 			}
 		} catch (error) {
 			console.error("Error approving request:", error);
 			setSnackbar({
 				open: true,
-				message: "Failed to approve request",
+				message: error instanceof Error ? error.message : "Failed to approve request",
 				severity: "error"
 			});
 		} finally {
@@ -103,19 +96,12 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 
 		setIsRejecting(true);
 		try {
-			const response = await fetch(`${env.API_URL}/api/v1/staff/approval/reject`, {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					request_id: parseInt(id),
-					reason: rejectReason
-				})
+			const result = await momoi_client.api.v1.staff.approval.reject.post({
+				request_id: parseInt(id),
+				reason: rejectReason
 			});
 
-			if (response.ok) {
+			if (!result.error) {
 				setSnackbar({
 					open: true,
 					message: "Request rejected successfully",
@@ -126,13 +112,13 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				throw new Error("Failed to reject request");
+				throw new Error(result.error.message || "Failed to reject request");
 			}
 		} catch (error) {
 			console.error("Error rejecting request:", error);
 			setSnackbar({
 				open: true,
-				message: "Failed to reject request",
+				message: error instanceof Error ? error.message : "Failed to reject request",
 				severity: "error"
 			});
 		} finally {
@@ -143,19 +129,12 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 	const handleEdit = async (editData: EditRequestData) => {
 		setIsEditing(true);
 		try {
-			const response = await fetch(`${env.API_URL}/api/v1/staff/approval/edit`, {
-				method: 'PUT',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					request_id: parseInt(id),
-					...editData
-				})
+			const result = await momoi_client.api.v1.staff.approval.edit.put({
+				request_id: parseInt(id),
+				...editData
 			});
 
-			if (response.ok) {
+			if (!result.error) {
 				setSnackbar({
 					open: true,
 					message: "Request updated successfully",
@@ -165,8 +144,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				const errorData = await response.json();
-				throw new Error(errorData.message || "Failed to update request");
+				throw new Error(result.error.message || "Failed to update request");
 			}
 		} catch (error) {
 			console.error("Error updating request:", error);
@@ -183,18 +161,11 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 	const handleApproveFromEdit = async () => {
 		setIsApprovingFromEdit(true);
 		try {
-			const response = await fetch(`${env.API_URL}/api/v1/staff/approval/approve`, {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					request_id: parseInt(id)
-				})
+			const result = await momoi_client.api.v1.staff.approval.approve.post({
+				request_id: parseInt(id)
 			});
 
-			if (response.ok) {
+			if (!result.error) {
 				setSnackbar({
 					open: true,
 					message: "Request approved successfully",
@@ -204,7 +175,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				throw new Error("Failed to approve request");
+				throw new Error(result.error.message || "Failed to approve request");
 			}
 		} catch (error) {
 			console.error("Error approving request:", error);

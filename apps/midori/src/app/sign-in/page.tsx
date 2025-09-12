@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +19,7 @@ import { env } from "@midori/libs/env";
 import { cn } from "@midori/utils/format";
 import { studentValidationFromId } from "@midori/utils/validation";
 
-export default function SignIn() {
+function SignInContent() {
 	const searchParams = useSearchParams();
 	const [error, setError] = useState<string | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -197,5 +197,13 @@ export default function SignIn() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+export default function SignIn() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<SignInContent />
+		</Suspense>
 	);
 }

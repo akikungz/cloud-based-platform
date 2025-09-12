@@ -10,7 +10,7 @@ import {
 	PendingRequestItemSkeleton,
 } from "./PendingRequestItem";
 import { EmptyState, LoadingSpinner, AlertMessage } from "@midori/components/ui";
-import { env } from "@midori/libs/env";
+import { momoi_client } from "@midori/libs/momoi";
 
 interface PendingRequestProps {
 	limit?: number;
@@ -48,18 +48,13 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 		setError(null);
 		
 		try {
-			const response = await fetch(`${env.API_URL}/api/v1/staff/approval?skip=${currentPage}&take=${pageSize}`, {
-				method: 'GET',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+			const result = await momoi_client.api.v1.staff.approval.get({
+				query: { skip: currentPage, take: pageSize }
 			});
 
-			if (response.ok) {
-				const data = await response.json();
-				const apiRequests = data.data?.data || [];
-				const paginationInfo = data.data;
+			if (!result.error) {
+				const apiRequests = result.data?.data?.data || [];
+				const paginationInfo = result.data?.data;
 				
 				// Update pagination info
 				setTotalPages(paginationInfo?.totalPages || 1);
@@ -104,7 +99,7 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 
 				setRequests(filteredRequests);
 			} else {
-				setError(`Failed to fetch requests: ${response.status}`);
+				setError(`Failed to fetch requests: ${result.error.message || 'Unknown error'}`);
 				setRequests([]);
 			}
 		} catch (err) {

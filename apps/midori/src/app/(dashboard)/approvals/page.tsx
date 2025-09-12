@@ -29,7 +29,7 @@ export default function ApprovalsPage() {
 		} else {
 			setLoading(true);
 		}
-		
+
 		try {
 			const result = await momoi_client.api.v1.staff.course["my-courses"].get();
 			if (result.error) {
@@ -62,7 +62,7 @@ export default function ApprovalsPage() {
 	return (
 		<RoleGuard allowedRoles={[Role.Staff]}>
 			<div className="flex flex-col items-center justify-center gap-4">
-				<div className="w-full max-w-4xl flex items-center justify-between">
+				<div className="w-full flex items-center justify-between">
 					<PageHeader
 						title="Pending Approvals"
 						description="Review and approve student requests for virtual machines."
@@ -80,7 +80,7 @@ export default function ApprovalsPage() {
 				</div>
 
 				{/* Filters */}
-				<Box className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+				<Box className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
 					{/* Course Filter */}
 					<FormControl className="w-full" size="small">
 						<InputLabel>Filter by Course</InputLabel>
@@ -102,7 +102,7 @@ export default function ApprovalsPage() {
 					</FormControl>
 
 					{/* Search Filter */}
-					<div className="w-full md:col-span-2">
+					<div className="w-full md:col-span-3">
 						<SearchInput
 							value={searchQuery}
 							onChange={setSearchQuery}
@@ -113,9 +113,9 @@ export default function ApprovalsPage() {
 
 				{/* Pending Requests */}
 				<div className="w-full">
-					<PendingRequest 
+					<PendingRequest
 						key={refreshKey}
-						limit={10} 
+						limit={10}
 						course={selectedCourse}
 						searchQuery={searchQuery}
 						showPagination={true}

@@ -26,6 +26,12 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
 		title: "Manage Instances",
 		description: "View and manage all virtual machine instances",
 	},
+	"/instances/staff/create": {
+		path: "/instances/staff/create",
+		allowedRoles: [Role.Staff],
+		title: "Create Instance",
+		description: "Create virtual machine instances directly without requiring student requests or semester locks",
+	},
 	"/instances/student": {
 		path: "/instances/student",
 		allowedRoles: [Role.Student],

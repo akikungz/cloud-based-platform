@@ -1,6 +1,7 @@
 // Card components
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 export { TrendCard } from "./TrendCard";
+export { CoursesCard } from "./CoursesCard";
 
 // Layout components
 export { ClientOnly } from "./ClientOnly";
@@ -20,3 +21,6 @@ export { SkeletonLoader, SkeletonCard, SkeletonListItem } from "./SkeletonLoader
 
 // Form components
 export { SearchInput } from "./SearchInput";
+
+// Navigation components
+export { Tabs } from "./Tabs";

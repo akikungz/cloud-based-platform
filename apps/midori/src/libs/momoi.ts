@@ -2,13 +2,15 @@
 import { treaty } from "@elysiajs/eden";
 import { env } from "./env";
 
-import { Server } from "momoi/client";
+import { client, type Server } from "momoi/client";
 
-export const momoi_client = treaty<Server>(env.API_URL, {
-  fetch: {
-    credentials: "include",
-  }
-});
+// export const momoi_client = treaty<Server>(env.API_URL, {
+//   fetch: {
+//     credentials: "include",
+//   }
+// });
+
+export const momoi_client = client(env.API_URL);
 
 // Type definitions for API responses
 export interface ApiResponse<T> {

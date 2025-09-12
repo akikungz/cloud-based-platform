@@ -5,7 +5,7 @@ import { env } from "@midori/libs/env";
 import { momoi_client } from "@midori/libs/momoi";
 import { useEffect, useState } from "react";
 import { Button, Chip } from "@mui/material";
-import { Play, Square, Trash2, ExternalLink, Database } from "lucide-react";
+import { Play, Square, Trash2, ExternalLink, Database, Cpu, MemoryStick, HardDrive, Monitor, Globe } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@midori/utils/format";
 
@@ -15,11 +15,23 @@ interface Instance {
 	hostname: string;
 	description: string;
 	status: string;
+	cpus: number;
+	memory: number;
+	disk: number;
+	created_at: string;
+	ip_address?: {
+		ip: string;
+		network: {
+			name: string;
+			network: string;
+			gateway: string;
+		};
+	} | null;
 	course?: {
 		course_title: string;
 		course_id: string;
 	};
-	created_at: string;
+	semester?: string;
 }
 
 export default function StudentInstancesPage() {
@@ -138,10 +150,10 @@ export default function StudentInstancesPage() {
 							</Link>
 						</div>
 					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 							{instances.map((instance) => (
 								<div key={instance.id} className="border border-vm-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-									<div className="flex items-start justify-between mb-2">
+									<div className="flex items-start justify-between mb-3">
 										<Link href={`/instances/${instance.id}`} className="hover:text-blue-600">
 											<h4 className="font-semibold text-vm-blue-900">{instance.title}</h4>
 										</Link>
@@ -152,14 +164,53 @@ export default function StudentInstancesPage() {
 										/>
 									</div>
 
-									<p className="text-sm text-vm-blue-600 mb-2">
-										Hostname: {instance.hostname}
-									</p>
+									{/* Hostname */}
+									<div className="flex items-center gap-2 mb-2">
+										<Monitor className="w-4 h-4 text-vm-blue-600" />
+										<span className="text-sm text-vm-blue-600 font-medium">Hostname:</span>
+										<span className="text-sm text-gray-700 font-mono">{instance.hostname}</span>
+									</div>
 
+									{/* IP Address */}
+									{instance.ip_address && (
+										<div className="flex items-center gap-2 mb-2">
+											<Globe className="w-4 h-4 text-vm-blue-600" />
+											<span className="text-sm text-vm-blue-600 font-medium">IP:</span>
+											<span className="text-sm text-gray-700 font-mono">{instance.ip_address.ip}</span>
+										</div>
+									)}
+
+									{/* Specifications */}
+									<div className="grid grid-cols-3 gap-2 mb-3">
+										<div className="flex items-center gap-1">
+											<Cpu className="w-3 h-3 text-vm-blue-600" />
+											<span className="text-xs text-gray-600">{instance.cpus} CPU</span>
+										</div>
+										<div className="flex items-center gap-1">
+											<MemoryStick className="w-3 h-3 text-vm-blue-600" />
+											<span className="text-xs text-gray-600">{instance.memory} MB</span>
+										</div>
+										<div className="flex items-center gap-1">
+											<HardDrive className="w-3 h-3 text-vm-blue-600" />
+											<span className="text-xs text-gray-600">{instance.disk} GB</span>
+										</div>
+									</div>
+
+									{/* Course and Semester */}
 									{instance.course && (
-										<p className="text-sm text-vm-blue-600 mb-2">
-											Course: {instance.course.course_title} ({instance.course.course_id})
-										</p>
+										<div className="mb-2">
+											<p className="text-sm text-vm-blue-600">
+												<span className="font-medium">Course:</span> {instance.course.course_title} ({instance.course.course_id})
+											</p>
+										</div>
+									)}
+
+									{instance.semester && (
+										<div className="mb-2">
+											<p className="text-sm text-vm-blue-600">
+												<span className="font-medium">Semester:</span> {instance.semester}
+											</p>
+										</div>
 									)}
 
 									<p className="text-xs text-gray-500 mb-3">

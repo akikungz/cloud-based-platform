@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@midori/*": ["./src/*"]
+      "@midori/*": ["./src/*"],
+      "@momoi/*": ["../momoi/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Chip, Alert } from "@mui/material";
-import { Database, ExternalLink, Trash2 } from "lucide-react";
+import { Database, ExternalLink, Trash2, Cpu, MemoryStick, HardDrive, Monitor, Globe } from "lucide-react";
 import { momoi_client } from "@midori/libs/momoi";
-import { formatRelativeDate, formatDate } from "@midori/utils/format";
+import { formatRelativeDate, formatDate, cn } from "@midori/utils/format";
 import { ClientOnly, LoadingSpinner, AlertMessage, EmptyState } from "@midori/components/ui";
 import Link from "next/link";
 
@@ -18,11 +18,23 @@ interface Instance {
 	hostname: string;
 	description: string;
 	status: string;
+	cpus: number;
+	memory: number;
+	disk: number;
+	created_at: string;
+	ip_address?: {
+		ip: string;
+		network: {
+			name: string;
+			network: string;
+			gateway: string;
+		};
+	} | null;
 	course?: {
 		course_title: string;
 		course_id: string;
 	};
-	created_at: string;
+	semester?: string;
 }
 
 export function StudentInstancesList({ maxItems = 3, showOnlyRecent = true }: InstancesListProps) {
@@ -161,42 +173,80 @@ export function StudentInstancesList({ maxItems = 3, showOnlyRecent = true }: In
 					description="Create a request to get your first instance."
 				/>
 			) : (
-				<div className="space-y-3">
+				<div className={cn(showOnlyRecent ? 'space-y-4' : 'space-x-4 space-y-4')}>
 					{instances.map((instance) => (
-						<div key={instance.id} className="flex items-center justify-between p-3 border border-vm-blue-200 rounded-lg hover:bg-gray-50">
-							<div className="flex items-center gap-3 flex-1">
-								{getStatusIcon(instance.status)}
-								<div className="flex-1">
-									<Link href={`/instances/${instance.id}`} className="hover:text-blue-600">
-										<h4 className="font-semibold text-vm-blue-900">
-											{instance.title}
-										</h4>
-									</Link>
-									<p className="text-sm text-vm-blue-600">
-										{instance.hostname}
-										{instance.course && ` • ${instance.course.course_title}`}
-									</p>
+						<div key={instance.id} className="p-4 border border-vm-blue-200 rounded-lg hover:bg-gray-50">
+							<div className="flex items-start justify-between mb-2">
+								<div className="flex items-center gap-3 flex-1">
+									{getStatusIcon(instance.status)}
+									<div className="flex-1">
+										<Link href={`/instances/${instance.id}`} className="hover:text-blue-600">
+											<h4 className="font-semibold text-vm-blue-900">
+												{instance.title}
+											</h4>
+										</Link>
+										<div className="flex items-center gap-4 mt-1">
+											<div className="flex items-center gap-1">
+												<Monitor className="w-3 h-3 text-vm-blue-600" />
+												<span className="text-xs text-gray-600 font-mono">{instance.hostname}</span>
+											</div>
+											{instance.ip_address && (
+												<div className="flex items-center gap-1">
+													<Globe className="w-3 h-3 text-vm-blue-600" />
+													<span className="text-xs text-gray-600 font-mono">{instance.ip_address.ip}</span>
+												</div>
+											)}
+										</div>
+									</div>
+								</div>
+								
+								<div className="flex items-center gap-2">
+									<Chip
+										label={instance.status}
+										color={getStatusColor(instance.status) as any}
+										size="small"
+									/>
+									<button
+										onClick={() => handleDeleteInstance(instance.id)}
+										className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+										title="Delete instance"
+									>
+										<Trash2 className="w-4 h-4" />
+									</button>
 								</div>
 							</div>
-							
-							<div className="flex items-center gap-2">
-								<Chip
-									label={instance.status}
-									color={getStatusColor(instance.status) as any}
-									size="small"
-								/>
+
+							{/* Specifications */}
+							<div className="flex items-center gap-4 mb-2">
+								<div className="flex items-center gap-1">
+									<Cpu className="w-3 h-3 text-vm-blue-600" />
+									<span className="text-xs text-gray-600">{instance.cpus} CPU</span>
+								</div>
+								<div className="flex items-center gap-1">
+									<MemoryStick className="w-3 h-3 text-vm-blue-600" />
+									<span className="text-xs text-gray-600">{instance.memory} MB</span>
+								</div>
+								<div className="flex items-center gap-1">
+									<HardDrive className="w-3 h-3 text-vm-blue-600" />
+									<span className="text-xs text-gray-600">{instance.disk} GB</span>
+								</div>
+							</div>
+
+							{/* Course and Semester */}
+							<div className="flex items-center justify-between">
+								<div className="text-xs text-vm-blue-600">
+									{instance.course && (
+										<span>{instance.course.course_title} ({instance.course.course_id})</span>
+									)}
+									{instance.semester && (
+										<span className="ml-2">• {instance.semester}</span>
+									)}
+								</div>
 								<ClientOnly fallback={<p className="text-xs text-gray-500">Loading...</p>}>
 									<p className="text-xs text-gray-500">
 										{formatRelativeDate(instance.created_at)}
 									</p>
 								</ClientOnly>
-								<button
-									onClick={() => handleDeleteInstance(instance.id)}
-									className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-									title="Delete instance"
-								>
-									<Trash2 className="w-4 h-4" />
-								</button>
 							</div>
 						</div>
 					))}
