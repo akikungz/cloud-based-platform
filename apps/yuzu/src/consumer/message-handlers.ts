@@ -97,8 +97,8 @@ export class VMMessageHandler implements MessageHandler {
    * Validates that all required fields have proper values before instance creation
    */
   private validateInstanceCreationData(
-    request: InstanceRequestWithRelations, 
-    activeSemester: semester, 
+    request: InstanceRequestWithRelations,
+    activeSemester: semester,
     message: VMCreateMessage
   ): void {
     const errors: string[] = [];
@@ -193,13 +193,13 @@ export class VMMessageHandler implements MessageHandler {
 
   private async handleVMCreate(message: VMCreateMessage): Promise<void> {
     console.log(`Creating VM ${message.data.vmid} from template ${message.data.templateId}`);
-    
+
     let instance: any = null;
-    
+
     try {
       // Extract request ID from the message
       const requestId = parseInt(message.requestId.replace('req-', ''));
-      
+
       // Get the original request data
       const request = await db.instance_request.findFirst({
         where: {
@@ -220,7 +220,7 @@ export class VMMessageHandler implements MessageHandler {
 
       // Get the active semester with better error handling
       const activeSemester = await db.semester.findFirst({
-        where: { 
+        where: {
           active: true,
           deleted_at: null
         },
@@ -281,7 +281,7 @@ export class VMMessageHandler implements MessageHandler {
 
     } catch (error) {
       console.error(`Error creating VM ${message.data.vmid}:`, error);
-      
+
       // Update instance status to indicate failure
       try {
         if (instance) {
@@ -293,30 +293,52 @@ export class VMMessageHandler implements MessageHandler {
       } catch (updateError) {
         console.error('Failed to update instance status after error:', updateError);
       }
-      
+
       throw error;
     }
   }
 
   private async createVMInPVE(message: VMCreateMessage, request: InstanceRequestWithRelations, instance: instance): Promise<void> {
     const { qemu, task_status } = await import('../libs/pve');
-    
+
     try {
       console.log('Starting VM creation in PVE...');
-      
+
+      // Find template details
+      const template = await db.instance_template.findFirst({
+        where: { id: message.data.templateId }
+      });
+
+      if (!template) {
+        throw new Error(`Template ${message.data.templateId} not found`);
+      }
+
+      // Get all pve-nodes
+      const pveNodes = await db.pve_node.findMany({
+        where: { deleted_at: null }
+      });
+
+      if (pveNodes.length === 0) {
+        throw new Error('No PVE nodes available');
+      }
+
+      // Randomly select a PVE node
+      const selectedNode = pveNodes[Math.floor(Math.random() * pveNodes.length)];
+      console.log(`Selected PVE node: ${selectedNode.name}`);
+
       // Step 1: Clone from template
-      console.log(`Cloning VM from template ${message.data.templateId} to ${message.data.vmid}`);
+      console.log(`Cloning VM from template ${template.vm_template_id} to ${message.data.vmid}`);
       const cloneTask = await qemu.clone({
-        node: message.data.node,
-        vmid: message.data.templateId,
-        target: 'local-lvm', // Default storage target
+        node: template.vm_template_host,
+        vmid: parseInt(template.vm_template_id),
+        target: selectedNode.name, // Default storage target
         newid: message.data.vmid,
         name: message.data.name,
         full: true // Full clone
       });
 
       console.log(`Clone task started: ${cloneTask.data}`);
-      
+
       // Wait for clone to complete
       await task_status(message.data.node, cloneTask.data);
       console.log('VM clone completed successfully');
@@ -324,10 +346,10 @@ export class VMMessageHandler implements MessageHandler {
       // Step 2: Assign IP address before VM configuration
       console.log('Assigning IP address before VM configuration...');
       const assignedIP = await this.assignIPAddress(instance);
-      
+
       // Prepare network configuration
       let networkConfig: { net0?: any; ipconfig0?: any } = {};
-      
+
       if (assignedIP) {
         // Get network information for configuration
         const networkInfo = await db.network.findFirst({
@@ -340,10 +362,10 @@ export class VMMessageHandler implements MessageHandler {
         if (networkInfo) {
           // Configure network interface (net0) with bridge name from network
           networkConfig.net0 = `model=virtio,bridge=${networkInfo.name}`;
-          
+
           // Configure IP address (ipconfig0) with assigned IP, subnet, and gateway
           networkConfig.ipconfig0 = `ip=${assignedIP.ip}/${this.getSubnetMask(networkInfo.network)},gw=${networkInfo.gateway}`;
-          
+
           console.log(`Network interface configured: ${networkConfig.net0}`);
           console.log(`IP address configured: ${networkConfig.ipconfig0}`);
         } else {
@@ -353,10 +375,12 @@ export class VMMessageHandler implements MessageHandler {
         console.warn('No IP address assigned, VM will be created without network configuration');
       }
 
+      // Check instance 
+
       // Step 3: Configure VM settings (including network and IP if assigned)
       console.log('Configuring VM settings...');
       const configTask = await qemu.config({
-        node: message.data.node,
+        node: selectedNode.name,
         vmid: message.data.vmid,
         cores: message.data.config?.cores || request.cpus,
         memory: message.data.config?.memory || request.memory,
@@ -368,21 +392,21 @@ export class VMMessageHandler implements MessageHandler {
       });
 
       console.log(`Config task started: ${configTask.data}`);
-      
+
       // Wait for configuration to complete
-      await task_status(message.data.node, configTask.data);
+      await task_status(selectedNode.name, configTask.data);
       console.log('VM configuration completed successfully');
 
       // Step 4: Start the VM
       console.log('Starting VM...');
       const startTask = await qemu.setStatusQEMU({
-        node: message.data.node,
+        node: selectedNode.name,
         vmid: message.data.vmid,
         state: 'start'
       });
 
       console.log(`Start task started: ${startTask.data}`);
-      
+
       // Wait for VM to start
       await task_status(message.data.node, startTask.data);
       console.log('VM started successfully');
@@ -390,7 +414,7 @@ export class VMMessageHandler implements MessageHandler {
       // Step 5: Update database with success status
       await db.instance.update({
         where: { id: instance.id },
-        data: { 
+        data: {
           status: 'running',
           updated_at: new Date()
         }
@@ -400,26 +424,26 @@ export class VMMessageHandler implements MessageHandler {
 
     } catch (error) {
       console.error('Error during VM creation in PVE:', error);
-      
+
       // Update instance status to indicate failure
       await db.instance.update({
         where: { id: instance.id },
-        data: { 
+        data: {
           status: 'stopped',
           updated_at: new Date()
         }
       });
-      
+
       throw error;
     }
   }
 
   private async handleVMDelete(message: VMDeleteMessage): Promise<void> {
     console.log(`Deleting VM ${message.data.vmid} on node ${message.data.node}`);
-    
+
     try {
       const { qemu, task_status } = await import('../libs/pve');
-      
+
       // Find the instance in database
       const instance = await db.instance.findFirst({
         where: {
@@ -442,7 +466,7 @@ export class VMMessageHandler implements MessageHandler {
           vmid: message.data.vmid,
           state: 'stop'
         });
-        
+
         await task_status(message.data.node, stopTask.data);
         console.log('VM stopped successfully');
       } catch (error) {
@@ -487,10 +511,10 @@ export class VMMessageHandler implements MessageHandler {
 
   private async handleVMResize(message: VMResizeMessage): Promise<void> {
     console.log(`Resizing VM ${message.data.vmid} with size: ${message.data.size} (type: ${message.data.resizeType})`);
-    
+
     try {
       const { qemu, task_status } = await import('../libs/pve');
-      
+
       // Find the instance in database with template information
       const instance = await db.instance.findFirst({
         where: {
@@ -549,10 +573,10 @@ export class VMMessageHandler implements MessageHandler {
 
   private async handleVMStatus(message: VMStatusMessage): Promise<void> {
     console.log(`Changing VM ${message.data.vmid} status to ${message.data.state}`);
-    
+
     try {
       const { qemu, task_status } = await import('../libs/pve');
-      
+
       // Find the instance in database
       const instance = await db.instance.findFirst({
         where: {
@@ -579,9 +603,9 @@ export class VMMessageHandler implements MessageHandler {
       console.log(`VM state changed to ${message.data.state} successfully`);
 
       // Step 2: Update database with new status
-      const newStatus = message.data.state === 'start' ? 'running' : 
-                       message.data.state === 'stop' ? 'stopped' : 
-                       instance.status; // Keep current status for other states
+      const newStatus = message.data.state === 'start' ? 'running' :
+        message.data.state === 'stop' ? 'stopped' :
+          instance.status; // Keep current status for other states
 
       await db.instance.update({
         where: { id: instance.id },
@@ -605,7 +629,7 @@ export class VMMessageHandler implements MessageHandler {
   private async syncVMStatus(instance: instance): Promise<void> {
     try {
       const { qemu } = await import('../libs/pve');
-      
+
       const vmStatus = await qemu.getStatusQEMU({
         node: instance.pve_node,
         vmid: instance.vm_id
@@ -643,7 +667,7 @@ export class VMMessageHandler implements MessageHandler {
       await db.$transaction(async (tx) => {
         // Double-check IP is still available (race condition protection)
         const ipStillAvailable = await tx.ip_address.findFirst({
-          where: { 
+          where: {
             id: availableIP.id,
             is_used: false,
             deleted_at: null
@@ -657,7 +681,7 @@ export class VMMessageHandler implements MessageHandler {
         // Mark IP as used
         await tx.ip_address.update({
           where: { id: availableIP.id },
-          data: { 
+          data: {
             is_used: true,
             updated_at: new Date()
           }
@@ -666,7 +690,7 @@ export class VMMessageHandler implements MessageHandler {
         // Assign IP to instance
         await tx.instance.update({
           where: { id: instance.id },
-          data: { 
+          data: {
             ip_address_id: availableIP.id,
             updated_at: new Date()
           }
@@ -690,7 +714,7 @@ export class VMMessageHandler implements MessageHandler {
     try {
       await db.ip_address.update({
         where: { id: ipAddressId },
-        data: { 
+        data: {
           is_used: false,
           updated_at: new Date()
         }
@@ -736,7 +760,7 @@ export class VMMessageHandler implements MessageHandler {
     if (resizeType === 'total') {
       // Total resize: size is the desired total size in GB
       let targetSizeGB: number;
-      
+
       if (typeof size === 'string') {
         // Parse string format like "8G" or "8.5G"
         const cleanSize = size.replace(/G$/, '');
@@ -745,18 +769,18 @@ export class VMMessageHandler implements MessageHandler {
         // Number format
         targetSizeGB = size;
       }
-      
+
       newDiskSizeGB = targetSizeGB;
-      
+
       // Calculate the difference for PVE resize command
       const sizeDifferenceGB = targetSizeGB - currentDiskSizeGB;
       pveResizeSize = `+${sizeDifferenceGB}G`;
-      
+
       console.log(`Total resize: User wants ${targetSizeGB}GB total, current is ${currentDiskSizeGB}GB, adding ${sizeDifferenceGB}GB`);
     } else {
       // Add resize: size is the amount to add
       let sizeToAddGB: number;
-      
+
       if (typeof size === 'string') {
         // Parse string format like "+4.5G" or "4.5G"
         const cleanSize = size.replace(/^\+/, '').replace(/G$/, '');
@@ -765,10 +789,10 @@ export class VMMessageHandler implements MessageHandler {
         // Number format
         sizeToAddGB = size;
       }
-      
+
       newDiskSizeGB = currentDiskSizeGB + sizeToAddGB;
       pveResizeSize = `+${sizeToAddGB}G`;
-      
+
       console.log(`Add resize: Adding ${sizeToAddGB}GB to current ${currentDiskSizeGB}GB, new total will be ${newDiskSizeGB}GB`);
     }
 
@@ -871,7 +895,7 @@ export class VMMessageHandler implements MessageHandler {
 
 export function parseMessage(message: ConsumeMessage): VMMessage {
   const content = JSON.parse(message.content.toString());
-  
+
   // Validate message based on type
   switch (content.type) {
     case 'vm.create':
