@@ -43,6 +43,28 @@ export const envSchema = z.object({
 	RABBITMQ_ROUTING_KEY: z.string().min(1, {
 		message: "RABBITMQ_ROUTING_KEY is required",
 	}).optional().default("yuzu.*"),
+	LOG_LEVEL: z
+		.enum(["debug", "info", "warn", "error"], {
+			message: "LOG_LEVEL must be one of debug, info, warn, or error",
+		})
+		.default("info"),
+	// Logging target
+	LOG_TARGET: z
+		.enum(["console", "file", "loki"], {
+			message: "LOG_TARGET must be one of console, file, or loki",
+		})
+		.default("console"),
+	// Loki logging URL
+	LOKI_URL: z
+		.url({
+			message: "LOKI_URL must be a valid URL",
+		})
+		.optional(),
+	NODE_ENV: z
+		.enum(["development", "production", "test"], {
+			message: "NODE_ENV must be one of development, production, or test",
+		})
+		.default("development"),
 });
 
 export type Env = z.infer<typeof envSchema>;

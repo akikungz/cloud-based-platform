@@ -16,7 +16,7 @@ export class PrismaMockData {
       image: null,
     },
     staff: {
-      id: "test-staff-id", 
+      id: "test-staff-id",
       email: "staff.t@itm.kmutnb.ac.th",
       name: "Staff Test",
       email_verified: true,
@@ -24,7 +24,7 @@ export class PrismaMockData {
     },
     admin: {
       id: "test-admin-id",
-      email: "admin@itm.kmutnb.ac.th", 
+      email: "admin@itm.kmutnb.ac.th",
       name: "Admin Test",
       email_verified: true,
       image: null,
@@ -63,7 +63,7 @@ export class PrismaMockData {
     },
     advanced: {
       id: 2,
-      course_id: "060233201", 
+      course_id: "060233201",
       course_title: "Advanced Network Engineering",
       main_staff: 1,
     }
@@ -80,7 +80,7 @@ export class PrismaMockData {
     },
     secondary: {
       id: 2,
-      name: "Test Node 2", 
+      name: "Test Node 2",
       status: "online" as const,
     },
     maintenance: {
@@ -100,13 +100,15 @@ export class PrismaMockData {
       vm_template_id: "101",
       vm_template_host: "Test Node",
       vm_type: "qemu" as const,
+      based_size: 3.5,
     },
     centos: {
       id: 2,
       os_name: "CentOS 8",
-      vm_template_id: "102", 
+      vm_template_id: "102",
       vm_template_host: "Test Node 2",
       vm_type: "lxc" as const,
+      based_size: 8,
     }
   };
 
@@ -123,7 +125,7 @@ export class PrismaMockData {
     secondary: {
       id: 2,
       name: "Secondary Network",
-      network: "10.20.32.0/24", 
+      network: "10.20.32.0/24",
       gateway: "10.20.32.1",
     }
   };
@@ -229,7 +231,7 @@ export class PrismaMockData {
       id: 2,
       user_id: "test-student-id",
       title: "Project Request",
-      hostname: "project-request", 
+      hostname: "project-request",
       description: "This is a project request",
       type: "project" as const,
       course_id: 1,
