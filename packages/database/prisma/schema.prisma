@@ -33,6 +33,7 @@ enum instance_status {
 enum instance_request_type {
   course
   project
+  personal
 }
 
 enum request_state {
@@ -154,12 +155,12 @@ model ip_address {
   network_id Int
   network    network   @relation(fields: [network_id], references: [id], onDelete: Cascade)
   ip         String    @unique
-  is_used    Boolean   @default(false)
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  instance instance[]
+  instance_id Int?      @unique
+  instance    instance? @relation(fields: [instance_id], references: [id], onDelete: SetNull)
 }
 
 model semester {
@@ -263,12 +264,11 @@ model instance {
   pve_node                 String
   node                     pve_node                   @relation(fields: [pve_node], references: [name], onDelete: Cascade)
   vm_id                    Int
-  ip_address_id            Int?
-  ip_address               ip_address?                @relation(fields: [ip_address_id], references: [id], onDelete: SetNull)
   created_at               DateTime                   @default(now())
   updated_at               DateTime                   @default(now())
   deleted_at               DateTime?
   instance_request_extends instance_request_extends[]
+  ip_address               ip_address?
 }
 
 model instance_request_extends {

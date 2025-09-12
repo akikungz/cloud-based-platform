@@ -180,7 +180,7 @@ describe("Prisma Mock System - Example Usage", () => {
       
       // All returned IPs should be available
       availableIps.forEach(ip => {
-        expect(ip.is_used).toBe(false);
+        expect(ip.instance_id).toBeNull();
         expect(ip.network).toBeDefined();
       });
     });

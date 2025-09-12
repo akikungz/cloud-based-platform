@@ -160,7 +160,8 @@ export class PrismaTestHelpers {
   async getAvailableIpAddresses(): Promise<any[]> {
     return await this.db.ip_address.findMany({
       where: { 
-        is_used: false,
+        // @ts-ignore - Prisma types seem incorrect for this relation
+        instance: null,
         deleted_at: null,
       },
       include: {

@@ -87,6 +87,22 @@ export class PrismaMockData {
       id: 3,
       name: "Maintenance Node",
       status: "maintenance" as const,
+    },
+    // Add the expected node names from example messages
+    node01: {
+      id: 4,
+      name: "pve-node-01",
+      status: "online" as const,
+    },
+    node02: {
+      id: 5,
+      name: "pve-node-02",
+      status: "online" as const,
+    },
+    node03: {
+      id: 6,
+      name: "pve-node-03",
+      status: "online" as const,
     }
   };
 
@@ -135,15 +151,15 @@ export class PrismaMockData {
    */
   static ipAddresses = {
     primary: [
-      { id: 1, network_id: 1, ip: "10.20.31.2/24", is_used: false },
-      { id: 2, network_id: 1, ip: "10.20.31.3/24", is_used: false },
-      { id: 3, network_id: 1, ip: "10.20.31.4/24", is_used: false },
-      { id: 4, network_id: 1, ip: "10.20.31.5/24", is_used: false },
-      { id: 5, network_id: 1, ip: "10.20.31.6/24", is_used: false },
+      { id: 1, network_id: 1, ip: "10.20.31.2/24", instance_id: null },
+      { id: 2, network_id: 1, ip: "10.20.31.3/24", instance_id: null },
+      { id: 3, network_id: 1, ip: "10.20.31.4/24", instance_id: null },
+      { id: 4, network_id: 1, ip: "10.20.31.5/24", instance_id: null },
+      { id: 5, network_id: 1, ip: "10.20.31.6/24", instance_id: null },
     ],
     secondary: [
-      { id: 6, network_id: 2, ip: "10.20.32.2/24", is_used: false },
-      { id: 7, network_id: 2, ip: "10.20.32.3/24", is_used: false },
+      { id: 6, network_id: 2, ip: "10.20.32.2/24", instance_id: null },
+      { id: 7, network_id: 2, ip: "10.20.32.3/24", instance_id: null },
     ]
   };
 
@@ -154,15 +170,15 @@ export class PrismaMockData {
     current: {
       id: 1,
       name: "1/2568",
-      start_at: new Date("2024-06-01"),
-      end_at: new Date("2024-10-30"),
+      start_at: new Date("2025-06-01"),
+      end_at: new Date("2025-10-30"),
       active: true,
     },
     next: {
       id: 2,
       name: "2/2568",
-      start_at: new Date("2024-11-01"),
-      end_at: new Date("2025-03-31"),
+      start_at: new Date("2025-12-01"),
+      end_at: new Date("2026-03-31"),
       active: false,
     }
   };
@@ -348,6 +364,9 @@ export class PrismaMockSetup {
         PrismaMockData.pveNodes.primary,
         PrismaMockData.pveNodes.secondary,
         PrismaMockData.pveNodes.maintenance,
+        PrismaMockData.pveNodes.node01,
+        PrismaMockData.pveNodes.node02,
+        PrismaMockData.pveNodes.node03,
       ],
       skipDuplicates: true,
     });
