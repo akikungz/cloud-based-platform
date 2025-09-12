@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { StudentRequestForm } from '@midori/components/dashboard/StudentRequestForm';
 import { RequestManager } from '@midori/components/dashboard/RequestManager';
+import { PageHeader } from '@midori/components/ui';
 
 export default function RequestsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -14,12 +15,10 @@ export default function RequestsPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Request Management</h1>
-        <p className="text-gray-600 mt-2">
-          Create new instance requests and manage your existing requests
-        </p>
-      </div>
+      <PageHeader
+        title="Request Management"
+        description="Create new instance requests and manage your existing requests"
+      />
 
       <StudentRequestForm onRequestSubmitted={handleRequestSubmitted} />
       <RequestManager refreshTrigger={refreshTrigger} />

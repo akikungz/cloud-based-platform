@@ -1,25 +1,22 @@
 "use client";
+import { PageHeader, SectionCard } from "@midori/components/ui";
 
 export default function SettingsPage() {
 	return (
 		<div className="flex flex-col items-center justify-center gap-4">
-			{/* Header */}
-			<div className="flex flex-col w-full px-2 pt-2">
-				<h2 className="text-3xl font-semibold">Settings</h2>
-				<p className="text-vm-blue-600">
-					Manage your account settings and preferences.
-				</p>
-			</div>
+			<PageHeader
+				title="Settings"
+				description="Manage your account settings and preferences."
+			/>
 
 			{/* Placeholder Content */}
-			<div className="w-full bg-white p-8 rounded-lg shadow-md text-center">
-				<h3 className="text-xl font-semibold text-vm-blue-900 mb-4">
-					Settings Panel
-				</h3>
-				<p className="text-vm-blue-600">
-					This page will contain the settings interface.
-				</p>
-			</div>
+			<SectionCard title="Settings Panel">
+				<div className="text-center py-8">
+					<p className="text-vm-blue-600">
+						This page will contain the settings interface.
+					</p>
+				</div>
+			</SectionCard>
 		</div>
 	);
 }

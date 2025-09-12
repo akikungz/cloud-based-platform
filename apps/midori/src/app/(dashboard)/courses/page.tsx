@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PageHeader, SectionCard } from "@midori/components/ui";
+import { PageHeader, SectionCard, SearchInput, LoadingSpinner, AlertMessage } from "@midori/components/ui";
 import { momoi_client } from "@midori/libs/momoi";
-import { Book, Users, Search, Plus, Edit, Trash2, User, UserCheck, AlertCircle, CheckCircle, X } from "lucide-react";
+import { Book, Users, Plus, Edit, Trash2, User, UserCheck, AlertCircle, CheckCircle, X } from "lucide-react";
 import { formatDate } from "@midori/utils/format";
 
 interface Course {
@@ -195,7 +195,7 @@ export default function CoursesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vm-blue-500"></div>
+        <LoadingSpinner size="xl" text="Loading courses..." />
       </div>
     );
   }
@@ -208,48 +208,31 @@ export default function CoursesPage() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center justify-between">
-          <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            {error}
-          </div>
-          <button
-            onClick={() => setError(null)}
-            className="text-red-500 hover:text-red-700"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+        <AlertMessage 
+          type="error" 
+          message={error}
+          dismissible
+          onDismiss={() => setError(null)}
+        />
       )}
 
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center justify-between">
-          <div className="flex items-center">
-            <CheckCircle className="h-5 w-5 mr-2" />
-            {successMessage}
-          </div>
-          <button
-            onClick={() => setSuccessMessage(null)}
-            className="text-green-500 hover:text-green-700"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+        <AlertMessage 
+          type="success" 
+          message={successMessage}
+          dismissible
+          onDismiss={() => setSuccessMessage(null)}
+        />
       )}
 
       {/* Search Section */}
       <SectionCard title="Search Courses">
         <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search courses by title or code..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search courses by title or code..."
+          />
           
           {searchQuery && (
             <p className="text-sm text-gray-600">

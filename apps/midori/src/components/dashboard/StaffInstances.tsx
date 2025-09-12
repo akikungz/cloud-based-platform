@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SectionCard } from "@midori/components/ui";
+import { SectionCard, LoadingSpinner, AlertMessage, EmptyState } from "@midori/components/ui";
 import { momoi_client } from "@midori/libs/momoi";
 import { Database, User, Calendar, Cpu, MemoryStick, HardDrive, ExternalLink } from "lucide-react";
 import { formatDate } from "@midori/utils/format";
@@ -93,9 +93,7 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
   if (loading) {
     return (
       <SectionCard title="Recent Instances">
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vm-blue-500"></div>
-        </div>
+        <LoadingSpinner size="lg" centered text="Loading instances..." />
       </SectionCard>
     );
   }
@@ -103,10 +101,11 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
   if (error) {
     return (
       <SectionCard title="Recent Instances">
-        <div className="text-center py-8 text-red-600">
-          <Database className="h-12 w-12 mx-auto mb-4 text-red-300" />
-          <p>Error loading instances: {error}</p>
-        </div>
+        <AlertMessage 
+          type="error" 
+          message={`Error loading instances: ${error}`}
+          className="mb-4"
+        />
       </SectionCard>
     );
   }
@@ -114,10 +113,11 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
   if (instances.length === 0) {
     return (
       <SectionCard title="Recent Instances">
-        <div className="text-center py-8 text-gray-500">
-          <Database className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No instances found.</p>
-        </div>
+        <EmptyState
+          icon={Database}
+          title="No instances found"
+          description="No virtual machine instances are currently available."
+        />
       </SectionCard>
     );
   }

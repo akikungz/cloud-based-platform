@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 import PendingRequest from "@midori/components/dashboard/PendingRequest";
 import { RoleGuard } from "@midori/components/auth/RoleGuard";
 import { Role } from "auth/utils/role";
-import { PageHeader } from "@midori/components/ui";
+import { PageHeader, SearchInput } from "@midori/components/ui";
 import { momoi_client } from "@midori/libs/momoi";
-import { Select, MenuItem, FormControl, InputLabel, Box, TextField, InputAdornment, Button } from "@mui/material";
-import { Search, RefreshCw } from "lucide-react";
+import { Select, MenuItem, FormControl, InputLabel, Box, Button } from "@mui/material";
+import { RefreshCw } from "lucide-react";
 
 interface Course {
 	id: number;
@@ -102,22 +102,13 @@ export default function ApprovalsPage() {
 					</FormControl>
 
 					{/* Search Filter */}
-					<TextField
-						className="w-full md:col-span-2"
-						size="small"
-						placeholder="Search by title or student name..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						slotProps={{
-							input: {
-								startAdornment: (
-									<InputAdornment position="start">
-										<Search className="w-4 h-4" />
-									</InputAdornment>
-								),
-							},
-						}}
-					/>
+					<div className="w-full md:col-span-2">
+						<SearchInput
+							value={searchQuery}
+							onChange={setSearchQuery}
+							placeholder="Search by title or student name..."
+						/>
+					</div>
 				</Box>
 
 				{/* Pending Requests */}

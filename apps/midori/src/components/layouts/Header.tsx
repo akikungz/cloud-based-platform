@@ -2,6 +2,7 @@
 import { SidebarContext } from "@midori/contexts/sidebar";
 import { UserContext } from "@midori/contexts/user";
 import { auth } from "@midori/libs/auth";
+import { useActiveSemester } from "@midori/hooks/useActiveSemester";
 import { cn, format_name } from "@midori/utils/format";
 import { Avatar, Tooltip } from "@mui/material";
 import {
@@ -11,6 +12,7 @@ import {
 	LogOut,
 	Menu,
 	Server,
+	Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -21,6 +23,7 @@ export const Header: React.FC = () => {
 	const { user, isPending } = useContext(UserContext);
 	const { isOpen, toggleSidebar, isCollapsed, toggleCollapse } =
 		useContext(SidebarContext);
+	const { activeSemester, loading: semesterLoading } = useActiveSemester();
 
 	const handleSignOut = async () => {
 		await auth.signOut();
@@ -69,6 +72,16 @@ export const Header: React.FC = () => {
 			</div>
 
 			<div className="flex items-center space-x-2">
+				{/* Active Semester Display */}
+				{activeSemester && (
+					<div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-vm-blue-50 rounded-lg border border-vm-blue-200">
+						<Calendar className="w-4 h-4 text-vm-blue-600" />
+						<span className="text-sm font-medium text-vm-blue-800">
+							{activeSemester.name}
+						</span>
+					</div>
+				)}
+
 				<button
 					type="button"
 					className="p-2 rounded hover:bg-vm-blue-100 transition-colors"

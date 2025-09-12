@@ -12,3 +12,11 @@ export { StatsCard } from "./StatsCard";
 export { QuickActionCard } from "./QuickActionCard";
 export { SpecBadge } from "./SpecBadge";
 export { EmptyState } from "./EmptyState";
+
+// Loading and feedback components
+export { LoadingSpinner } from "./LoadingSpinner";
+export { AlertMessage } from "./AlertMessage";
+export { SkeletonLoader, SkeletonCard, SkeletonListItem } from "./SkeletonLoader";
+
+// Form components
+export { SearchInput } from "./SearchInput";

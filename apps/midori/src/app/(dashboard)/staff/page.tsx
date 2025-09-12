@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PageHeader, SectionCard } from "@midori/components/ui";
+import { PageHeader, SectionCard, SearchInput, LoadingSpinner, AlertMessage } from "@midori/components/ui";
 import { momoi_client } from "@midori/libs/momoi";
-import { Plus, Users, User, Search, Trash2, UserPlus, Mail } from "lucide-react";
+import { Plus, Users, User, Trash2, UserPlus, Mail, Search } from "lucide-react";
 import { formatDate } from "@midori/utils/format";
 
 interface Person {
@@ -101,7 +101,7 @@ export default function StaffPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vm-blue-500"></div>
+        <LoadingSpinner size="xl" text="Loading staff members..." />
       </div>
     );
   }
@@ -114,35 +114,22 @@ export default function StaffPage() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
+        <AlertMessage 
+          type="error" 
+          message={error}
+          dismissible
+          onDismiss={() => setError(null)}
+        />
       )}
 
       {/* Search Section */}
       <SectionCard title="Search Staff Members">
         <div className="space-y-4">
-          <div className="flex space-x-3">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name or email address..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vm-blue-500"
-              />
-            </div>
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center space-x-2"
-              >
-                <Search className="h-4 w-4" />
-                <span>Clear</span>
-              </button>
-            )}
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search by name or email address..."
+          />
           {searchQuery && (
             <p className="text-sm text-gray-600">
               Showing {filteredPersons.length} of {persons.length} staff members

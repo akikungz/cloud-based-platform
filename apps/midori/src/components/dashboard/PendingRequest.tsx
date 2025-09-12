@@ -9,7 +9,7 @@ import {
 	type PendingRequestItemProps,
 	PendingRequestItemSkeleton,
 } from "./PendingRequestItem";
-import { EmptyState } from "@midori/components/ui";
+import { EmptyState, LoadingSpinner, AlertMessage } from "@midori/components/ui";
 import { env } from "@midori/libs/env";
 
 interface PendingRequestProps {
@@ -176,15 +176,12 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 			</div>
 			{
 				isLoading ? (
-					Array.from({ length: limit }).map((_, index) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: <Skeletons should not have keys></Skeletons>
-						<PendingRequestItemSkeleton key={index} />
-					))
+					<LoadingSpinner size="lg" centered text="Loading requests..." />
 				) : error ? (
-					<EmptyState
-						icon={SearchX}
-						title="Error loading requests"
-						description={error}
+					<AlertMessage 
+						type="error" 
+						message={error}
+						className="mb-4"
 					/>
 				) : requests.length > 0 ? (
 					<>

@@ -4,7 +4,7 @@ import { Chip, Alert, Button, Snackbar } from "@mui/material";
 import { Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, ClipboardList, Plus } from "lucide-react";
 import { momoi_client } from "@midori/libs/momoi";
 import { formatRelativeDate, formatDate } from "@midori/utils/format";
-import { ClientOnly } from "@midori/components/ui/ClientOnly";
+import { ClientOnly, LoadingSpinner, AlertMessage, EmptyState } from "@midori/components/ui";
 import Link from "next/link";
 
 interface RequestHistoryProps {
@@ -164,9 +164,7 @@ export function StudentRequestHistory({ maxItems = 5, showOnlyRecent = true }: R
 	if (loading) {
 		return (
 			<div className="w-full bg-white p-8 rounded-lg shadow-md">
-				<div className="flex items-center justify-center py-8">
-					<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-				</div>
+				<LoadingSpinner size="lg" centered text="Loading request history..." />
 			</div>
 		);
 	}
@@ -192,21 +190,19 @@ export function StudentRequestHistory({ maxItems = 5, showOnlyRecent = true }: R
 			</div>
 
 				{error && (
-					<Alert severity="error" className="mb-4">
-						{error}
-					</Alert>
+					<AlertMessage 
+						type="error" 
+						message={error} 
+						className="mb-4" 
+					/>
 				)}
 
 				{allRequests.length === 0 ? (
-					<div className="text-center py-8">
-						<ClipboardList className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-						<p className="text-vm-blue-600">
-							{showOnlyRecent ? 'No recent requests found.' : 'No requests found.'}
-						</p>
-						<p className="text-vm-blue-600 mt-2">
-							Create your first request to get started.
-						</p>
-					</div>
+					<EmptyState
+						icon={ClipboardList}
+						title={showOnlyRecent ? 'No recent requests found' : 'No requests found'}
+						description="Create your first request to get started."
+					/>
 				) : (
 					<div className="space-y-3">
 						{allRequests.map((request) => (

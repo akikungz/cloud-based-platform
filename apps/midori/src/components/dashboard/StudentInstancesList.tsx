@@ -4,7 +4,7 @@ import { Chip, Alert } from "@mui/material";
 import { Database, ExternalLink, Trash2 } from "lucide-react";
 import { momoi_client } from "@midori/libs/momoi";
 import { formatRelativeDate, formatDate } from "@midori/utils/format";
-import { ClientOnly } from "@midori/components/ui/ClientOnly";
+import { ClientOnly, LoadingSpinner, AlertMessage, EmptyState } from "@midori/components/ui";
 import Link from "next/link";
 
 interface InstancesListProps {
@@ -126,9 +126,7 @@ export function StudentInstancesList({ maxItems = 3, showOnlyRecent = true }: In
 	if (loading) {
 		return (
 			<div className="w-full bg-white p-8 rounded-lg shadow-md">
-				<div className="flex items-center justify-center py-8">
-					<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-				</div>
+				<LoadingSpinner size="lg" centered text="Loading instances..." />
 			</div>
 		);
 	}
@@ -149,21 +147,19 @@ export function StudentInstancesList({ maxItems = 3, showOnlyRecent = true }: In
 			</div>
 
 			{error && (
-				<Alert severity="error" className="mb-4">
-					{error}
-				</Alert>
+				<AlertMessage 
+					type="error" 
+					message={error} 
+					className="mb-4" 
+				/>
 			)}
 
 			{instances.length === 0 ? (
-				<div className="text-center py-8">
-					<Database className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-					<p className="text-vm-blue-600">
-						{showOnlyRecent ? 'No recent instances found.' : 'No instances found.'}
-					</p>
-					<p className="text-vm-blue-600 mt-2">
-						Create a request to get your first instance.
-					</p>
-				</div>
+				<EmptyState
+					icon={Database}
+					title={showOnlyRecent ? 'No recent instances found' : 'No instances found'}
+					description="Create a request to get your first instance."
+				/>
 			) : (
 				<div className="space-y-3">
 					{instances.map((instance) => (
