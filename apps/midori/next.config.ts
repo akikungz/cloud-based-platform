@@ -4,7 +4,21 @@ import { env } from "@midori/libs/env";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: "standalone",
+  experimental: {
+    instrumentationHook: false,
+    serverComponentsExternalPackages: ['@opentelemetry/api'],
+  },
+  telemetry: {
+    disabled: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Exclude OpenTelemetry packages from server bundle
+      config.externals = config.externals || [];
+      config.externals.push('@opentelemetry/api');
+    }
+    return config;
+  },
   rewrites: async () => [
     {
       source: "/openapi/:path*",

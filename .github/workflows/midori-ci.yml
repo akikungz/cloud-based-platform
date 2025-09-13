@@ -31,6 +31,57 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Cache Bun global store
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/global
+          key: ${{ runner.os }}-bun-global-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-global-
+
+      - name: Cache node_modules (workspace root)
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-bun-modules-root-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-modules-root-
+
+      - name: Cache node_modules (apps/midori)
+        uses: actions/cache@v4
+        with:
+          path: apps/midori/node_modules
+          key: ${{ runner.os }}-bun-modules-midori-${{ hashFiles('apps/midori/package.json') }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-modules-midori-${{ hashFiles('apps/midori/package.json') }}-
+            ${{ runner.os }}-bun-modules-midori-
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/midori/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('apps/midori/package.json') }}-${{ hashFiles('apps/midori/**/*.ts', 'apps/midori/**/*.tsx', 'apps/midori/**/*.js', 'apps/midori/**/*.jsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('apps/midori/package.json') }}-
+            ${{ runner.os }}-nextjs-
+
+      - name: Install dependencies (workspace root)
+        run: bun install --frozen-lockfile
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

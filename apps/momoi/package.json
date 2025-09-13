@@ -1,6 +1,11 @@
 {
   "name": "momoi",
   "version": "1.0.50",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./client": "./client.ts"
+  },
   "scripts": {
     "test": "bun test",
     "dev": "bun --watch --no-watch-external index.ts"
