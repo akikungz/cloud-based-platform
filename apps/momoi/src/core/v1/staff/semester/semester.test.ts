@@ -26,7 +26,7 @@ describe("Staff/Semester Module", () => {
 
   describe("GET /semester", () => {
     it("should return list of semesters", async () => {
-      const response = await api.semester.get();
+      const response = await api.semester.get({ query: {} });
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
@@ -37,7 +37,7 @@ describe("Staff/Semester Module", () => {
       // Reset database to test empty state
       await mockSetup.resetDatabase();
 
-      const response = await api.semester.get();
+      const response = await api.semester.get({ query: {} });
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
@@ -83,7 +83,7 @@ describe("Staff/Semester Module", () => {
       expect((response.data as any)!.data).toHaveProperty("active", true);
 
       // Verify only one active semester exists
-      const allSemesters = await api.semester.get();
+      const allSemesters = await api.semester.get({ query: {} });
       const activeSemesters = (allSemesters.data as any)!.data.filter((s: any) => s.active);
       expect(activeSemesters).toHaveLength(1);
     });
@@ -336,7 +336,7 @@ describe("Staff/Semester Module", () => {
       expect((response.data as any)!.data).toHaveProperty("active", true);
 
       // Verify only semester2 is active
-      const allSemesters = await api.semester.get();
+      const allSemesters = await api.semester.get({ query: {} });
       const activeSemesters = (allSemesters.data as any)!.data.filter((s: any) => s.active);
       expect(activeSemesters).toHaveLength(1);
       expect(activeSemesters[0].id).toBe((semester2.data as any)!.data.id);
@@ -466,14 +466,14 @@ describe("Staff/Semester Module", () => {
       });
 
       // Verify original semester still exists
-      const response = await api.semester.get();
+      const response = await api.semester.get({ query: {} });
       const originalSemester = (response.data as any)!.data.find((s: any) => s.id === semesterId);
       expect(originalSemester).toBeDefined();
       expect(originalSemester?.name).toBe("Consistency Test");
     });
 
     it("should handle database connection errors gracefully", async () => {
-      const response = await api.semester.get();
+      const response = await api.semester.get({ query: {} });
 
       // Should still return a response
       expect(response.status).toBe(200);

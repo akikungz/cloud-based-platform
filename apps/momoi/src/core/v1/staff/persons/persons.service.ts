@@ -7,7 +7,7 @@ import { Prisma } from "database/generated/prisma-client/client";
 export class PersonsService {
   private static db = db;
 
-  static async getPersons() {
+  static async getPersons(skip?: number, take?: number) {
     try {
       // Get all staff emails from staff_list table
       const staffEmails = await this.db.staff_list.findMany({ 
@@ -52,7 +52,10 @@ export class PersonsService {
         }
       });
 
-      return allPersons;
+      // Apply pagination
+      const startIndex = skip || 0;
+      const endIndex = startIndex + (take || 50);
+      return allPersons.slice(startIndex, endIndex);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         throw new BadRequestError(error.message);

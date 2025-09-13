@@ -18,11 +18,11 @@ export const PersonsController = new Elysia({
   .onBeforeHandle(({ isStaff, status }) => {
     if (!isStaff) return status(403, { message: "Forbidden" });
   })
-  .get("/", async ({ status }) => {
+  .get("/", async ({ status, query }) => {
     const [err, persons] = await create_callback<
       BadRequestError, Awaited<ReturnType<typeof PersonsService.getPersons>>
     >(
-      () => PersonsService.getPersons()
+      () => PersonsService.getPersons(query?.skip, query?.take)
     );
 
     if (err) {
@@ -35,6 +35,11 @@ export const PersonsController = new Elysia({
     }
 
     return status(200, { message: "Get all persons", data: persons });
+  }, {
+    query: t.Optional(t.Object({
+      skip: t.Optional(t.Number()),
+      take: t.Optional(t.Number())
+    }))
   })
   .get("/search", async ({ status, query }) => {
     const [err, person] = await create_callback<
@@ -77,7 +82,7 @@ export const PersonsController = new Elysia({
   })
   .delete("/", async ({ status, body }) => {
     const [err, person] = await create_callback<
-      BadRequestError | NotFoundError, ReturnType<typeof PersonsService.deletePerson>
+      BadRequestError | NotFoundError, Awaited<ReturnType<typeof PersonsService.deletePerson>>
     >(
       () => PersonsService.deletePerson(body.email)
     );

@@ -5,7 +5,7 @@ import { Prisma } from "database/generated/prisma-client/client";
 export class SemesterService {
   private static db = db;
 
-  static async getSemesters() {
+  static async getSemesters(skip?: number, take?: number) {
     try {
       return await this.db.semester.findMany({
         where: { deleted_at: null },
@@ -18,7 +18,9 @@ export class SemesterService {
           created_at: true,
           updated_at: true
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
+        skip: skip || 0,
+        take: take || 50
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

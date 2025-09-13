@@ -5,7 +5,7 @@ import { Prisma } from "database/generated/prisma-client/client";
 export class CourseService {
   private static db = db;
 
-  static async getCourses() {
+  static async getCourses(skip?: number, take?: number) {
     try {
       return await this.db.instance_course.findMany({
         where: { deleted_at: null },
@@ -26,7 +26,9 @@ export class CourseService {
             }
           }
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
+        skip: skip || 0,
+        take: take || 50
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -384,7 +386,7 @@ export class CourseService {
     }
   }
 
-  static async searchCourses(query: string) {
+  static async searchCourses(query: string, skip?: number, take?: number) {
     try {
       return await this.db.instance_course.findMany({
         where: {
@@ -412,7 +414,8 @@ export class CourseService {
           }
         },
         orderBy: { created_at: 'desc' },
-        take: 20
+        skip: skip || 0,
+        take: take || 20
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

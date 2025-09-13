@@ -10,7 +10,7 @@ export const PublicController = new Elysia({
 })
   .get("/active-semester", async ({ status }) => {
     const [err, activeSemester] = await create_callback<
-      BadRequestError, ReturnType<typeof SemesterService.getActiveSemester>
+      BadRequestError, Awaited<ReturnType<typeof SemesterService.getActiveSemester>>
     >(
       () => SemesterService.getActiveSemester()
     );
@@ -30,7 +30,7 @@ export const PublicController = new Elysia({
   })
   .get("/next-semester", async ({ status }) => {
     const [err, nextSemester] = await create_callback<
-      BadRequestError, ReturnType<typeof SemesterService.getNextSemester>
+      BadRequestError, Awaited<ReturnType<typeof SemesterService.getNextSemester>>
     >(
       () => SemesterService.getNextSemester()
     );

@@ -35,8 +35,8 @@ export const StaffInstancesController = new Elysia({
     }
 
     // Apply pagination if provided
-    const skip = query.skip ? parseInt(query.skip) : 0;
-    const take = query.take ? parseInt(query.take) : 50;
+    const skip = query?.skip ? query.skip : 0;
+    const take = query?.take ? query.take : 50;
     
     const paginatedInstances = instances.slice(skip, skip + take);
 
@@ -50,10 +50,10 @@ export const StaffInstancesController = new Elysia({
       }
     });
   }, {
-    query: t.Object({
-      skip: t.Optional(t.String()),
-      take: t.Optional(t.String())
-    })
+    query: t.Optional(t.Object({
+      skip: t.Optional(t.Number()),
+      take: t.Optional(t.Number())
+    }))
   })
   .get("/stats", async ({ status }) => {
     const [err, stats] = await create_callback<

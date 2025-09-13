@@ -26,7 +26,7 @@ describe("Staff/Course Module", () => {
 
   describe("GET /course", () => {
     it("should return list of courses", async () => {
-      const response = await api.course.get();
+      const response = await api.course.get({ query: {} });
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
@@ -38,7 +38,7 @@ describe("Staff/Course Module", () => {
       // Reset database to test empty state
       await mockSetup.resetDatabase();
 
-      const response = await api.course.get();
+      const response = await api.course.get({ query: {} });
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");

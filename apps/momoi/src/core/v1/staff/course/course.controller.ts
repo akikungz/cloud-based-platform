@@ -17,45 +17,56 @@ export const CourseController = new Elysia({
   .onBeforeHandle(async ({ isStaff, status }) => {
     if (!isStaff) return status(403, { message: "Forbidden" });
   })
-  .get("/", async ({ status }) => {
+  .get("/", async ({ status, query }) => {
     const [err, courses] = await create_callback<
-      BadRequestError, ReturnType<typeof CourseService.getCourses>
+      BadRequestError, Awaited<ReturnType<typeof CourseService.getCourses>>
     >(
-      () => CourseService.getCourses()
+      () => CourseService.getCourses(query?.skip, query?.take)
     );
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Courses fetched successfully",
       data: courses
     });
+  }, {
+    query: t.Optional(t.Object({
+      skip: t.Optional(t.Number()),
+      take: t.Optional(t.Number())
+    }))
   })
   .get("/search", async ({ status, query }) => {
+    if (!query?.q) {
+      return status(400, { message: "Search query 'q' is required" });
+    }
+
     const [err, courses] = await create_callback<
-      BadRequestError, ReturnType<typeof CourseService.searchCourses>
+      BadRequestError, Awaited<ReturnType<typeof CourseService.searchCourses>>
     >(
-      () => CourseService.searchCourses(query.q)
+      () => CourseService.searchCourses(query.q!, query?.skip, query?.take)
     );
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Courses searched successfully",
       data: courses
     });
   }, {
-    query: t.Object({
-      q: t.String({ minLength: 1 })
-    })
+    query: t.Optional(t.Object({
+      q: t.String({ minLength: 1 }),
+      skip: t.Optional(t.Number()),
+      take: t.Optional(t.Number())
+    }))
   })
   .get("/my-courses", async ({ status, user }) => {
     const [err, courses] = await create_callback<
-      BadRequestError, ReturnType<typeof CourseService.getCoursesByStaff>
+      BadRequestError, Awaited<ReturnType<typeof CourseService.getCoursesByStaff>>
     >(
       () => CourseService.getCoursesByStaff(user.staff_id!)
     );
@@ -64,14 +75,14 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Courses fetched for current staff successfully",
       data: courses
     });
   })
   .get("/staff/:staffId", async ({ status, params }) => {
     const [err, courses] = await create_callback<
-      BadRequestError, ReturnType<typeof CourseService.getCoursesByStaff>
+      BadRequestError, Awaited<ReturnType<typeof CourseService.getCoursesByStaff>>
     >(
       () => CourseService.getCoursesByStaff(params.staffId)
     );
@@ -80,7 +91,7 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Courses fetched for staff successfully",
       data: courses
     });
@@ -91,7 +102,7 @@ export const CourseController = new Elysia({
   })
   .get("/course-id/:courseId", async ({ status, params }) => {
     const [err, course] = await create_callback<
-      BadRequestError | NotFoundError, ReturnType<typeof CourseService.getCourseByCourseId>
+      BadRequestError | NotFoundError, Awaited<ReturnType<typeof CourseService.getCourseByCourseId>>
     >(
       () => CourseService.getCourseByCourseId(params.courseId)
     );
@@ -100,7 +111,7 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Course fetched successfully",
       data: course
     });
@@ -111,7 +122,7 @@ export const CourseController = new Elysia({
   })
   .get("/:id/stats", async ({ status, params }) => {
     const [err, stats] = await create_callback<
-      BadRequestError | NotFoundError, ReturnType<typeof CourseService.getCourseStats>
+      BadRequestError | NotFoundError, Awaited<ReturnType<typeof CourseService.getCourseStats>>
     >(
       () => CourseService.getCourseStats(params.id)
     );
@@ -120,7 +131,7 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Course statistics fetched successfully",
       data: stats
     });
@@ -131,7 +142,7 @@ export const CourseController = new Elysia({
   })
   .get("/:id", async ({ status, params }) => {
     const [err, course] = await create_callback<
-      BadRequestError | NotFoundError, ReturnType<typeof CourseService.getCourseById>
+      BadRequestError | NotFoundError, Awaited<ReturnType<typeof CourseService.getCourseById>>
     >(
       () => CourseService.getCourseById(params.id)
     );
@@ -140,7 +151,7 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Course fetched successfully",
       data: course
     });
@@ -151,7 +162,7 @@ export const CourseController = new Elysia({
   })
   .post("/", async ({ status, body }) => {
     const [err, course] = await create_callback<
-      BadRequestError | ConflictError, ReturnType<typeof CourseService.createCourse>
+      BadRequestError | ConflictError, Awaited<ReturnType<typeof CourseService.createCourse>>
     >(
       () => CourseService.createCourse(body)
     );
@@ -160,7 +171,7 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(201, { 
+    return status(201, {
       message: "Course created successfully",
       data: course
     });
@@ -176,7 +187,7 @@ export const CourseController = new Elysia({
   })
   .put("/:id", async ({ status, params, body }) => {
     const [err, course] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, ReturnType<typeof CourseService.updateCourse>
+      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof CourseService.updateCourse>>
     >(
       () => CourseService.updateCourse(params.id, body)
     );
@@ -185,7 +196,7 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Course updated successfully",
       data: course
     });
@@ -204,7 +215,7 @@ export const CourseController = new Elysia({
   })
   .delete("/:id", async ({ status, params }) => {
     const [err, deletedCourse] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, ReturnType<typeof CourseService.deleteCourse>
+      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof CourseService.deleteCourse>>
     >(
       () => CourseService.deleteCourse(params.id)
     );
@@ -213,7 +224,7 @@ export const CourseController = new Elysia({
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Course deleted successfully",
       data: deletedCourse
     });

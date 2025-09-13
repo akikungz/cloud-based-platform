@@ -25,7 +25,7 @@ describe("Staff/Persons Module", () => {
   });
 
   it("GET /persons - should return list of persons with both active and pending status", async () => {
-    const response = await api.persons.get();
+    const response = await api.persons.get({ query: {} });
 
     expect(response.status).toBe(200);
     expect(response.data).toHaveProperty("data");
@@ -78,7 +78,7 @@ describe("Staff/Persons Module", () => {
     const pendingEmail = "pending.staff@itm.kmutnb.ac.th";
     await api.persons.post({ email: pendingEmail });
 
-    const response = await api.persons.get();
+    const response = await api.persons.get({ query: {} });
 
     expect(response.status).toBe(200);
     expect(response.data).toHaveProperty("data");
@@ -243,7 +243,7 @@ describe("Staff/Persons Module", () => {
 
     it("should handle database connection errors gracefully", async () => {
       // This test simulates database connection issues
-      const response = await api.persons.get();
+      const response = await api.persons.get({ query: {} });
 
       // Should still return a response
       expect(response.status).toBe(200);
@@ -255,7 +255,7 @@ describe("Staff/Persons Module", () => {
       // Reset database to test empty state
       await mockSetup.resetDatabase();
 
-      const response = await api.persons.get();
+      const response = await api.persons.get({ query: {} });
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");

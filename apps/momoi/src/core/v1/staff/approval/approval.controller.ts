@@ -26,7 +26,7 @@ export const ApprovalController = new Elysia({
   .get("/", async ({ user: { staff_id }, query, status }) => {
     if (!staff_id) return { count: 0, totalPages: 0, data: [] };
 
-    const { skip = 1, take = 10 } = query as { skip?: number, take?: number };
+    const { skip = 1, take = 10 } = query as { skip?: number, take?: number } || {};
     const result = await ApprovalService.getApprovals(staff_id, { skip, take });
 
     return status(200, {
@@ -35,13 +35,13 @@ export const ApprovalController = new Elysia({
     });
   }, {
     description: "Get pending approvals for the staff",
-    query: t.Object({
+    query: t.Optional(t.Object({
       skip: t.Optional(t.Number({ minimum: 1, default: 1 })),
       take: t.Optional(t.Number({ minimum: 1, maximum: 100, default: 10 })),
-    }),
+    })),
   })
   .get("/extends", async ({ query, status }) => {
-    const { skip = 1, take = 10 } = query as { skip?: number, take?: number };
+    const { skip = 1, take = 10 } = query as { skip?: number, take?: number } || {};
     const result = await ApprovalService.getExtendsRequests({ skip, take });
     return status(200, {
       message: "Get pending extension requests",
@@ -49,17 +49,17 @@ export const ApprovalController = new Elysia({
     });
   }, {
     description: "Get pending extension requests",
-    query: t.Object({
+    query: t.Optional(t.Object({
       skip: t.Optional(t.Number({ minimum: 1, default: 1 })),
       take: t.Optional(t.Number({ minimum: 1, maximum: 100, default: 10 })),
-    }),
+    })),
   })
   .post("/approve", async ({ user: { staff_id }, body, status }) => {
     if (!staff_id) return status(403, { message: "Forbidden" });
     const { request_id } = body;
 
     const [err, approval] = await create_callback<
-      BadRequestError, ReturnType<typeof ApprovalService.approveRequest>
+      BadRequestError, Awaited<ReturnType<typeof ApprovalService.approveRequest>>
     >(
       () => ApprovalService.approveRequest({ request_id }, staff_id)
     );
@@ -85,7 +85,7 @@ export const ApprovalController = new Elysia({
     const { request_id } = body;
 
     const [err, approval] = await create_callback<
-      BadRequestError, ReturnType<typeof ApprovalService.approveExtendsRequest>
+      BadRequestError, Awaited<ReturnType<typeof ApprovalService.approveExtendsRequest>>
     >(
       () => ApprovalService.approveExtendsRequest({ request_id })
     );
@@ -111,7 +111,7 @@ export const ApprovalController = new Elysia({
     const { request_id, reason } = body;
 
     const [err, rejection] = await create_callback<
-      BadRequestError, ReturnType<typeof ApprovalService.rejectRequest>
+      BadRequestError, Awaited<ReturnType<typeof ApprovalService.rejectRequest>>
     >(
       () => ApprovalService.rejectRequest({ request_id, reason }, staff_id)
     );
@@ -137,7 +137,7 @@ export const ApprovalController = new Elysia({
     const { request_id, reason } = body;
 
     const [err, rejection] = await create_callback<
-      BadRequestError, ReturnType<typeof ApprovalService.rejectExtendsRequest>
+      BadRequestError, Awaited<ReturnType<typeof ApprovalService.rejectExtendsRequest>>
     >(
       () => ApprovalService.rejectExtendsRequest({ request_id, reason })
     );
@@ -164,7 +164,7 @@ export const ApprovalController = new Elysia({
     const { request_id, cpus, memory, disk } = body;
 
     const [err, updatedRequest] = await create_callback<
-      BadRequestError, ReturnType<typeof ApprovalService.editRequest>
+      BadRequestError, Awaited<ReturnType<typeof ApprovalService.editRequest>>
     >(
       () => ApprovalService.editRequest({ request_id, cpus, memory, disk }, staff_id)
     );
