@@ -1,16 +1,27 @@
-name: Momoi CI
+name: Momoi CI Build and Push Docker Image
 
 on:
   push:
     branches: [ main, development ]
     paths:
-      - 'apps/momoi/**/*.ts'
+      - 'apps/momoi/**'
+      - 'docker/momoi.dockerfile'
       - '.github/**/*.yml'
       - '.github/**/*.yaml'
-      - 'packages/database/**/*.prisma'
-      - 'packages/database/**/*.ts'
+      - 'packages/database/**'
   pull_request:
     branches: [ main, development ]
+    paths:
+      - 'apps/momoi/**'
+      - 'docker/momoi.dockerfile'
+      - '.github/**/*.yml'
+      - '.github/**/*.yaml'
+      - 'packages/database/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/momoi
 
 jobs:
   test:
@@ -54,3 +65,52 @@ jobs:
           NODE_ENV: test
         working-directory: apps/momoi
         run: bun test --bail
+
+  build-docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/momoi.dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+  
