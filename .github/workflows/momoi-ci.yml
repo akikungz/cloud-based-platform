@@ -44,14 +44,39 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
-      - name: Cache node_modules
+      - name: Cache Bun global store
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-bun-modules-${{ hashFiles('bun.lock') }}
+          path: ~/.bun/install/global
+          key: ${{ runner.os }}-bun-global-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-modules-
+            ${{ runner.os }}-bun-global-
+
+      - name: Cache node_modules (workspace root)
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-bun-modules-root-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-modules-root-
+
+      - name: Cache node_modules (apps/momoi)
+        uses: actions/cache@v4
+        with:
+          path: apps/momoi/node_modules
+          key: ${{ runner.os }}-bun-modules-momoi-${{ hashFiles('apps/momoi/package.json') }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-modules-momoi-${{ hashFiles('apps/momoi/package.json') }}-
+            ${{ runner.os }}-bun-modules-momoi-
+
+      - name: Cache Prisma client
+        uses: actions/cache@v4
+        with:
+          path: packages/database/node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('packages/database/schema.prisma') }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-${{ hashFiles('packages/database/schema.prisma') }}-
+            ${{ runner.os }}-prisma-
 
       - name: Install dependencies (workspace root)
         run: bun install --frozen-lockfile
@@ -107,8 +132,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=gha,scope=momoi
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: |
+            type=gha,mode=max,scope=momoi
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
           platforms: linux/amd64,linux/arm64
 
       - name: Image digest
