@@ -5,11 +5,11 @@ import { momoi_client } from "@midori/libs/momoi";
 interface NextSemester {
   id: number;
   name: string;
-  start_at: string;
-  end_at: string;
+  start_at: Date;
+  end_at: Date;
   active: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export function useNextSemester() {

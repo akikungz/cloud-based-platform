@@ -12,20 +12,20 @@ interface InstanceRequest {
   title: string;
   type: string;
   state: string;
-  reason?: string;
+  reason: string | null;
   hostname: string;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface ExtensionRequest {
   id: number;
   title: string;
   state: string;
-  reason?: string;
+  reason: string | null;
   instance_id: number;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface RequestManagerProps {
@@ -66,11 +66,11 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
       ]);
 
       if (requestsResult.error) {
-        throw new Error(requestsResult.error.message || 'Failed to fetch requests');
+        throw new Error(requestsResult.error.value.message || 'Failed to fetch requests');
       }
 
       if (instancesResult.error) {
-        throw new Error(instancesResult.error.message || 'Failed to fetch instances');
+        throw new Error(instancesResult.error.value.message || 'Failed to fetch instances');
       }
 
       const requestsData = requestsResult.data?.data || requestsResult.data;

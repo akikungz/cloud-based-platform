@@ -12,6 +12,16 @@ interface Course {
 	id: number;
 	course_id: string;
 	course_title: string;
+	main_staff: number;
+	assistant_staff_1: number | null;
+	assistant_staff_2: number | null;
+	assistant_staff_3: number | null;
+	created_at: Date;
+	updated_at: Date;
+	_count?: {
+		instance_request: number;
+		instance: number;
+	};
 }
 
 export default function ApprovalsPage() {
@@ -33,7 +43,7 @@ export default function ApprovalsPage() {
 		try {
 			const result = await momoi_client.api.v1.staff.course["my-courses"].get();
 			if (result.error) {
-				console.error("Failed to fetch courses:", result.error.message);
+				console.error("Failed to fetch courses:", result.error.value.message);
 				return;
 			}
 			setCourses(result.data?.data || []);

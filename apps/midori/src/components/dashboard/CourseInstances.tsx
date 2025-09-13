@@ -17,10 +17,10 @@ interface CourseInstance {
   memory: number;
   disk: number;
   ip_address: string | { ip: string } | null;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
   user: {
-    id: number;
+    id: string;
     email: string;
     name: string;
   };
@@ -43,12 +43,12 @@ export function CourseInstances({ limit = 10 }: CourseInstancesProps) {
       try {
         const result = await momoi_client.api.v1.staff.instances.get({
           query: {
-            take: limit.toString()
+            take: limit
           }
         });
 
         if (result.error) {
-          setError(result.error.message || 'Failed to fetch instances');
+          setError(result.error.value.message || 'Failed to fetch instances');
         } else if (result.data) {
           const instancesData = result.data?.data?.instances || result.data?.data || [];
           // Filter for course instances (instances that have a course assigned)

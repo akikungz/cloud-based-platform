@@ -42,12 +42,16 @@ export function StaffApprovalManager() {
     setError(null);
     try {
       const [approvalsResult, extensionsResult] = await Promise.all([
-        momoi_client.api.v1.staff.approval.get({ skip: 1, take: 50 }),
-        momoi_client.api.v1.staff.approval.extends.get({ skip: 1, take: 50 })
+        momoi_client.api.v1.staff.approval.get({
+          query: {}
+        }),
+        momoi_client.api.v1.staff.approval.extends.get({
+          query: {}
+        })
       ]);
       
-      if (approvalsResult.error) throw new Error(approvalsResult.error.message || 'Failed to fetch approvals');
-      if (extensionsResult.error) throw new Error(extensionsResult.error.message || 'Failed to fetch extensions');
+      if (approvalsResult.error) throw new Error(approvalsResult.error.value.message || 'Failed to fetch approvals');
+      if (extensionsResult.error) throw new Error(extensionsResult.error.value.message || 'Failed to fetch extensions');
       
       // Handle the API response structure: { message: string, data: T }
       const approvalsData = approvalsResult.data?.data || approvalsResult.data;
@@ -66,7 +70,7 @@ export function StaffApprovalManager() {
     try {
       const result = await momoi_client.api.v1.staff.approval.approve.post({ request_id: requestId });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to approve request');
+        throw new Error(result.error.value.message || 'Failed to approve request');
       }
       await fetchData(); // Refresh the list
     } catch (err) {
@@ -78,7 +82,7 @@ export function StaffApprovalManager() {
     try {
       const result = await momoi_client.api.v1.staff.approval.reject.post({ request_id: requestId, reason });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to reject request');
+        throw new Error(result.error.value.message || 'Failed to reject request');
       }
       await fetchData(); // Refresh the list
     } catch (err) {
@@ -90,7 +94,7 @@ export function StaffApprovalManager() {
     try {
       const result = await momoi_client.api.v1.staff.approval.extends.approve.post({ request_id: requestId });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to approve extension');
+        throw new Error(result.error.value.message || 'Failed to approve extension');
       }
       await fetchData(); // Refresh the list
     } catch (err) {
@@ -102,7 +106,7 @@ export function StaffApprovalManager() {
     try {
       const result = await momoi_client.api.v1.staff.approval.extends.reject.post({ request_id: requestId, reason });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to reject extension');
+        throw new Error(result.error.value.message || 'Failed to reject extension');
       }
       await fetchData(); // Refresh the list
     } catch (err) {

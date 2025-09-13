@@ -12,8 +12,8 @@ interface Person {
   name?: string | null;
   role?: string;
   staff_id: number;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
   status: 'active' | 'pending';
 }
 
@@ -36,9 +36,11 @@ export default function StaffPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await momoi_client.api.v1.staff.persons.get();
+      const result = await momoi_client.api.v1.staff.persons.get({
+        query: {}
+      });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to fetch staff members');
+        throw new Error(result.error.value.message || 'Failed to fetch staff members');
       }
       // Handle the API response structure: { message: string, data: Person[] }
       const personsData = result.data?.data || result.data;
@@ -67,7 +69,7 @@ export default function StaffPage() {
     try {
       const result = await momoi_client.api.v1.staff.persons.post({ email: formData.email });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to create person');
+        throw new Error(result.error.value.message || 'Failed to create person');
       }
       setShowCreateForm(false);
       setFormData({ email: "" });
@@ -84,7 +86,7 @@ export default function StaffPage() {
     try {
       const result = await momoi_client.api.v1.staff.persons.delete({ email });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to delete person');
+        throw new Error(result.error.value.message || 'Failed to delete person');
       }
       fetchPersons();
     } catch (err) {

@@ -70,7 +70,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				throw new Error(result.error.message || "Failed to approve request");
+				throw new Error(result.error.value.message || "Failed to approve request");
 			}
 		} catch (error) {
 			console.error("Error approving request:", error);
@@ -112,7 +112,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				throw new Error(result.error.message || "Failed to reject request");
+				throw new Error(result.error.value.message || "Failed to reject request");
 			}
 		} catch (error) {
 			console.error("Error rejecting request:", error);
@@ -144,7 +144,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				throw new Error(result.error.message || "Failed to update request");
+				throw new Error(result.error.value.message || "Failed to update request");
 			}
 		} catch (error) {
 			console.error("Error updating request:", error);
@@ -175,7 +175,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 				// Trigger parent component refresh
 				onRequestUpdate?.();
 			} else {
-				throw new Error(result.error.message || "Failed to approve request");
+				throw new Error(result.error.value.message || "Failed to approve request");
 			}
 		} catch (error) {
 			console.error("Error approving request:", error);

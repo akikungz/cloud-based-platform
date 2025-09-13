@@ -11,11 +11,11 @@ interface Course {
   course_id: string;
   course_title: string;
   main_staff: number;
-  assistant_staff_1?: number;
-  assistant_staff_2?: number;
-  assistant_staff_3?: number;
-  created_at: string;
-  updated_at: string;
+  assistant_staff_1: number | null;
+  assistant_staff_2: number | null;
+  assistant_staff_3: number | null;
+  created_at: Date;
+  updated_at: Date;
   _count?: {
     instance_request: number;
     instance: number;
@@ -32,12 +32,13 @@ interface CreateCourseData {
 }
 
 interface StaffMember {
-  id: number;
+  id: string | null;
   email: string;
-  name: string;
+  name: string | null;
   staff_id: number;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
+  status: "active" | "pending";
 }
 
 export default function CoursesPage() {
@@ -57,9 +58,11 @@ export default function CoursesPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await momoi_client.api.v1.staff.course.get();
+      const result = await momoi_client.api.v1.staff.course.get({
+        query: {}
+      });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to fetch courses');
+        throw new Error(result.error.value.message || 'Failed to fetch courses');
       }
       setCourses(result.data?.data || []);
     } catch (err) {
@@ -83,7 +86,7 @@ export default function CoursesPage() {
         query: { q: query }
       });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to search courses');
+        throw new Error(result.error.value.message || 'Failed to search courses');
       }
       setCourses(result.data?.data || []);
     } catch (err) {
@@ -97,9 +100,11 @@ export default function CoursesPage() {
   const fetchStaffMembers = async () => {
     setStaffLoading(true);
     try {
-      const result = await momoi_client.api.v1.staff.persons.get();
+      const result = await momoi_client.api.v1.staff.persons.get({
+        query: {}
+      });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to fetch staff members');
+        throw new Error(result.error.value.message || 'Failed to fetch staff members');
       }
       setStaffMembers(result.data?.data || []);
     } catch (err) {
@@ -116,7 +121,7 @@ export default function CoursesPage() {
     try {
       const result = await momoi_client.api.v1.staff.course.post(courseData);
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to create course');
+        throw new Error(result.error.value.message || 'Failed to create course');
       }
       setSuccessMessage('Course created successfully');
       fetchCourses();
@@ -130,7 +135,7 @@ export default function CoursesPage() {
     try {
       const result = await momoi_client.api.v1.staff.course({ id: courseId }).put(courseData);
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to update course');
+        throw new Error(result.error.value.message || 'Failed to update course');
       }
       setSuccessMessage('Course updated successfully');
       setShowEditForm(false);
@@ -151,7 +156,7 @@ export default function CoursesPage() {
     try {
       const result = await momoi_client.api.v1.staff.course({ id: courseId }).delete();
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to delete course');
+        throw new Error(result.error.value.message || 'Failed to delete course');
       }
       setSuccessMessage('Course deleted successfully');
       fetchCourses();
@@ -614,8 +619,8 @@ function EditCourseFormInline({
     course_id: course.course_id,
     course_title: course.course_title,
     main_staff: course.main_staff,
-    assistant_staff_1: course.assistant_staff_1,
-    assistant_staff_2: course.assistant_staff_2,
+    assistant_staff_1: course.assistant_staff_1 ?? undefined,
+    assistant_staff_2: course.assistant_staff_2 ?? undefined,
   });
   const [loading, setLoading] = useState(false);
 
@@ -816,8 +821,8 @@ function EditCourseForm({
     course_id: course.course_id,
     course_title: course.course_title,
     main_staff: course.main_staff,
-    assistant_staff_1: course.assistant_staff_1,
-    assistant_staff_2: course.assistant_staff_2,
+    assistant_staff_1: course.assistant_staff_1 ?? undefined,
+    assistant_staff_2: course.assistant_staff_2 ?? undefined,
   });
   const [loading, setLoading] = useState(false);
 

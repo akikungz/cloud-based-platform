@@ -20,16 +20,16 @@ interface Course {
   course_id: string;
   course_title: string;
   main_staff: number;
-  assistant_staff_1?: number;
-  assistant_staff_2?: number;
-  assistant_staff_3?: number;
+  assistant_staff_1: number | null;
+  assistant_staff_2: number | null;
+  assistant_staff_3: number | null;
 }
 
 interface Semester {
   id: number;
   name: string;
-  start_at: string;
-  end_at: string;
+  start_at: Date;
+  end_at: Date;
   active: boolean;
 }
 
@@ -88,9 +88,9 @@ export function StaffInstanceCreationForm({ onInstanceCreated }: StaffInstanceCr
         momoi_client.api.v1.staff.instances.semesters.get()
       ]);
 
-      if (templatesResult.error) throw new Error(templatesResult.error.message || 'Failed to fetch templates');
-      if (coursesResult.error) throw new Error(coursesResult.error.message || 'Failed to fetch courses');
-      if (semestersResult.error) throw new Error(semestersResult.error.message || 'Failed to fetch semesters');
+      if (templatesResult.error) throw new Error(templatesResult.error.value.message || 'Failed to fetch templates');
+      if (coursesResult.error) throw new Error(coursesResult.error.value.message || 'Failed to fetch courses');
+      if (semestersResult.error) throw new Error(semestersResult.error.value.message || 'Failed to fetch semesters');
 
       setTemplates(templatesResult.data?.data || []);
       setCourses(coursesResult.data?.data || []);
@@ -168,7 +168,7 @@ export function StaffInstanceCreationForm({ onInstanceCreated }: StaffInstanceCr
       });
       
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to create instance');
+        throw new Error(result.error.value.message || 'Failed to create instance');
       }
 
       setSuccess("Instance created successfully! VM creation is in progress.");

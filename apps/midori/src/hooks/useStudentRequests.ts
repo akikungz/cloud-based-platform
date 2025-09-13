@@ -17,8 +17,23 @@ interface Instance {
   id: number;
   hostname: string;
   title: string;
+  description: string;
   status: string;
-  course?: string;
+  cpus: number;
+  memory: number;
+  disk: number;
+  created_at: Date;
+  ip_address: {
+    ip: string;
+    network: {
+      name: string;
+    };
+  } | null;
+  course: {
+    course_id: string;
+    course_title: string;
+  };
+  semester: string;
 }
 
 interface RequestFormData {
@@ -83,13 +98,13 @@ export function useStudentRequests() {
       
       // Handle API errors
       if (coursesResult.error) {
-        throw new Error(extractErrorMessage(coursesResult.error, 'Failed to fetch courses'));
+        throw new Error(coursesResult.error.value.message || 'Failed to fetch courses');
       }
       if (templatesResult.error) {
-        throw new Error(extractErrorMessage(templatesResult.error, 'Failed to fetch templates'));
+        throw new Error(templatesResult.error.value.message || 'Failed to fetch templates');
       }
       if (instancesResult.error) {
-        throw new Error(extractErrorMessage(instancesResult.error, 'Failed to fetch instances'));
+        throw new Error(instancesResult.error.value.message || 'Failed to fetch instances');
       }
       
       // Extract data from API responses
@@ -119,7 +134,7 @@ export function useStudentRequests() {
       const result = await momoi_client.api.v1.student.requests.post(data);
       
       if (result.error) {
-        throw new Error(extractErrorMessage(result.error, 'Failed to create request'));
+        throw new Error(result.error.value.message || 'Failed to create request');
       }
 
       setSuccess('Request created successfully!');
@@ -144,7 +159,7 @@ export function useStudentRequests() {
       const result = await momoi_client.api.v1.student.requests.extends.post(data);
       
       if (result.error) {
-        throw new Error(extractErrorMessage(result.error, 'Failed to create extension request'));
+        throw new Error(result.error.value.message || 'Failed to create extension request');
       }
 
       setSuccess('Extension request created successfully!');

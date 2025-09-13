@@ -18,7 +18,7 @@ interface Instance {
 	cpus: number;
 	memory: number;
 	disk: number;
-	created_at: string;
+	created_at: Date;
 	ip_address?: {
 		ip: string;
 		network: {
@@ -45,7 +45,7 @@ export default function StudentInstancesPage() {
 				const result = await momoi_client.api.v1.student.instances.get();
 
 				if (result.error) {
-					setError(result.error.message || 'Failed to fetch instances');
+					setError(result.error.value.message || 'Failed to fetch instances');
 				} else if (result.data) {
 					// Handle the API response structure: { message: string, data: T }
 					const instancesData = result.data?.data || result.data;
@@ -73,7 +73,7 @@ export default function StudentInstancesPage() {
 			const result = await momoi_client.api.v1.student.instances({ id: instanceId }).delete();
 
 			if (result.error) {
-				alert(`Failed to delete instance: ${result.error.message}`);
+				alert(`Failed to delete instance: ${result.error.value.message}`);
 			} else {
 				// Remove the instance from the list
 				setInstances(prev => prev.filter(instance => instance.id !== instanceId));

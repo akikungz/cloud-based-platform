@@ -99,7 +99,7 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 
 				setRequests(filteredRequests);
 			} else {
-				setError(`Failed to fetch requests: ${result.error.message || 'Unknown error'}`);
+				setError(`Failed to fetch requests: ${result.error.value.message || 'Unknown error'}`);
 				setRequests([]);
 			}
 		} catch (err) {

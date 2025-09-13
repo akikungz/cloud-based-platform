@@ -9,11 +9,11 @@ import { formatDate } from "@midori/utils/format";
 interface Semester {
   id: number;
   name: string;
-  start_at: string | Date;
-  end_at: string | Date;
+  start_at: Date;
+  end_at: Date;
   active: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface CreateSemesterForm {
@@ -44,15 +44,17 @@ export default function SemestersPage() {
     setError(null);
     try {
       const [semestersResult, activeResult] = await Promise.all([
-        momoi_client.api.v1.staff.semester.get(),
+        momoi_client.api.v1.staff.semester.get({
+          query: {}
+        }),
         momoi_client.api.v1.staff.semester.active.get(),
       ]);
 
       if (semestersResult.error) {
-        throw new Error(typeof semestersResult.error === 'string' ? semestersResult.error : semestersResult.error.message || 'Failed to fetch semesters');
+        throw new Error(semestersResult.error.value.message || 'Failed to fetch semesters');
       }
       if (activeResult.error) {
-        throw new Error(typeof activeResult.error === 'string' ? activeResult.error : activeResult.error.message || 'Failed to fetch active semester');
+        throw new Error(activeResult.error.value.message || 'Failed to fetch active semester');
       }
 
       // Handle the API response structure: { message: string, data: Semester[] }
@@ -84,7 +86,7 @@ export default function SemestersPage() {
 
       const result = await momoi_client.api.v1.staff.semester.post(semesterData);
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to create semester');
+        throw new Error(result.error.value.message || 'Failed to create semester');
       }
       setShowCreateForm(false);
       setFormData({ name: "", start_at: "", end_at: "", active: false });
@@ -109,7 +111,7 @@ export default function SemestersPage() {
 
       const result = await momoi_client.api.v1.staff.semester({ id: editingSemester.id }).put(updateData);
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to update semester');
+        throw new Error(result.error.value.message || 'Failed to update semester');
       }
       setEditingSemester(null);
       setFormData({ name: "", start_at: "", end_at: "", active: false });
@@ -124,7 +126,7 @@ export default function SemestersPage() {
     try {
       const result = await momoi_client.api.v1.staff.semester({ id: semesterId }).activate.post();
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to activate semester');
+        throw new Error(result.error.value.message || 'Failed to activate semester');
       }
       fetchSemesters();
     } catch (err) {
@@ -137,9 +139,9 @@ export default function SemestersPage() {
     if (!confirm("Are you sure you want to delete this semester?")) return;
 
     try {
-      const result = await momoi_client.api.v1.staff.semester.id.delete({ params: { id: semesterId } });
+      const result = await momoi_client.api.v1.staff.semester({ id: semesterId }).delete();
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to delete semester');
+        throw new Error(result.error.value.message || 'Failed to delete semester');
       }
       fetchSemesters();
     } catch (err) {

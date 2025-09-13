@@ -18,9 +18,18 @@ interface Instance {
 	memory: number;
 	disk: number;
 	ip_address?: string;
-	semester?: string;
-	created_at: string;
-	updated_at: string;
+	semester?: {
+		active: boolean;
+		name: string;
+		id: number;
+		created_at: Date;
+		updated_at: Date;
+		deleted_at: Date | null;
+		start_at: Date;
+		end_at: Date;
+	} | null;
+	created_at: Date;
+	updated_at: Date;
 }
 
 export default function InstanceDetailsPage() {
@@ -43,10 +52,10 @@ export default function InstanceDetailsPage() {
 				const result = await momoi_client.api.v1.student.instances({ id: instanceId }).get();
 				
 				if (result.error) {
-					setError(result.error.message || 'Failed to fetch instance');
+					setError(result.error.value.message || 'Failed to fetch instance');
 				} else if (result.data) {
 					const instanceData = result.data?.data || result.data;
-					setInstance(instanceData);
+					setInstance(instanceData as Instance);
 				} else {
 					setError('No data received');
 				}
@@ -70,7 +79,7 @@ export default function InstanceDetailsPage() {
 			const result = await momoi_client.api.v1.student.instances({ id: instanceId }).delete();
 			
 			if (result.error) {
-				alert(`Failed to delete instance: ${result.error.message}`);
+				alert(`Failed to delete instance: ${result.error.value.message}`);
 			} else {
 				alert('Instance deleted successfully');
 				// Redirect to instances list
@@ -250,7 +259,7 @@ export default function InstanceDetailsPage() {
 											Semester
 										</Typography>
 										<Typography variant="body2">
-											{instance.semester || 'Not assigned'}
+											{instance.semester?.name || 'Not assigned'}
 										</Typography>
 									</div>
 									

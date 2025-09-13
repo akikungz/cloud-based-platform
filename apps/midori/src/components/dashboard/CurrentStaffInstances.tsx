@@ -18,11 +18,11 @@ interface Instance {
   memory: number;
   disk: number;
   ip_address: string | { ip: string } | null;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
   type?: string; // 'course' or 'project'
   user: {
-    id: number;
+    id: string;
     email: string;
     name: string;
   };
@@ -48,12 +48,12 @@ export function CurrentStaffInstances({ limit = 10 }: CurrentStaffInstancesProps
       try {
         const result = await momoi_client.api.v1.staff.instances.get({
           query: {
-            take: limit.toString()
+            take: limit
           }
         });
 
         if (result.error) {
-          setError(result.error.message || 'Failed to fetch instances');
+          setError(result.error.value.message || 'Failed to fetch instances');
         } else if (result.data) {
           const instancesData = result.data?.data?.instances || result.data?.data || [];
           const allInstances = Array.isArray(instancesData) ? instancesData : [];

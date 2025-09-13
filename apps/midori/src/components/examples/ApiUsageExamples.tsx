@@ -14,9 +14,11 @@ export function ApiUsageExamples() {
     setLoading(true);
     setError(null);
     try {
-      const result = await momoi_client.api.v1.staff.approval.get({ skip: 1, take: 10 });
+      const result = await momoi_client.api.v1.staff.approval.get({
+        query: {}
+      });
       if (result.error) {
-        throw new Error(result.error.message || 'API request failed');
+        throw new Error(result.error.value.message || 'API request failed');
       }
       setData(result.data);
     } catch (err) {
@@ -33,7 +35,7 @@ export function ApiUsageExamples() {
     try {
       const result = await momoi_client.api.v1.student.instances.get();
       if (result.error) {
-        throw new Error(result.error.message || 'API request failed');
+        throw new Error(result.error.value.message || 'API request failed');
       }
       setData(result.data);
     } catch (err) {
@@ -54,9 +56,9 @@ export function ApiUsageExamples() {
         momoi_client.api.v1.autocomplete.template.get(),
       ]);
       
-      if (coursesResult.error) throw new Error(coursesResult.error.message || 'Failed to fetch courses');
-      if (staffResult.error) throw new Error(staffResult.error.message || 'Failed to fetch staff');
-      if (templatesResult.error) throw new Error(templatesResult.error.message || 'Failed to fetch templates');
+      if (coursesResult.error) throw new Error(coursesResult.error.value.message || 'Failed to fetch courses');
+      if (staffResult.error) throw new Error(staffResult.error.value.message || 'Failed to fetch staff');
+      if (templatesResult.error) throw new Error(templatesResult.error.value.message || 'Failed to fetch templates');
       
       // Handle the API response structure: { message: string, data: T }
       const coursesData = coursesResult.data?.data || coursesResult.data;
@@ -83,7 +85,7 @@ export function ApiUsageExamples() {
       const result = await momoi_client.api.v1.student.requests.post({
         title: "New VM Request",
         description: "Request for a new virtual machine",
-        type: "CREATE",
+        type: "course",
         hostname: "student-vm-001",
         course_id: 1,
         template_id: 1,
@@ -92,7 +94,7 @@ export function ApiUsageExamples() {
         disk: 16,
       });
       if (result.error) {
-        throw new Error(result.error.message || 'API request failed');
+        throw new Error(result.error.value.message || 'API request failed');
       }
       setData(result.data);
     } catch (err) {
@@ -232,9 +234,11 @@ export function StaffApprovalsManager() {
 
   const fetchApprovals = () => {
     execute(async () => {
-      const result = await momoi_client.api.v1.staff.approval.get({ skip: 1, take: 10 });
+      const result = await momoi_client.api.v1.staff.approval.get({
+        query: {}
+      });
       if (result.error) {
-        throw new Error(result.error.message || 'API request failed');
+        throw new Error(result.error.value.message || 'API request failed');
       }
       if (!result.data) {
         throw new Error('No data received from API');
@@ -247,7 +251,7 @@ export function StaffApprovalsManager() {
     try {
       const result = await momoi_client.api.v1.staff.approval.approve.post({ request_id: requestId });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to approve request');
+        throw new Error(result.error.value.message || 'Failed to approve request');
       }
       // Refresh the list after approval
       fetchApprovals();
@@ -260,7 +264,7 @@ export function StaffApprovalsManager() {
     try {
       const result = await momoi_client.api.v1.staff.approval.reject.post({ request_id: requestId, reason });
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to reject request');
+        throw new Error(result.error.value.message || 'Failed to reject request');
       }
       // Refresh the list after rejection
       fetchApprovals();

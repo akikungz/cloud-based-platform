@@ -40,7 +40,9 @@ export default function StaffDashboard() {
 				// Fetch instances stats
 				momoi_client.api.v1.staff.instances.stats.get(),
 				// Fetch courses data
-				momoi_client.api.v1.staff.course.get()
+				momoi_client.api.v1.staff.course.get({
+					query: {}
+				})
 			]);
 
 				let totalRequests = 0;
@@ -69,7 +71,7 @@ export default function StaffDashboard() {
 
 			// Fetch instances data to calculate unique students and courses
 			const instancesListResult = await momoi_client.api.v1.staff.instances.get({
-				query: { skip: 0, take: 1000 }
+				query: {}
 			});
 
 			if (!instancesListResult.error) {

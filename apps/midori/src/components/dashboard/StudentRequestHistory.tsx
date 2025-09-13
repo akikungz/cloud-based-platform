@@ -17,20 +17,20 @@ interface InstanceRequest {
 	title: string;
 	type: string;
 	state: string;
-	reason?: string;
-	hostname?: string;
-	created_at: string;
-	updated_at: string;
+	reason: string | null;
+	hostname: string;
+	created_at: Date;
+	updated_at: Date;
 }
 
 interface ExtensionRequest {
 	id: number;
 	title: string;
 	state: string;
-	reason?: string;
+	reason: string | null;
 	instance_id: number;
-	created_at: string;
-	updated_at: string;
+	created_at: Date;
+	updated_at: Date;
 }
 
 export function StudentRequestHistory({ maxItems = 5, showOnlyRecent = true }: RequestHistoryProps) {
@@ -88,7 +88,7 @@ export function StudentRequestHistory({ maxItems = 5, showOnlyRecent = true }: R
 			const result = await momoi_client.api.v1.student.requests.get();
 			
 			if (result.error) {
-				setError(result.error.message || 'Failed to fetch request history');
+				setError(result.error.value.message || 'Failed to fetch request history');
 			} else if (result.data) {
 				const requestsData = result.data?.data || result.data;
 				let allRequests = requestsData.requests || [];
