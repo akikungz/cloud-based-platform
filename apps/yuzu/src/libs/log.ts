@@ -6,13 +6,13 @@ import { env } from "./env";
 // In test environment, use simple console logging
 export const init_transport = (env.NODE_ENV === "test" || !env.NODE_ENV)
   ? undefined // Use default console transport
-  : env.LOG_TARGET === "loki"
+  : (env.LOG_TARGET === "loki" && env.LOKI_URL)
     ? transport<LokiOptions>({
       target: "pino-loki",
       options: {
         host: env.LOKI_URL || "http://localhost:3100",
         labels: {
-          app: "Momoi",
+          app: "Yuzu",
         },
         batching: true,
         interval: 5,

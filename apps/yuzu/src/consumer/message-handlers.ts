@@ -1,6 +1,7 @@
 import { ConsumeMessage } from 'amqplib';
 import { z } from 'zod';
 import { db } from '../libs/db';
+import { logger } from '../libs/log';
 import type { instance, ip_address, network, instance_request, User, instance_course, instance_template, semester } from 'database/generated/prisma-client';
 
 // Message schemas for different types of VM operations
@@ -129,7 +130,7 @@ export class VMMessageHandler implements MessageHandler {
       throw new Error(`Instance creation validation failed: ${errors.join(', ')}`);
     }
 
-    console.log('Instance creation data validation passed');
+    logger.info('Instance creation data validation passed');
   }
 
   /**
@@ -162,11 +163,15 @@ export class VMMessageHandler implements MessageHandler {
       throw new Error(`Created instance validation failed: ${errors.join(', ')}`);
     }
 
-    console.log(`Instance ${instance.id} validation passed - all required fields have values`);
+    logger.info({ instanceId: instance.id }, 'Instance validation passed - all required fields have values');
   }
 
   async handle(message: VMMessage): Promise<void> {
-    console.log(`Processing message: ${message.type}`, { requestId: message.requestId, userId: message.userId });
+    logger.info({
+      messageType: message.type,
+      requestId: message.requestId,
+      userId: message.userId
+    }, 'Processing message');
 
     try {
       switch (message.type) {
@@ -183,16 +188,19 @@ export class VMMessageHandler implements MessageHandler {
           await this.handleVMStatus(message);
           break;
         default:
-          console.warn(`Unknown message type: ${(message as any).type}`);
+          logger.warn({ messageType: (message as any).type }, 'Unknown message type');
       }
     } catch (error) {
-      console.error(`Error processing message ${message.type}:`, error);
+      logger.error({ error, messageType: message.type }, 'Error processing message');
       throw error;
     }
   }
 
   private async handleVMCreate(message: VMCreateMessage): Promise<void> {
-    console.log(`Creating VM ${message.data.vmid} from template ${message.data.templateId}`);
+    logger.info({
+      vmid: message.data.vmid,
+      templateId: message.data.templateId
+    }, 'Creating VM from template');
 
     let instance: any = null;
 
@@ -236,7 +244,10 @@ export class VMMessageHandler implements MessageHandler {
         throw new Error("No active semester found. Please ensure there is an active semester configured in the system.");
       }
 
-      console.log(`Using active semester: ${activeSemester.name} (ID: ${activeSemester.id})`);
+      logger.info({
+        semesterName: activeSemester.name,
+        semesterId: activeSemester.id
+      }, 'Using active semester');
 
       // Check if instance already exists
       const existingInstance = await db.instance.findFirst({
@@ -248,7 +259,7 @@ export class VMMessageHandler implements MessageHandler {
       });
 
       if (existingInstance) {
-        console.log(`Instance already exists for request ${requestId}`);
+        logger.info({ requestId }, 'Instance already exists for request');
         return;
       }
 
@@ -288,7 +299,7 @@ export class VMMessageHandler implements MessageHandler {
         }
       });
 
-      console.log(`Instance created in database with ID: ${instance.id}`);
+      logger.info({ instanceId: instance.id }, 'Instance created in database');
 
       // Validate that instance was created with all required fields
       this.validateCreatedInstance(instance);
@@ -297,7 +308,7 @@ export class VMMessageHandler implements MessageHandler {
       await this.createVMInPVE(message, request, instance);
 
     } catch (error) {
-      console.error(`Error creating VM ${message.data.vmid}:`, error);
+      logger.error({ error, vmid: message.data.vmid }, 'Error creating VM');
 
       // Update instance status to indicate failure
       try {
@@ -308,7 +319,7 @@ export class VMMessageHandler implements MessageHandler {
           });
         }
       } catch (updateError) {
-        console.error('Failed to update instance status after error:', updateError);
+        logger.error({ error: updateError }, 'Failed to update instance status after error');
       }
 
       throw error;
@@ -319,7 +330,7 @@ export class VMMessageHandler implements MessageHandler {
     const { qemu, task_status } = await import('../libs/pve');
 
     try {
-      console.log('Starting VM creation in PVE...');
+      logger.info('Starting VM creation in PVE...');
 
       // Find template details
       const template = await db.instance_template.findFirst({
@@ -331,10 +342,13 @@ export class VMMessageHandler implements MessageHandler {
       }
 
       // Use the node specified in the message (already validated in handleVMCreate)
-      console.log(`Using PVE node: ${message.data.node}`);
+      logger.info({ node: message.data.node }, 'Using PVE node');
 
       // Step 1: Clone from template
-      console.log(`Cloning VM from template ${template.vm_template_id} to ${message.data.vmid}`);
+      logger.info({
+        templateId: template.vm_template_id,
+        newVmid: message.data.vmid
+      }, 'Cloning VM from template');
       const cloneTask = await qemu.clone({
         node: template.vm_template_host,
         vmid: parseInt(template.vm_template_id),
@@ -344,14 +358,14 @@ export class VMMessageHandler implements MessageHandler {
         full: true // Full clone
       });
 
-      console.log(`Clone task started: ${cloneTask.data}`);
+      logger.info({ taskId: cloneTask.data }, 'Clone task started');
 
       // Wait for clone to complete (task runs on the template host node)
       await task_status(template.vm_template_host, cloneTask.data);
-      console.log('VM clone completed successfully');
+      logger.info('VM clone completed successfully');
 
       // Step 2: Assign IP address before VM configuration
-      console.log('Assigning IP address before VM configuration...');
+      logger.info('Assigning IP address before VM configuration...');
       const assignedIP = await this.assignIPAddress(instance);
 
       // Prepare network configuration
@@ -373,13 +387,15 @@ export class VMMessageHandler implements MessageHandler {
           // Configure IP address (ipconfig0) with assigned IP, subnet, and gateway
           networkConfig.ipconfig0 = `ip=${assignedIP.ip}/${this.getSubnetMask(networkInfo.network)},gw=${networkInfo.gateway}`;
 
-          console.log(`Network interface configured: ${networkConfig.net0}`);
-          console.log(`IP address configured: ${networkConfig.ipconfig0}`);
+          logger.info({
+            net0: networkConfig.net0,
+            ipconfig0: networkConfig.ipconfig0
+          }, 'Network configuration applied');
         } else {
-          console.warn(`Network with ID ${assignedIP.network_id} not found, using default network configuration`);
+          logger.warn({ networkId: assignedIP.network_id }, 'Network not found, using default configuration');
         }
       } else {
-        console.warn('No IP address assigned, VM will be created without network configuration');
+        logger.warn('No IP address assigned, VM will be created without network configuration');
       }
 
       // Check instance user
@@ -432,9 +448,9 @@ export class VMMessageHandler implements MessageHandler {
           vmid: instanceUser.vm_id,
           size: newDiskSize.pveResizeSize as any // Type assertion for PVE_Disk_Resize
         });
-        
+
         console.log(`Resize task started: ${resizeTask.data}`);
-        
+
         // Wait for resize to complete
         await task_status(instanceUser.pve_node, resizeTask.data);
         console.log('VM disk resized successfully');
@@ -1042,12 +1058,12 @@ export class VMMessageHandler implements MessageHandler {
         course: instanceData.course,
         template: instanceData.template
       };
-      
+
       await this.createVMInPVE(message, requestData, instance);
 
     } catch (error) {
       console.error(`Error creating staff VM ${message.data.vmid}:`, error);
-      
+
       // Update instance status to failed if it exists
       if (instance) {
         try {
@@ -1059,7 +1075,7 @@ export class VMMessageHandler implements MessageHandler {
           console.error('Failed to update instance status to failed:', updateError);
         }
       }
-      
+
       throw error;
     }
   }

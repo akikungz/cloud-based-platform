@@ -1,5 +1,6 @@
 import { env } from "@yuzu/libs/env";
 import { http_instance, replace_params } from "@yuzu/libs/http";
+import { logger } from "@yuzu/libs/log";
 import type {
 	PVE_API,
 	PVE_PATH,
@@ -21,23 +22,16 @@ export const pve_instance = http_instance.create({
 pve_instance.interceptors.response.use(
 	(response) => {
 		// Skip logging for task status requests to reduce noise
-		if(response.config.url?.includes("tasks")) return Promise.resolve(response);
+		if (response.config.url?.includes("tasks")) return Promise.resolve(response);
 
-		console.info(
-			JSON.stringify({
-				timestamp: new Date().toISOString(),
-				level: "info",
-				message: "PVE API request",
-				data: {
-					url: response.config.url,
-					method: response.config.method,
-					status: response.status,
-					bytes: response.headers["content-length"]
-						? parseInt(response.headers["content-length"])
-						: -1,
-				},
-			}),
-		);
+		logger.info({
+			url: response.config.url,
+			method: response.config.method,
+			status: response.status,
+			bytes: response.headers["content-length"]
+				? parseInt(response.headers["content-length"])
+				: -1,
+		}, "PVE API request");
 
 		return Promise.resolve(response);
 	},
@@ -135,7 +129,7 @@ export const instance = async <
 		if (error instanceof PVEAPIError) {
 			throw error;
 		}
-		
+
 		// Fallback for any other errors
 		throw ErrorHandler.handleError(error, context);
 	}

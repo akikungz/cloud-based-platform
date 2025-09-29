@@ -71,6 +71,7 @@ export type Env = z.infer<typeof envSchema>;
 
 export const parseEnv = envSchema.safeParse(process.env);
 if (!parseEnv.success) {
+	// Using console.error here is fine since this runs before the logger is initialized
 	console.error("Invalid environment variables:", parseEnv.error.message);
 	process.exit(1);
 }

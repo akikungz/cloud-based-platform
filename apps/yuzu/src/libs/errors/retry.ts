@@ -1,5 +1,6 @@
 import { YuzuError, ErrorSeverity } from './types';
 import { ErrorHandler } from './handler';
+import { logger } from '../log';
 
 /**
  * Retry configuration options
@@ -52,12 +53,12 @@ export class RetryHandler {
     for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
       try {
         const result = await operation();
-        
+
         // Log successful retry if this wasn't the first attempt
         if (attempt > 0) {
-          console.log(`✅ Operation succeeded on attempt ${attempt + 1}: ${context.operation}`);
+          logger.info({ operation: context.operation, attempt: attempt + 1 }, '✅ Operation succeeded on retry attempt');
         }
-        
+
         return result;
       } catch (error) {
         const yuzuError = ErrorHandler.handleError(error, {
@@ -74,23 +75,32 @@ export class RetryHandler {
 
         // Don't retry if error is not retryable
         if (!this.shouldRetry(yuzuError, retryConfig)) {
-          console.log(`❌ Error is not retryable: ${yuzuError.message}`);
+          logger.info({ operation: context.operation, error: yuzuError.message }, '❌ Error is not retryable');
           break;
         }
 
         // Calculate delay for next attempt
         const delay = this.calculateDelay(attempt, retryConfig);
-        
-        console.log(`🔄 Retrying operation in ${delay}ms (attempt ${attempt + 2}/${retryConfig.maxRetries + 1}): ${context.operation}`);
-        console.log(`   Error: ${yuzuError.message}`);
-        
+
+        logger.info({
+          operation: context.operation,
+          delay,
+          attempt: attempt + 2,
+          maxRetries: retryConfig.maxRetries + 1,
+          error: yuzuError.message
+        }, '🔄 Retrying operation after delay');
+
         await this.sleep(delay);
       }
     }
 
     // If we get here, all retries failed
     if (lastError) {
-      console.error(`💥 Operation failed after ${retryConfig.maxRetries + 1} attempts: ${context.operation}`);
+      logger.error({
+        operation: context.operation,
+        attempts: retryConfig.maxRetries + 1,
+        error: lastError.message
+      }, '💥 Operation failed after all retry attempts');
       throw lastError;
     }
 

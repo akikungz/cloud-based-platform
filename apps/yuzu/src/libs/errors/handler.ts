@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import { logger } from '../log';
 import {
   YuzuError,
   PVEAPIError,
@@ -47,7 +48,7 @@ export class ErrorHandler {
           errorContext
         );
       }
-      
+
       if (error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN') {
         return new NetworkError(
           `DNS resolution failed for ${error.config?.baseURL || 'PVE server'}`,
@@ -55,7 +56,7 @@ export class ErrorHandler {
           errorContext
         );
       }
-      
+
       if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
         return new NetworkError(
           `Request timeout to ${error.config?.baseURL || 'PVE server'}`,
@@ -63,7 +64,7 @@ export class ErrorHandler {
           errorContext
         );
       }
-      
+
       return new NetworkError(
         `Network error: ${error.message}`,
         error,
@@ -74,17 +75,17 @@ export class ErrorHandler {
     // HTTP response errors
     const statusCode = error.response.status;
     const responseData = error.response.data as any;
-    
+
     // Extract meaningful error message from PVE response
     let errorMessage = `HTTP ${statusCode}: ${error.response.statusText}`;
-    
+
     if (responseData) {
       if (typeof responseData === 'string') {
         errorMessage = responseData;
       } else if (responseData.errors) {
         // PVE API often returns errors in this format
-        const errors = Array.isArray(responseData.errors) 
-          ? responseData.errors 
+        const errors = Array.isArray(responseData.errors)
+          ? responseData.errors
           : [responseData.errors];
         errorMessage = errors.map((e: any) => e.message || e).join(', ');
       } else if (responseData.message) {
@@ -104,7 +105,7 @@ export class ErrorHandler {
           error.config?.method,
           { ...errorContext, originalMessage: errorMessage }
         );
-        
+
       case 403:
         return new PVEAPIError(
           `Permission denied: ${errorMessage}`,
@@ -113,7 +114,7 @@ export class ErrorHandler {
           error.config?.method,
           { ...errorContext, originalMessage: errorMessage }
         );
-        
+
       case 404:
         return new PVEAPIError(
           `Resource not found: ${errorMessage}`,
@@ -122,7 +123,7 @@ export class ErrorHandler {
           error.config?.method,
           { ...errorContext, originalMessage: errorMessage }
         );
-        
+
       case 409:
         return new PVEAPIError(
           `Resource conflict: ${errorMessage}`,
@@ -131,7 +132,7 @@ export class ErrorHandler {
           error.config?.method,
           { ...errorContext, originalMessage: errorMessage }
         );
-        
+
       case 422:
         return new PVEAPIError(
           `Validation error: ${errorMessage}`,
@@ -140,7 +141,7 @@ export class ErrorHandler {
           error.config?.method,
           { ...errorContext, originalMessage: errorMessage }
         );
-        
+
       case 429:
         return new PVEAPIError(
           `Rate limit exceeded: ${errorMessage}`,
@@ -149,7 +150,7 @@ export class ErrorHandler {
           error.config?.method,
           { ...errorContext, originalMessage: errorMessage }
         );
-        
+
       case 500:
       case 502:
       case 503:
@@ -161,7 +162,7 @@ export class ErrorHandler {
           error.config?.method,
           { ...errorContext, originalMessage: errorMessage }
         );
-        
+
       default:
         return new PVEAPIError(
           errorMessage,
@@ -293,16 +294,16 @@ export class ErrorHandler {
 
     switch (errorInfo.severity) {
       case ErrorSeverity.CRITICAL:
-        console.error('🚨 CRITICAL ERROR:', JSON.stringify(logData, null, 2));
+        logger.error(logData, '🚨 CRITICAL ERROR');
         break;
       case ErrorSeverity.HIGH:
-        console.error('🔴 HIGH SEVERITY ERROR:', JSON.stringify(logData, null, 2));
+        logger.error(logData, '🔴 HIGH SEVERITY ERROR');
         break;
       case ErrorSeverity.MEDIUM:
-        console.warn('🟡 MEDIUM SEVERITY ERROR:', JSON.stringify(logData, null, 2));
+        logger.warn(logData, '🟡 MEDIUM SEVERITY ERROR');
         break;
       case ErrorSeverity.LOW:
-        console.info('🔵 LOW SEVERITY ERROR:', JSON.stringify(logData, null, 2));
+        logger.info(logData, '🔵 LOW SEVERITY ERROR');
         break;
     }
   }

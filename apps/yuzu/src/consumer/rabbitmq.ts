@@ -1,5 +1,6 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { env } from '@yuzu/libs/env';
+import { logger } from '../libs/log';
 
 export interface RabbitMQConfig {
   url: string;
@@ -24,19 +25,19 @@ export class RabbitMQConsumer {
     try {
       this.connection = await amqp.connect(this.config.url);
       this.channel = await this.connection.createChannel();
-      
-      console.log('Connected to RabbitMQ');
-      
+
+      logger.info('Connected to RabbitMQ');
+
       // Handle connection close
       this.connection.on('close', () => {
-        console.log('RabbitMQ connection closed');
+        logger.info('RabbitMQ connection closed');
       });
-      
+
       this.connection.on('error', (error: Error) => {
-        console.error('RabbitMQ connection error:', error);
+        logger.error({ error }, 'RabbitMQ connection error');
       });
     } catch (error) {
-      console.error('Failed to connect to RabbitMQ:', error);
+      logger.error({ error }, 'Failed to connect to RabbitMQ');
       throw error;
     }
   }
@@ -51,21 +52,21 @@ export class RabbitMQConsumer {
 
     // Assert exchange
     await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    
+
     // Assert queue
     await this.channel.assertQueue(queue, { durable: true });
-    
+
     // Bind queue to exchange
     await this.channel.bindQueue(queue, exchange, routingKey);
-    
-    console.log(`Queue ${queue} bound to exchange ${exchange} with routing key ${routingKey}`);
+
+    logger.info({ queue, exchange, routingKey }, 'Queue bound to exchange with routing key');
   }
 
   /**
    * Starts consuming messages from the queue
    */
   async consume(
-    queue: string, 
+    queue: string,
     messageHandler: (message: ConsumeMessage | null) => Promise<void>,
     options: { noAck?: boolean } = { noAck: false }
   ): Promise<void> {
@@ -74,7 +75,7 @@ export class RabbitMQConsumer {
     }
 
     await this.channel.consume(queue, messageHandler, options);
-    console.log(`Started consuming messages from queue: ${queue}`);
+    logger.info({ queue }, 'Started consuming messages from queue');
   }
 
   /**
@@ -105,7 +106,7 @@ export class RabbitMQConsumer {
     if (this.connection) {
       await this.connection.close();
     }
-    console.log('RabbitMQ connection closed');
+    logger.info('RabbitMQ connection closed');
   }
 }
 

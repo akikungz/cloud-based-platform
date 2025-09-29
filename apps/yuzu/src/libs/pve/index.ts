@@ -1,5 +1,6 @@
 import { instance } from "./http_client";
 import { RetryHandler, TaskError, ValidationError } from "@yuzu/libs/errors";
+import { logger } from "@yuzu/libs/log";
 
 /**
  * Waits for a PVE task to complete and returns its exit status.
@@ -27,10 +28,10 @@ export const task_status = async (node: string, upid: string) => {
 	return new Promise<string>((resolve, reject) => {
 		let attempts = 0;
 		const maxAttempts = 300; // 5 minutes timeout (300 * 1000ms)
-		
+
 		const interval = setInterval(async () => {
 			attempts++;
-			
+
 			try {
 				const { data: task } = await instance({
 					path: "/nodes/:node/tasks/:upid/status",
@@ -40,7 +41,7 @@ export const task_status = async (node: string, upid: string) => {
 
 				if (task.data.status === "stopped") {
 					clearInterval(interval);
-					
+
 					if (task.data.exitstatus) {
 						if (task.data.exitstatus !== "OK") {
 							const error = new TaskError(
@@ -53,7 +54,7 @@ export const task_status = async (node: string, upid: string) => {
 						}
 						return resolve(task.data.exitstatus);
 					}
-					
+
 					const error = new TaskError(
 						`Task ${upid} completed with unknown exit status`,
 						upid,
@@ -62,7 +63,7 @@ export const task_status = async (node: string, upid: string) => {
 					);
 					return reject(error);
 				}
-				
+
 				// Check for timeout
 				if (attempts >= maxAttempts) {
 					clearInterval(interval);
@@ -81,8 +82,14 @@ export const task_status = async (node: string, upid: string) => {
 					clearInterval(interval);
 					return reject(error);
 				}
-				
-				console.warn(`Error checking task status (attempt ${attempts}/${maxAttempts}):`, error);
+
+				logger.warn({
+					error,
+					attempt: attempts,
+					maxAttempts,
+					node,
+					upid
+				}, 'Error checking task status');
 			}
 		}, 1000);
 	});
