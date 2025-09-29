@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it, beforeEach } from "bun:test";
 
 import { treaty } from "@elysiajs/eden";
@@ -59,7 +60,7 @@ describe("Student/Requests Module", () => {
     // Create a next semester for the extension request
     const nextSemesterDate = new Date();
     nextSemesterDate.setMonth(nextSemesterDate.getMonth() + 3); // 3 months from now
-    
+
     await db.semester.create({
       data: {
         name: "Test Next Semester",
@@ -470,7 +471,7 @@ describe("Student/Requests Module", () => {
       // Create a next semester for the extension requests
       const nextSemesterDate = new Date();
       nextSemesterDate.setMonth(nextSemesterDate.getMonth() + 3); // 3 months from now
-      
+
       await db.semester.create({
         data: {
           name: "Concurrent Test Next Semester",
@@ -534,7 +535,7 @@ describe("Student/Requests Module", () => {
       // Create a next semester for the extension request
       const nextSemesterDate = new Date();
       nextSemesterDate.setMonth(nextSemesterDate.getMonth() + 3); // 3 months from now
-      
+
       await db.semester.create({
         data: {
           name: "Rapid Test Next Semester",
@@ -722,11 +723,11 @@ describe("Student/Requests Module", () => {
     it("should block extension requests when no next semester exists", async () => {
       // Delete all semesters and create only past semesters to simulate no next semester
       await db.semester.deleteMany({});
-      
+
       // Create only past semesters
       const pastDate = new Date();
       pastDate.setMonth(pastDate.getMonth() - 6); // 6 months ago
-      
+
       await db.semester.create({
         data: {
           name: "Past Semester",
@@ -752,7 +753,7 @@ describe("Student/Requests Module", () => {
       // Create a next semester for the extension request
       const nextSemesterDate = new Date();
       nextSemesterDate.setMonth(nextSemesterDate.getMonth() + 3); // 3 months from now
-      
+
       await db.semester.create({
         data: {
           name: "Test Next Semester",

@@ -9,11 +9,7 @@ export const PublicController = new Elysia({
   prefix: "/public"
 })
   .get("/active-semester", async ({ status }) => {
-    const [err, activeSemester] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof SemesterService.getActiveSemester>>
-    >(
-      () => SemesterService.getActiveSemester()
-    );
+    const [err, activeSemester] = await create_callback<BadRequestError, typeof SemesterService.getActiveSemester>(SemesterService.getActiveSemester);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -23,17 +19,13 @@ export const PublicController = new Elysia({
       return status(404, { message: "No active semester found" });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Active semester fetched successfully",
       data: activeSemester
     });
   })
   .get("/next-semester", async ({ status }) => {
-    const [err, nextSemester] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof SemesterService.getNextSemester>>
-    >(
-      () => SemesterService.getNextSemester()
-    );
+    const [err, nextSemester] = await create_callback<BadRequestError, typeof SemesterService.getNextSemester>(SemesterService.getNextSemester);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -43,7 +35,7 @@ export const PublicController = new Elysia({
       return status(404, { message: "No next semester found" });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Next semester fetched successfully",
       data: nextSemester
     });

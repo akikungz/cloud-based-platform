@@ -20,10 +20,8 @@ export const PersonsController = new Elysia({
   })
   .get("/", async ({ status, query }) => {
     const [err, persons] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof PersonsService.getPersons>>
-    >(
-      () => PersonsService.getPersons(query?.skip, query?.take)
-    );
+      BadRequestError, typeof PersonsService.getPersons
+    >(PersonsService.getPersons, query?.skip, query?.take);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -43,10 +41,8 @@ export const PersonsController = new Elysia({
   })
   .get("/search", async ({ status, query }) => {
     const [err, person] = await create_callback<
-      BadRequestError | NotFoundError, Awaited<ReturnType<typeof PersonsService.getPersonsByEmail>>
-    >(
-      () => PersonsService.getPersonsByEmail(query.email)
-    );
+      BadRequestError | NotFoundError, typeof PersonsService.getPersonsByEmail
+    >(PersonsService.getPersonsByEmail, query.email);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -65,10 +61,8 @@ export const PersonsController = new Elysia({
   })
   .post("/", async ({ status, body }) => {
     const [err, person] = await create_callback<
-      BadRequestError | ConflictError, Awaited<ReturnType<typeof PersonsService.createPerson>>
-    >(
-      () => PersonsService.createPerson(body.email)
-    );
+      BadRequestError | ConflictError, typeof PersonsService.createPerson
+    >(PersonsService.createPerson, body.email);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -82,10 +76,8 @@ export const PersonsController = new Elysia({
   })
   .delete("/", async ({ status, body }) => {
     const [err, person] = await create_callback<
-      BadRequestError | NotFoundError, Awaited<ReturnType<typeof PersonsService.deletePerson>>
-    >(
-      () => PersonsService.deletePerson(body.email)
-    );
+      BadRequestError | NotFoundError, typeof PersonsService.deletePerson
+    >(PersonsService.deletePerson, body.email);
 
     if (err) {
       return status(err.code, { message: err.message });

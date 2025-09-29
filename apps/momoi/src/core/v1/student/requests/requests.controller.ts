@@ -22,10 +22,8 @@ export const RequestsController = new Elysia({
   })
   .get("/", async ({ status, user }) => {
     const [err1, requests] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof RequestsService.getRequests>>
-    >(
-      () => RequestsService.getRequests(user.id)
-    );
+      BadRequestError, typeof RequestsService.getRequests
+    >(RequestsService.getRequests, user.id);
 
     if (err1) {
       return status(err1.code, { message: err1.message });
@@ -37,10 +35,8 @@ export const RequestsController = new Elysia({
     }
 
     const [err2, extend_requests] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof RequestsService.getExtendRequests>>
-    >(
-      () => RequestsService.getExtendRequests(user.id)
-    );
+      BadRequestError, typeof RequestsService.getExtendRequests
+    >(RequestsService.getExtendRequests, user.id);
 
     if (err2) {
       return status(err2.code, { message: err2.message });
@@ -55,10 +51,8 @@ export const RequestsController = new Elysia({
   })
   .post("/", async ({ status, user, body }) => {
     const [err, result] = await create_callback<
-      BadRequestError | ConflictError, Awaited<ReturnType<typeof RequestsService.createRequest>>
-    >(
-      () => RequestsService.createRequest(user.id, body)
-    );
+      BadRequestError | ConflictError, typeof RequestsService.createRequest
+    >(RequestsService.createRequest, user.id, body);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -109,10 +103,8 @@ export const RequestsController = new Elysia({
   })
   .post("/create-instance", async ({ status, user, body }) => {
     const [err, result] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof RequestsService.createInstanceFromRequest>>
-    >(
-      () => RequestsService.createInstanceFromRequest(body.request_id, user.id)
-    );
+      BadRequestError | NotFoundError | ConflictError, typeof RequestsService.createInstanceFromRequest
+    >(RequestsService.createInstanceFromRequest, body.request_id, user.id);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -125,8 +117,8 @@ export const RequestsController = new Elysia({
 
     // Return the request data in the format expected by the frontend/tests
     // The actual instance creation is now handled by the yuzu service
-    return status(201, { 
-      message: "Instance creation initiated successfully", 
+    return status(201, {
+      message: "Instance creation initiated successfully",
       data: {
         id: result.requestId,
         title: result.request.title,

@@ -5,10 +5,9 @@ import { getRabbitMQPublisher } from "@momoi/libs/rabbitmq";
 import { logger } from "@momoi/libs/log";
 
 export class ApprovalService {
-  private static db = db;
 
   private static getStaffCourses(staff_id: number) {
-    return this.db.instance_course.findMany({
+    return db.instance_course.findMany({
       where: {
         OR: [
           { main_staff: staff_id },
@@ -26,7 +25,7 @@ export class ApprovalService {
     const course_ids = courses.map(c => c.id);
 
     // Pagination
-    const count = await this.db.instance_request.count({
+    const count = await db.instance_request.count({
       where: {
         course_id: { in: course_ids },
         state: "pending",
@@ -39,7 +38,7 @@ export class ApprovalService {
     if (skip < 1) skip = 1;
     skip = (skip - 1) * take;
 
-    const data = await this.db.instance_request.findMany({
+    const data = await db.instance_request.findMany({
       where: {
         course_id: { in: course_ids },
         state: "pending",
@@ -62,7 +61,7 @@ export class ApprovalService {
   public static async approveRequest({ request_id }: { request_id: number }, staff_id: number) {
     try {
       // First, get the request details before updating
-      const request = await this.db.instance_request.findFirst({
+      const request = await db.instance_request.findFirst({
         where: {
           id: request_id,
           course: {
@@ -86,7 +85,7 @@ export class ApprovalService {
       }
 
       // Update the request state to approved
-      const approvedRequest = await this.db.instance_request.update({
+      const approvedRequest = await db.instance_request.update({
         where: { id: request_id },
         data: { state: "approved" }
       });
@@ -99,7 +98,7 @@ export class ApprovalService {
         const vmid = 1000 + request_id; // Simple ID generation for now
 
         // Get random available PVE node
-        const availableNode = await this.db.pve_node.findMany({
+        const availableNode = await db.pve_node.findMany({
           where: { status: 'online' }
         });
 
@@ -157,7 +156,7 @@ export class ApprovalService {
 
   public static async rejectRequest({ request_id, reason }: { request_id: number, reason: string }, staff_id: number) {
     try {
-      return await this.db.instance_request.update({
+      return await db.instance_request.update({
         where: {
           id: request_id,
           course: {
@@ -197,7 +196,7 @@ export class ApprovalService {
 
   public static async getExtendsRequests({ skip = 1, take = 10 }: { skip: number, take: number }) {
     // Pagination
-    const count = await this.db.instance_request_extends.count({
+    const count = await db.instance_request_extends.count({
       where: { state: "pending" }
     });
 
@@ -207,7 +206,7 @@ export class ApprovalService {
     if (skip < 1) skip = 1;
     skip = (skip - 1) * take;
 
-    const data = await this.db.instance_request_extends.findMany({
+    const data = await db.instance_request_extends.findMany({
       where: { state: "pending" },
       skip,
       take
@@ -218,7 +217,7 @@ export class ApprovalService {
 
   public static async approveExtendsRequest({ request_id }: { request_id: number }) {
     try {
-      return await this.db.instance_request_extends.update({
+      return await db.instance_request_extends.update({
         where: { id: request_id },
         data: { state: "approved" }
       });
@@ -245,7 +244,7 @@ export class ApprovalService {
 
   public static async rejectExtendsRequest({ request_id, reason }: { request_id: number, reason: string }) {
     try {
-      return await this.db.instance_request_extends.update({
+      return await db.instance_request_extends.update({
         where: { id: request_id },
         data: { state: "rejected", reason }
       });
@@ -281,7 +280,7 @@ export class ApprovalService {
   ) {
     try {
       // First, verify the request exists and the staff has permission to edit it
-      const request = await this.db.instance_request.findFirst({
+      const request = await db.instance_request.findFirst({
         where: {
           id: request_id,
           state: "pending", // Only allow editing pending requests
@@ -312,7 +311,7 @@ export class ApprovalService {
       if (disk !== undefined) updateData.disk = disk;
 
       // Update the request
-      const updatedRequest = await this.db.instance_request.update({
+      const updatedRequest = await db.instance_request.update({
         where: { id: request_id },
         data: updateData,
         include: {
@@ -326,6 +325,61 @@ export class ApprovalService {
     } catch (error) {
       console.error("Error editing request specification:", error);
       throw new BadRequestError("Failed to edit request specification");
+    }
+  }
+
+  public static async getApprovalStats(staff_id: number) {
+    try {
+      const courses = await this.getStaffCourses(staff_id);
+      const course_ids = courses.map(c => c.id);
+
+      // Get total requests (all states)
+      const totalRequests = await db.instance_request.count({
+        where: {
+          course_id: { in: course_ids }
+        }
+      });
+
+      // Get pending requests
+      const pendingRequests = await db.instance_request.count({
+        where: {
+          course_id: { in: course_ids },
+          state: "pending"
+        }
+      });
+
+      // Get processed requests (approved + rejected)
+      const processedRequests = await db.instance_request.count({
+        where: {
+          course_id: { in: course_ids },
+          state: { in: ["approved", "rejected"] }
+        }
+      });
+
+      // Get extension request stats
+      const totalExtensionRequests = await db.instance_request_extends.count();
+      const pendingExtensionRequests = await db.instance_request_extends.count({
+        where: { state: "pending" }
+      });
+      const processedExtensionRequests = await db.instance_request_extends.count({
+        where: { state: { in: ["approved", "rejected"] } }
+      });
+
+      return {
+        instanceRequests: {
+          total: totalRequests,
+          pending: pendingRequests,
+          processed: processedRequests
+        },
+        extensionRequests: {
+          total: totalExtensionRequests,
+          pending: pendingExtensionRequests,
+          processed: processedExtensionRequests
+        }
+      };
+    } catch (error) {
+      console.error("Error fetching approval statistics:", error);
+      throw new BadRequestError("Failed to fetch approval statistics");
     }
   }
 }

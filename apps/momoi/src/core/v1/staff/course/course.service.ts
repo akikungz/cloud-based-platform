@@ -3,11 +3,9 @@ import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/err
 import { Prisma } from "database/generated/prisma-client/client";
 
 export class CourseService {
-  private static db = db;
-
   static async getCourses(skip?: number, take?: number) {
     try {
-      return await this.db.instance_course.findMany({
+      return await db.instance_course.findMany({
         where: { deleted_at: null },
         select: {
           id: true,
@@ -45,7 +43,7 @@ export class CourseService {
 
   static async getCourseById(id: number) {
     try {
-      const course = await this.db.instance_course.findUnique({
+      const course = await db.instance_course.findUnique({
         where: { id, deleted_at: null },
         select: {
           id: true,
@@ -116,7 +114,7 @@ export class CourseService {
 
   static async getCourseByCourseId(courseId: string) {
     try {
-      const course = await this.db.instance_course.findFirst({
+      const course = await db.instance_course.findFirst({
         where: { course_id: courseId, deleted_at: null },
         select: {
           id: true,
@@ -162,7 +160,7 @@ export class CourseService {
   }) {
     try {
       // Check if course_id already exists
-      const existingCourse = await this.db.instance_course.findFirst({
+      const existingCourse = await db.instance_course.findFirst({
         where: { course_id: data.course_id }
       });
 
@@ -170,7 +168,7 @@ export class CourseService {
         throw new ConflictError("Course with this ID already exists");
       }
 
-      return await this.db.instance_course.create({
+      return await db.instance_course.create({
         data: {
           course_id: data.course_id,
           course_title: data.course_title,
@@ -221,7 +219,7 @@ export class CourseService {
   }) {
     try {
       // Check if course exists
-      const existingCourse = await this.db.instance_course.findUnique({
+      const existingCourse = await db.instance_course.findUnique({
         where: { id, deleted_at: null }
       });
 
@@ -231,7 +229,7 @@ export class CourseService {
 
       // Check if course_id is being changed and if it already exists
       if (data.course_id && data.course_id !== existingCourse.course_id) {
-        const courseIdExists = await this.db.instance_course.findFirst({
+        const courseIdExists = await db.instance_course.findFirst({
           where: { course_id: data.course_id }
         });
 
@@ -240,7 +238,7 @@ export class CourseService {
         }
       }
 
-      return await this.db.instance_course.update({
+      return await db.instance_course.update({
         where: { id },
         data: {
           ...data,
@@ -284,7 +282,7 @@ export class CourseService {
   static async deleteCourse(id: number) {
     try {
       // Check if course exists
-      const existingCourse = await this.db.instance_course.findUnique({
+      const existingCourse = await db.instance_course.findUnique({
         where: { id, deleted_at: null }
       });
 
@@ -294,10 +292,10 @@ export class CourseService {
 
       // Check if course has associated instances or requests
       const [instanceCount, requestCount] = await Promise.all([
-        this.db.instance.count({
+        db.instance.count({
           where: { course_id: id }
         }),
-        this.db.instance_request.count({
+        db.instance_request.count({
           where: { course_id: id }
         })
       ]);
@@ -307,7 +305,7 @@ export class CourseService {
       }
 
       // Soft delete the course
-      return await this.db.instance_course.update({
+      return await db.instance_course.update({
         where: { id },
         data: { deleted_at: new Date() },
         select: {
@@ -344,7 +342,7 @@ export class CourseService {
 
   static async getCoursesByStaff(staffId: number) {
     try {
-      return await this.db.instance_course.findMany({
+      return await db.instance_course.findMany({
         where: {
           deleted_at: null,
           OR: [
@@ -388,7 +386,7 @@ export class CourseService {
 
   static async searchCourses(query: string, skip?: number, take?: number) {
     try {
-      return await this.db.instance_course.findMany({
+      return await db.instance_course.findMany({
         where: {
           deleted_at: null,
           OR: [
@@ -432,7 +430,7 @@ export class CourseService {
 
   static async getCourseStats(id: number) {
     try {
-      const course = await this.db.instance_course.findUnique({
+      const course = await db.instance_course.findUnique({
         where: { id, deleted_at: null }
       });
 
@@ -441,31 +439,31 @@ export class CourseService {
       }
 
       const [totalRequests, pendingRequests, approvedRequests, rejectedRequests] = await Promise.all([
-        this.db.instance_request.count({
+        db.instance_request.count({
           where: { course_id: id }
         }),
-        this.db.instance_request.count({
+        db.instance_request.count({
           where: { course_id: id, state: 'pending' }
         }),
-        this.db.instance_request.count({
+        db.instance_request.count({
           where: { course_id: id, state: 'approved' }
         }),
-        this.db.instance_request.count({
+        db.instance_request.count({
           where: { course_id: id, state: 'rejected' }
         })
       ]);
 
       const [totalInstances, activeInstances, runningInstances, stoppedInstances] = await Promise.all([
-        this.db.instance.count({
+        db.instance.count({
           where: { course_id: id }
         }),
-        this.db.instance.count({
+        db.instance.count({
           where: { course_id: id, state: 'active' }
         }),
-        this.db.instance.count({
+        db.instance.count({
           where: { course_id: id, status: 'running' }
         }),
-        this.db.instance.count({
+        db.instance.count({
           where: { course_id: id, status: 'stopped' }
         })
       ]);

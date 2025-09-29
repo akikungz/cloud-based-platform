@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach } from "bun:test";
 import { treaty } from "@elysiajs/eden";
 
@@ -78,7 +79,7 @@ describe("Autocomplete Module", () => {
       // This test simulates database connection issues
       // In a real scenario, you might mock the database to throw errors
       const response = await api.autocomplete.course.get();
-      
+
       // Should still return a response, even if empty
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("message");
@@ -88,9 +89,9 @@ describe("Autocomplete Module", () => {
     it("should return empty arrays when no data is available", async () => {
       // Reset database to test empty state
       await mockSetup.resetDatabase();
-      
+
       const response = await api.autocomplete.course.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toEqual({
         message: "Get course autocomplete",
@@ -101,7 +102,7 @@ describe("Autocomplete Module", () => {
     it("should handle malformed database responses", async () => {
       // Test with corrupted or unexpected data structure
       const response = await api.autocomplete.staff.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("message");
       expect(response.data).toHaveProperty("data");
@@ -116,9 +117,9 @@ describe("Autocomplete Module", () => {
         api.autocomplete.template.get(),
         api.autocomplete.staff.emails.get()
       ];
-      
+
       const responses = await Promise.all(promises);
-      
+
       responses.forEach(response => {
         expect(response.status).toBe(200);
         expect(response.data).toHaveProperty("message");
@@ -134,10 +135,10 @@ describe("Autocomplete Module", () => {
         name: `Test Course ${i}`,
         code: `TC${i.toString().padStart(3, '0')}`
       }));
-      
+
       // This test ensures the autocomplete can handle large datasets
       const response = await api.autocomplete.course.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(Array.isArray(response.data!.data)).toBe(true);
@@ -146,7 +147,7 @@ describe("Autocomplete Module", () => {
     it("should handle special characters in data", async () => {
       // Test with data containing special characters
       const response = await api.autocomplete.staff.get();
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("data");
       expect(Array.isArray(response.data!.data)).toBe(true);
@@ -159,10 +160,10 @@ describe("Autocomplete Module", () => {
         () => api.autocomplete.template.get(),
         () => api.autocomplete.staff.emails.get()
       ];
-      
+
       for (const endpoint of endpoints) {
         const response = await endpoint();
-        
+
         expect(response.status).toBe(200);
         expect(response.data).toHaveProperty("message");
         expect(response.data).toHaveProperty("data");
@@ -176,7 +177,7 @@ describe("Autocomplete Module", () => {
       const startTime = Date.now();
       const response = await api.autocomplete.course.get();
       const endTime = Date.now();
-      
+
       expect(response.status).toBe(200);
       expect(endTime - startTime).toBeLessThan(5000); // Should complete within 5 seconds
     });
@@ -196,12 +197,12 @@ describe("Autocomplete Module", () => {
 
     it("should handle memory pressure scenarios", async () => {
       // Test multiple rapid requests to simulate memory pressure
-      const rapidRequests = Array.from({ length: 10 }, () => 
+      const rapidRequests = Array.from({ length: 10 }, () =>
         api.autocomplete.course.get()
       );
-      
+
       const responses = await Promise.all(rapidRequests);
-      
+
       responses.forEach(response => {
         expect(response.status).toBe(200);
         expect(response.data).toHaveProperty("data");

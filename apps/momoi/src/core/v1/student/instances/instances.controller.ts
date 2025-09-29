@@ -20,10 +20,8 @@ export const InstancesController = new Elysia({
   })
   .get("/", async ({ status, user }) => {
     const [err, instances] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof InstanceService.getInstances>>
-    >(
-      () => InstanceService.getInstances(user.id)
-    );
+      BadRequestError, typeof InstanceService.getInstances
+    >(InstanceService.getInstances, user.id);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -38,10 +36,8 @@ export const InstancesController = new Elysia({
   })
   .get("/:id", async ({ status, user, params }) => {
     const [err, instance] = await create_callback<
-      BadRequestError | NotFoundError, Awaited<ReturnType<typeof InstanceService.getInstanceById>>
-    >(
-      () => InstanceService.getInstanceById(user.id, params.id)
-    );
+      BadRequestError | NotFoundError, typeof InstanceService.getInstanceById
+    >(InstanceService.getInstanceById, user.id, params.id);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -60,10 +56,8 @@ export const InstancesController = new Elysia({
   })
   .delete("/:id", async ({ status, user, params }) => {
     const [err, result] = await create_callback<
-      BadRequestError | NotFoundError, Awaited<ReturnType<typeof InstanceService.deleteInstance>>
-    >(
-      () => InstanceService.deleteInstance(user.id, params.id)
-    );
+      BadRequestError | NotFoundError, typeof InstanceService.deleteInstance
+    >(InstanceService.deleteInstance, user.id, params.id);
 
     if (err) {
       return status(err.code, { message: err.message });

@@ -19,37 +19,35 @@ export const SemesterController = new Elysia({
   })
   .get("/", async ({ status, query }) => {
     const [err, semesters] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof SemesterService.getSemesters>>
-    >(
-      () => SemesterService.getSemesters(query?.skip, query?.take)
-    );
+      BadRequestError, typeof SemesterService.getSemesters
+    >(SemesterService.getSemesters, query?.skip, query?.take);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Semesters fetched successfully",
       data: semesters
     });
   }, {
-    query: t.Optional(t.Object({
-      skip: t.Optional(t.Number()),
-      take: t.Optional(t.Number())
-    }))
+    query: t.Optional(
+      t.Object({
+        skip: t.Optional(t.Number()),
+        take: t.Optional(t.Number())
+      })
+    )
   })
   .post("/", async ({ status, body }) => {
     const [err, semester] = await create_callback<
-      BadRequestError | ConflictError, Awaited<ReturnType<typeof SemesterService.createSemester>>
-    >(
-      () => SemesterService.createSemester(body)
-    );
+      BadRequestError | ConflictError, typeof SemesterService.createSemester
+    >(SemesterService.createSemester, body);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(201, { 
+    return status(201, {
       message: "Semester created successfully",
       data: semester
     });
@@ -63,10 +61,9 @@ export const SemesterController = new Elysia({
   })
   .get("/active", async ({ status }) => {
     const [err, activeSemester] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof SemesterService.getActiveSemester>>
-    >(
-      () => SemesterService.getActiveSemester()
-    );
+      BadRequestError | NotFoundError | ConflictError,
+      typeof SemesterService.getActiveSemester
+    >(SemesterService.getActiveSemester);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -76,23 +73,22 @@ export const SemesterController = new Elysia({
       return status(404, { message: "No active semester found" });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Active semester fetched successfully",
       data: activeSemester
     });
   })
   .put("/:id", async ({ status, params, body }) => {
     const [err, semester] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof SemesterService.updateSemester>>
-    >(
-      () => SemesterService.updateSemester(params.id, body)
-    );
+      BadRequestError | NotFoundError | ConflictError,
+      typeof SemesterService.updateSemester
+    >(SemesterService.updateSemester, params.id, body);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Semester updated successfully",
       data: semester
     });
@@ -109,16 +105,14 @@ export const SemesterController = new Elysia({
   })
   .post("/:id/activate", async ({ status, params }) => {
     const [err, semester] = await create_callback<
-      BadRequestError | NotFoundError, Awaited<ReturnType<typeof SemesterService.activateSemester>>
-    >(
-      () => SemesterService.activateSemester(params.id)
-    );
+      BadRequestError | NotFoundError, typeof SemesterService.activateSemester
+    >(SemesterService.activateSemester, params.id);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Semester activated successfully",
       data: semester
     });
@@ -129,16 +123,14 @@ export const SemesterController = new Elysia({
   })
   .delete("/:id", async ({ status, params }) => {
     const [err, deletedSemester] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof SemesterService.deleteSemester>>
-    >(
-      () => SemesterService.deleteSemester(params.id)
-    );
+      BadRequestError | NotFoundError | ConflictError, typeof SemesterService.deleteSemester
+    >(SemesterService.deleteSemester, params.id);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
+    return status(200, {
       message: "Semester deleted successfully"
     });
   }, {

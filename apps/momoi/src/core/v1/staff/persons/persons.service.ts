@@ -5,17 +5,16 @@ import { Prisma } from "database/generated/prisma-client/client";
 // import { union } from "utils/functions/objects";
 
 export class PersonsService {
-  private static db = db;
 
   static async getPersons(skip?: number, take?: number) {
     try {
       // Get all staff emails from staff_list table
-      const staffEmails = await this.db.staff_list.findMany({ 
+      const staffEmails = await db.staff_list.findMany({ 
         select: { id: true, email: true, created_at: true, updated_at: true } 
       });
 
       // Get users who have logged in and are in staff_list
-      const loggedInUsers = await this.db.user.findMany({
+      const loggedInUsers = await db.user.findMany({
         where: { email: { in: staffEmails.map(e => e.email) } },
         select: { id: true, email: true, name: true }
       });
@@ -71,12 +70,12 @@ export class PersonsService {
 
   static async getPersonsByEmail(email: string) {
     try {
-      const person = await this.db.user.findUnique({ where: { email }, select: { id: true, email: true, name: true } });
+      const person = await db.user.findUnique({ where: { email }, select: { id: true, email: true, name: true } });
       if (!person) {
         throw new NotFoundError("Person not found");
       }
 
-      const staff = await this.db.staff_list.findUnique({ where: { email }, select: { id: true } });
+      const staff = await db.staff_list.findUnique({ where: { email }, select: { id: true } });
       if (!staff) {
         throw new NotFoundError("Person is not a staff member");
       }
@@ -102,7 +101,7 @@ export class PersonsService {
   static async createPerson(email: string) {
     try {
       // Check if person already exists
-      const existingPerson = await this.db.staff_list.findUnique({
+      const existingPerson = await db.staff_list.findUnique({
         where: { email }
       });
 
@@ -110,7 +109,7 @@ export class PersonsService {
         throw new ConflictError("Person with this email already exists");
       }
 
-      return await this.db.staff_list.create({ data: { email } });
+      return await db.staff_list.create({ data: { email } });
     } catch (error) {
       if (error instanceof ConflictError) {
         throw error;
@@ -134,7 +133,7 @@ export class PersonsService {
   static async deletePerson(email: string) {
     try {
       // Check if person exists
-      const existingPerson = await this.db.staff_list.findUnique({
+      const existingPerson = await db.staff_list.findUnique({
         where: { email }
       });
 
@@ -142,7 +141,7 @@ export class PersonsService {
         throw new NotFoundError("Person not found");
       }
 
-      return await this.db.staff_list.delete({ where: { email } });
+      return await db.staff_list.delete({ where: { email } });
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;

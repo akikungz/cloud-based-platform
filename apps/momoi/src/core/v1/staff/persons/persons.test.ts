@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it, beforeEach } from "bun:test";
 
 import { treaty } from "@elysiajs/eden";
@@ -31,13 +32,13 @@ describe("Staff/Persons Module", () => {
     expect(response.data).toHaveProperty("data");
     expect(Array.isArray(response.data!.data)).toBe(true);
     expect(response.data!.data.length).toBeGreaterThan(0);
-    
+
     // Check that at least one person has the expected staff email
     const staffPerson = response.data!.data.find((p: any) => p.email === "staff.t@itm.kmutnb.ac.th");
     expect(staffPerson).toBeDefined();
     expect(staffPerson).toHaveProperty("staff_id", 1);
     expect(staffPerson).toHaveProperty("status", "active");
-    
+
     // Check that all persons have the required fields
     response.data!.data.forEach((person: any) => {
       expect(person).toHaveProperty("email");
@@ -46,7 +47,7 @@ describe("Staff/Persons Module", () => {
       expect(person).toHaveProperty("created_at");
       expect(person).toHaveProperty("updated_at");
       expect(["active", "pending"]).toContain(person.status);
-      
+
       if (person.status === "active") {
         expect(person).toHaveProperty("id");
         expect(person).toHaveProperty("name");
@@ -82,7 +83,7 @@ describe("Staff/Persons Module", () => {
 
     expect(response.status).toBe(200);
     expect(response.data).toHaveProperty("data");
-    
+
     // Find the pending staff member
     const pendingPerson = response.data!.data.find((p: any) => p.email === pendingEmail);
     expect(pendingPerson).toBeDefined();

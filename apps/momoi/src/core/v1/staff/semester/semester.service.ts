@@ -3,11 +3,9 @@ import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/err
 import { Prisma } from "database/generated/prisma-client/client";
 
 export class SemesterService {
-  private static db = db;
-
   static async getSemesters(skip?: number, take?: number) {
     try {
-      return await this.db.semester.findMany({
+      return await db.semester.findMany({
         where: { deleted_at: null },
         select: {
           id: true,
@@ -37,7 +35,7 @@ export class SemesterService {
 
   static async getSemesterById(id: number) {
     try {
-      const semester = await this.db.semester.findUnique({
+      const semester = await db.semester.findUnique({
         where: { id, deleted_at: null },
         select: {
           id: true,
@@ -79,7 +77,7 @@ export class SemesterService {
   }) {
     try {
       // Check if semester name already exists
-      const existingSemester = await this.db.semester.findUnique({
+      const existingSemester = await db.semester.findUnique({
         where: { name: data.name }
       });
 
@@ -89,13 +87,13 @@ export class SemesterService {
 
       // If creating an active semester, deactivate all other semesters
       if (data.active) {
-        await this.db.semester.updateMany({
+        await db.semester.updateMany({
           where: { active: true },
           data: { active: false }
         });
       }
 
-      return await this.db.semester.create({
+      return await db.semester.create({
         data: {
           name: data.name,
           start_at: data.start_at,
@@ -140,7 +138,7 @@ export class SemesterService {
   }) {
     try {
       // Check if semester exists
-      const existingSemester = await this.db.semester.findUnique({
+      const existingSemester = await db.semester.findUnique({
         where: { id, deleted_at: null }
       });
 
@@ -150,7 +148,7 @@ export class SemesterService {
 
       // Check if name is being changed and if it already exists
       if (data.name && data.name !== existingSemester.name) {
-        const nameExists = await this.db.semester.findUnique({
+        const nameExists = await db.semester.findUnique({
           where: { name: data.name }
         });
 
@@ -161,13 +159,13 @@ export class SemesterService {
 
       // If activating this semester, deactivate all other semesters
       if (data.active === true) {
-        await this.db.semester.updateMany({
+        await db.semester.updateMany({
           where: { active: true, id: { not: id } },
           data: { active: false }
         });
       }
 
-      return await this.db.semester.update({
+      return await db.semester.update({
         where: { id },
         data: {
           ...data,
@@ -209,7 +207,7 @@ export class SemesterService {
   static async deleteSemester(id: number) {
     try {
       // Check if semester exists
-      const existingSemester = await this.db.semester.findUnique({
+      const existingSemester = await db.semester.findUnique({
         where: { id, deleted_at: null }
       });
 
@@ -218,7 +216,7 @@ export class SemesterService {
       }
 
       // Check if semester has associated instances
-      const instanceCount = await this.db.instance.count({
+      const instanceCount = await db.instance.count({
         where: { semester_id: id }
       });
 
@@ -227,7 +225,7 @@ export class SemesterService {
       }
 
       // Soft delete the semester
-      return await this.db.semester.update({
+      return await db.semester.update({
         where: { id },
         data: { deleted_at: new Date() },
         select: {
@@ -262,7 +260,7 @@ export class SemesterService {
 
   static async getActiveSemester() {
     try {
-      const activeSemester = await this.db.semester.findFirst({
+      const activeSemester = await db.semester.findFirst({
         where: { active: true, deleted_at: null },
         select: {
           id: true,
@@ -278,11 +276,15 @@ export class SemesterService {
       // Return null instead of throwing error when no active semester found
       return activeSemester;
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new NotFoundError("No active semester found");
+        }
+
+        if (error.code === "P2002") {
+          throw new ConflictError("Multiple active semesters found");
+        }
+
         throw new BadRequestError(error.message);
       }
 
@@ -294,16 +296,15 @@ export class SemesterService {
     }
   }
 
-  static async getNextSemester(dbInstance?: any) {
+  static async getNextSemester() {
     try {
       const now = new Date();
-      const dbToUse = dbInstance || this.db;
-      
+
       // Find the next semester that starts after the current date
       // Use findMany and filter manually since the mock database doesn't handle complex where clauses well
-      const allSemesters = await dbToUse.semester.findMany({
-        where: { 
-          deleted_at: null 
+      const allSemesters = await db.semester.findMany({
+        where: {
+          deleted_at: null
         },
         select: {
           id: true,
@@ -316,10 +317,10 @@ export class SemesterService {
         },
         orderBy: { start_at: 'asc' }
       });
-      
+
       // Find the first semester that starts after the current date
       const nextSemester = allSemesters.find((semester: { start_at: Date }) => semester.start_at > now) || null;
-      
+
       // Return null if no next semester found
       return nextSemester;
     } catch (error) {
@@ -338,7 +339,7 @@ export class SemesterService {
   static async activateSemester(id: number) {
     try {
       // Check if semester exists
-      const existingSemester = await this.db.semester.findUnique({
+      const existingSemester = await db.semester.findUnique({
         where: { id, deleted_at: null }
       });
 
@@ -347,15 +348,15 @@ export class SemesterService {
       }
 
       // Deactivate all other semesters
-      await this.db.semester.updateMany({
+      await db.semester.updateMany({
         where: { active: true },
         data: { active: false }
       });
 
       // Activate the specified semester
-      return await this.db.semester.update({
+      return await db.semester.update({
         where: { id },
-        data: { 
+        data: {
           active: true,
           updated_at: new Date()
         },

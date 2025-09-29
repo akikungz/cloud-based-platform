@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { AutoCompleteService } from "./autocomplete..service";
+import { AutoCompleteService } from "./autocomplete.service";
 
 import { BadRequestError } from "@momoi/shared/errors";
 import { create_callback } from "utils/functions/callback";
@@ -9,11 +9,7 @@ export const AutocompleteController = new Elysia({
   prefix: "/autocomplete"
 })
   .get("/course", async ({ status }) => {
-    const [err, result] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getCourse>>
-    >(
-      () => AutoCompleteService.getCourse()
-    );
+    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getCourse>(AutoCompleteService.getCourse);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -30,11 +26,7 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/staff", async ({ status }) => {
-    const [err, result] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getStaff>>
-    >(
-      () => AutoCompleteService.getStaff()
-    );
+    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getStaff>(AutoCompleteService.getStaff);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -51,11 +43,7 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/staff/emails", async ({ status }) => {
-    const [err, result] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getStaffEmails>>
-    >(
-      () => AutoCompleteService.getStaffEmails()
-    );
+    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getStaffEmails>(AutoCompleteService.getStaffEmails);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -72,11 +60,7 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/template", async ({ status }) => {
-    const [err, result] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof AutoCompleteService.getTemplate>>
-    >(
-      () => AutoCompleteService.getTemplate()
-    );
+    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getTemplate>(AutoCompleteService.getTemplate);
 
     if (err) {
       return status(err.code, { message: err.message });

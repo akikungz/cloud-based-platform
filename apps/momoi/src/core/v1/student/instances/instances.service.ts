@@ -3,11 +3,10 @@ import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/err
 import { Prisma } from "database/generated/prisma-client/client";
 
 export class InstanceService {
-  private static db = db;
 
   public static async getInstances(userId: string) {
     try {
-      const results = await this.db.instance.findMany({
+      const results = await db.instance.findMany({
         where: { user_id: userId, NOT: { state: "deleted" } },
         select: {
           id: true,
@@ -69,7 +68,7 @@ export class InstanceService {
 
   public static async getInstanceById(userId: string, id: number) {
     try {
-      const result = await this.db.instance.findFirst({
+      const result = await db.instance.findFirst({
         where: { user_id: userId, id, NOT: { state: "deleted" } },
         include: { semester: true }
       });
@@ -98,7 +97,7 @@ export class InstanceService {
 
   public static async deleteInstance(userId: string, id: number) {
     try {
-      const existing = await this.db.instance.findFirst({
+      const existing = await db.instance.findFirst({
         where: { user_id: userId, id, NOT: { OR: [{ state: "deleted" }, { state: "archived" }] } }
       });
       
@@ -106,7 +105,7 @@ export class InstanceService {
         throw new NotFoundError("Instance not found or already deleted/archived");
       }
 
-      return await this.db.instance.update({
+      return await db.instance.update({
         where: { id },
         data: { state: "deleted" }
       });

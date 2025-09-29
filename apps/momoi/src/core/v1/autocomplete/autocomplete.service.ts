@@ -3,11 +3,9 @@ import { BadRequestError } from "@momoi/shared/errors";
 import { Prisma } from "database/generated/prisma-client/client";
 
 export class AutoCompleteService {
-  private static db = db;
-
   public static async getCourse() {
     try {
-      const results = await this.db.instance_course.findMany({
+      const results = await db.instance_course.findMany({
         select: { id: true, course_title: true, course_id: true }
       });
       return results.map(r => ({ id: r.id, title: r.course_title, code: r.course_id }));
@@ -27,9 +25,9 @@ export class AutoCompleteService {
   public static async getStaff() {
     try {
       // staff_list is a separate model with user_id string; fetch joins via two queries
-      const staff = await this.db.staff_list.findMany({ select: { email: true } });
+      const staff = await db.staff_list.findMany({ select: { email: true } });
 
-      return await this.db.user.findMany({
+      return await db.user.findMany({
         where: { email: { in: staff.map(s => s.email) } },
         select: {
           id: true,
@@ -52,14 +50,14 @@ export class AutoCompleteService {
 
   public static async getStaffEmails() {
     try {
-      const staffs = await this.db
+      const staffs = await db
         .user
         .findMany({
           where: { email: { endsWith: "@itm.kmutnb.ac.th" } },
           select: { email: true }
         })
 
-      const listed_staffs = await this.db
+      const listed_staffs = await db
         .staff_list
         .findMany({ select: { email: true } });
 
@@ -85,7 +83,7 @@ export class AutoCompleteService {
 
   public static async getTemplate() {
     try {
-      return await this.db.instance_template.findMany({
+      return await db.instance_template.findMany({
         select: { id: true, os_name: true, vm_type: true }
       });
     } catch (error) {

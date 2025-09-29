@@ -7,11 +7,10 @@ import { logger } from "@momoi/libs/log";
 import { SemesterService } from "@momoi/core/v1/staff/semester/semester.service";
 
 export class RequestsService {
-  private static db = db;
 
   public static async getRequests(userId: string) {
     try {
-      return await this.db.instance_request.findMany({
+      return await db.instance_request.findMany({
         where: { user_id: userId }
       });
     } catch (error) {
@@ -29,12 +28,12 @@ export class RequestsService {
 
   public static async getExtendRequests(userId: string) {
     try {
-      const instances = await this.db.instance.findMany({
+      const instances = await db.instance.findMany({
         where: { user_id: userId },
         select: { id: true }
       });
       const instanceIds = instances.map((i: { id: number }) => i.id);
-      return await this.db.instance_request_extends.findMany({
+      return await db.instance_request_extends.findMany({
         where: { instance_id: { in: instanceIds } },
         include: { instance: true }
       });
@@ -58,7 +57,7 @@ export class RequestsService {
   ) {
     try {
       // Check if there's an active semester before allowing new instance requests
-      const activeSemester = await this.db.semester.findFirst({
+      const activeSemester = await db.semester.findFirst({
         where: {
           active: true,
           deleted_at: null
@@ -70,7 +69,7 @@ export class RequestsService {
         throw new BadRequestError("Cannot create new instance request: No active semester found. Please contact an administrator to activate a semester.");
       }
 
-      return await this.db.instance_request.create({
+      return await db.instance_request.create({
         data: {
           user_id: userId,
           ...data
@@ -105,7 +104,7 @@ export class RequestsService {
     dbInstance?: any
   ) {
     try {
-      const dbToUse = dbInstance || this.db;
+      const dbToUse = dbInstance || db;
 
       const userInstance = await dbToUse.instance.findFirst({
         where: { id: data.instance_id, user_id: userId }
@@ -116,7 +115,7 @@ export class RequestsService {
       }
 
       // Check if there's a next semester available for extension
-      const nextSemester = await SemesterService.getNextSemester(dbInstance);
+      const nextSemester = await SemesterService.getNextSemester();
 
       if (!nextSemester) {
         throw new BadRequestError("Cannot create extension request: No next semester is available. Please contact an administrator to set up the next semester.");
@@ -151,7 +150,7 @@ export class RequestsService {
   public static async createInstanceFromRequest(requestId: number, userId: string) {
     try {
       // First, verify the request exists, is approved, and belongs to the user
-      const request = await this.db.instance_request.findFirst({
+      const request = await db.instance_request.findFirst({
         where: {
           id: requestId,
           user_id: userId,
@@ -170,7 +169,7 @@ export class RequestsService {
 
       // Check if an instance already exists for this request
       // We'll check by matching the hostname and user_id
-      const existingInstance = await this.db.instance.findFirst({
+      const existingInstance = await db.instance.findFirst({
         where: {
           user_id: userId,
           hostname: request.hostname,
@@ -183,7 +182,7 @@ export class RequestsService {
       }
 
       // Get available PVE node
-      const availableNode = await this.db.pve_node.findFirst({
+      const availableNode = await db.pve_node.findFirst({
         where: { status: 'online' }
       });
 

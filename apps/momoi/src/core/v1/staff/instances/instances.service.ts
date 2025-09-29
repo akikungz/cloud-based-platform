@@ -4,11 +4,10 @@ import { Prisma } from "database/generated/prisma-client/client";
 import { getRabbitMQPublisher } from "@momoi/libs/rabbitmq";
 
 export class StaffInstanceService {
-  private static db = db;
 
   public static async getAllInstances() {
     try {
-      const results = await this.db.instance.findMany({
+      const results = await db.instance.findMany({
         where: { NOT: { state: "deleted" } },
         select: {
           id: true,
@@ -86,7 +85,7 @@ export class StaffInstanceService {
 
   public static async getInstanceById(id: number) {
     try {
-      const result = await this.db.instance.findFirst({
+      const result = await db.instance.findFirst({
         where: { 
           id: id,
           NOT: { state: "deleted" } 
@@ -168,25 +167,25 @@ export class StaffInstanceService {
 
   public static async getInstancesStats() {
     try {
-      const totalInstances = await this.db.instance.count({
+      const totalInstances = await db.instance.count({
         where: { NOT: { state: "deleted" } }
       });
 
-      const runningInstances = await this.db.instance.count({
+      const runningInstances = await db.instance.count({
         where: { 
           status: "running",
           NOT: { state: "deleted" } 
         }
       });
 
-      const stoppedInstances = await this.db.instance.count({
+      const stoppedInstances = await db.instance.count({
         where: { 
           status: "stopped",
           NOT: { state: "deleted" } 
         }
       });
 
-      const pendingInstances = await this.db.instance.count({
+      const pendingInstances = await db.instance.count({
         where: { 
           status: "pending",
           NOT: { state: "deleted" } 
@@ -230,7 +229,7 @@ export class StaffInstanceService {
   }) {
     try {
       // Validate that the user exists
-      const user = await this.db.user.findUnique({
+      const user = await db.user.findUnique({
         where: { id: data.user_id }
       });
 
@@ -239,7 +238,7 @@ export class StaffInstanceService {
       }
 
       // Validate that the course exists
-      const course = await this.db.instance_course.findFirst({
+      const course = await db.instance_course.findFirst({
         where: { 
           id: data.course_id,
           deleted_at: null 
@@ -251,7 +250,7 @@ export class StaffInstanceService {
       }
 
       // Validate that the template exists
-      const template = await this.db.instance_template.findFirst({
+      const template = await db.instance_template.findFirst({
         where: { 
           id: data.template_id,
           deleted_at: null 
@@ -263,7 +262,7 @@ export class StaffInstanceService {
       }
 
       // Check if instance with same hostname already exists for this user
-      const existingInstance = await this.db.instance.findFirst({
+      const existingInstance = await db.instance.findFirst({
         where: {
           user_id: data.user_id,
           hostname: data.hostname,
@@ -276,7 +275,7 @@ export class StaffInstanceService {
       }
 
       // Get available PVE node
-      const availableNode = await this.db.pve_node.findFirst({
+      const availableNode = await db.pve_node.findFirst({
         where: { 
           status: 'online',
           deleted_at: null 
@@ -290,7 +289,7 @@ export class StaffInstanceService {
       // Handle semester - if not provided, try to get active semester, but don't require it
       let semesterId = data.semester_id;
       if (!semesterId) {
-        const activeSemester = await this.db.semester.findFirst({
+        const activeSemester = await db.semester.findFirst({
           where: {
             active: true,
             deleted_at: null
@@ -301,13 +300,13 @@ export class StaffInstanceService {
       }
 
       // Generate a unique VM ID (starting from 1000 for staff-created instances)
-      const maxVmId = await this.db.instance.aggregate({
+      const maxVmId = await db.instance.aggregate({
         _max: { vm_id: true }
       });
       const vmid = (maxVmId._max.vm_id || 1000) + 1;
 
       // Create the instance record in the database
-      const instance = await this.db.instance.create({
+      const instance = await db.instance.create({
         data: {
           user_id: data.user_id,
           title: data.title,
@@ -328,7 +327,7 @@ export class StaffInstanceService {
       });
 
       // Get the created instance with relations
-      const instanceWithRelations = await this.db.instance.findUnique({
+      const instanceWithRelations = await db.instance.findUnique({
         where: { id: instance.id },
         include: {
           user: true,
@@ -434,7 +433,7 @@ export class StaffInstanceService {
    */
   public static async getAvailableTemplates() {
     try {
-      const templates = await this.db.instance_template.findMany({
+      const templates = await db.instance_template.findMany({
         where: { deleted_at: null },
         select: {
           id: true,
@@ -477,7 +476,7 @@ export class StaffInstanceService {
    */
   public static async getAvailableCourses() {
     try {
-      const courses = await this.db.instance_course.findMany({
+      const courses = await db.instance_course.findMany({
         where: { deleted_at: null },
         select: {
           id: true,
@@ -518,7 +517,7 @@ export class StaffInstanceService {
    */
   public static async getAvailableSemesters() {
     try {
-      const semesters = await this.db.semester.findMany({
+      const semesters = await db.semester.findMany({
         where: { deleted_at: null },
         select: {
           id: true,

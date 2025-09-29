@@ -18,12 +18,10 @@ const baseEnvSchema = z.object({
       message: "LOG_TARGET must be one of console, file, or loki",
     })
     .default("console"),
-  // Loki logging URL
-  LOKI_URL: z
-    .url({
-      message: "LOKI_URL must be a valid URL",
-    })
-    .optional(),
+  // Loki URL for logging
+  LOKI_URL: z.url({
+    message: "LOKI_URL must be a valid URL",
+  }).optional(), // Will validate conditionally below
   // OpenTelemetry Collector URL
   OTEL_COLLECTOR_URL: z
     .url({
@@ -115,7 +113,17 @@ const testEnvSchema = z.object({
 // Conditional schema based on NODE_ENV
 const envSchema = process.env.NODE_ENV === "test"
   ? testEnvSchema
-  : baseEnvSchema;
+  : baseEnvSchema.extend({
+    // If LOG_TARGET is loki, LOKI_URL is required
+    LOKI_URL: z.string().refine((val) => {
+      if (process.env.LOG_TARGET === "loki") {
+        return typeof val === "string" && val.length > 0;
+      }
+      return true; // Not required otherwise
+    }, {
+      message: "LOKI_URL is required when LOG_TARGET is set to loki",
+    }),
+  });
 
 const parseEnv = envSchema.safeParse(process.env);
 if (!parseEnv.success) {

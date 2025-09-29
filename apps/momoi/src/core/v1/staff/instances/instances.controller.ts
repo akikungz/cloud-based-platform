@@ -20,10 +20,8 @@ export const StaffInstancesController = new Elysia({
   })
   .get("/", async ({ status, query }) => {
     const [err, instances] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof StaffInstanceService.getAllInstances>>
-    >(
-      () => StaffInstanceService.getAllInstances()
-    );
+      BadRequestError, typeof StaffInstanceService.getAllInstances
+    >(StaffInstanceService.getAllInstances);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -37,11 +35,11 @@ export const StaffInstancesController = new Elysia({
     // Apply pagination if provided
     const skip = query?.skip ? query.skip : 0;
     const take = query?.take ? query.take : 50;
-    
+
     const paginatedInstances = instances.slice(skip, skip + take);
 
-    return status(200, { 
-      message: "Instances fetched successfully", 
+    return status(200, {
+      message: "Instances fetched successfully",
       data: {
         instances: paginatedInstances,
         total: instances.length,
@@ -57,10 +55,8 @@ export const StaffInstancesController = new Elysia({
   })
   .get("/stats", async ({ status }) => {
     const [err, stats] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof StaffInstanceService.getInstancesStats>>
-    >(
-      () => StaffInstanceService.getInstancesStats()
-    );
+      BadRequestError, typeof StaffInstanceService.getInstancesStats
+    >(StaffInstanceService.getInstancesStats);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -71,17 +67,15 @@ export const StaffInstancesController = new Elysia({
       return status(error.code, { message: error.message });
     }
 
-    return status(200, { 
-      message: "Instance statistics fetched successfully", 
-      data: stats 
+    return status(200, {
+      message: "Instance statistics fetched successfully",
+      data: stats
     });
   })
   .get("/:id", async ({ status, params }) => {
     const [err, instance] = await create_callback<
-      BadRequestError | NotFoundError, Awaited<ReturnType<typeof StaffInstanceService.getInstanceById>>
-    >(
-      () => StaffInstanceService.getInstanceById(params.id)
-    );
+      BadRequestError | NotFoundError, typeof StaffInstanceService.getInstanceById
+    >(StaffInstanceService.getInstanceById, params.id);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -100,10 +94,8 @@ export const StaffInstancesController = new Elysia({
   })
   .post("/create", async ({ status, body }) => {
     const [err, instance] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof StaffInstanceService.createInstanceDirectly>>
-    >(
-      () => StaffInstanceService.createInstanceDirectly(body)
-    );
+      BadRequestError | ConflictError, typeof StaffInstanceService.createInstanceDirectly
+    >(StaffInstanceService.createInstanceDirectly, body);
 
     if (err) {
       return status(err.code, { message: err.message });
@@ -114,9 +106,9 @@ export const StaffInstancesController = new Elysia({
       return status(error.code, { message: error.message });
     }
 
-    return status(201, { 
-      message: "Instance created successfully", 
-      data: instance 
+    return status(201, {
+      message: "Instance created successfully",
+      data: instance
     });
   }, {
     body: t.Object({
@@ -135,49 +127,43 @@ export const StaffInstancesController = new Elysia({
   })
   .get("/templates", async ({ status }) => {
     const [err, templates] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof StaffInstanceService.getAvailableTemplates>>
-    >(
-      () => StaffInstanceService.getAvailableTemplates()
-    );
+      BadRequestError, typeof StaffInstanceService.getAvailableTemplates
+    >(StaffInstanceService.getAvailableTemplates);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
-      message: "Templates fetched successfully", 
-      data: templates 
+    return status(200, {
+      message: "Templates fetched successfully",
+      data: templates
     });
   })
   .get("/courses", async ({ status }) => {
     const [err, courses] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof StaffInstanceService.getAvailableCourses>>
-    >(
-      () => StaffInstanceService.getAvailableCourses()
-    );
+      BadRequestError, typeof StaffInstanceService.getAvailableCourses
+    >(StaffInstanceService.getAvailableCourses);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
-      message: "Courses fetched successfully", 
-      data: courses 
+    return status(200, {
+      message: "Courses fetched successfully",
+      data: courses
     });
   })
   .get("/semesters", async ({ status }) => {
     const [err, semesters] = await create_callback<
-      BadRequestError, Awaited<ReturnType<typeof StaffInstanceService.getAvailableSemesters>>
-    >(
-      () => StaffInstanceService.getAvailableSemesters()
-    );
+      BadRequestError, typeof StaffInstanceService.getAvailableSemesters
+    >(StaffInstanceService.getAvailableSemesters);
 
     if (err) {
       return status(err.code, { message: err.message });
     }
 
-    return status(200, { 
-      message: "Semesters fetched successfully", 
-      data: semesters 
+    return status(200, {
+      message: "Semesters fetched successfully",
+      data: semesters
     });
   });
