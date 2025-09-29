@@ -3,5 +3,5 @@
   "typescript.tsserver.experimental.enableProjectDiagnostics": true,
   "github.copilot.enable": {
     "*.env": false
-  }
+  },
 }
