@@ -11,7 +11,7 @@ describe("Create Callback", () => {
   });
 
   it("should return error when callback rejects", async () => {
-    const [error, result] = await create_callback<Error, null>(async () => {
+    const [error, result] = await create_callback<Error, () => void>(async () => {
       throw new Error("Test error");
     });
 
@@ -25,7 +25,8 @@ describe("Create Callback", () => {
       throw "String error";
     });
 
-    expect(error).toBe("String error");
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toInclude("Unknown error");
     expect(result).toBeNull();
   });
 
