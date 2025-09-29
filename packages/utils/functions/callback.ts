@@ -25,7 +25,7 @@ export const create_callback =
         if (error instanceof Error) {
           return [error as E, null as any];
         } else {
-          return [new Error(`Unknown error: from ${callback.name} with args ${JSON.stringify(args)}`) as E, null as any];
+          return [new Error(`Unknown error: from ${callback.name} with args ${JSON.stringify(args)} have an error => ${error}`) as E, null as any];
         }
       }
     }
@@ -33,23 +33,3 @@ export const create_callback =
     // This should never be reached, but TypeScript requires a return statement
     return [null, null] as any;
   }
-
-const test_callback = async (num: number) => {
-  if (num > 5) {
-    throw "Number is too large";
-  }
-
-  return num * 2;
-}
-
-// Example usage
-const main = async () => {
-  const [err, result] = await create_callback<Error, typeof test_callback>(test_callback, 5);
-  if (err) {
-    console.error(err.message);
-  } else {
-    console.log("Result:", result); // Should log: Result: 10
-  }
-}
-
-main();
