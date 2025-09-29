@@ -42,7 +42,7 @@ const ClientMenu: Record<Role, ClientMenuItem[]> = {
 			disabled: true, // Placeholder for future feature
 		},
 		{
-			href: "/samesters",
+			href: "/semesters",
 			label: "Semesters",
 			icon: <GraduationCap />,
 		},

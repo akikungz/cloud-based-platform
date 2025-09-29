@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import PendingRequest from "@midori/components/dashboard/PendingRequest";
+import { ExtensionApprovalManager } from "@midori/components/dashboard/ExtensionApprovalManager";
 import { RoleGuard } from "@midori/components/auth/RoleGuard";
 import { Role } from "auth/utils/role";
-import { PageHeader, SearchInput } from "@midori/components/ui";
+import { PageHeader, SearchInput, Tabs } from "@midori/components/ui";
 import { momoi_client } from "@midori/libs/momoi";
 import { Select, MenuItem, FormControl, InputLabel, Box, Button } from "@mui/material";
 import { RefreshCw } from "lucide-react";
@@ -69,13 +70,79 @@ export default function ApprovalsPage() {
 		fetchCourses();
 	}, []);
 
+	const tabs = [
+		{
+			id: "pending-requests",
+			label: "Pending Requests",
+			content: (
+				<div className="space-y-6">
+					{/* Filters */}
+					<Box className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+						{/* Course Filter */}
+						<FormControl className="w-full" size="small">
+							<InputLabel>Filter by Course</InputLabel>
+							<Select
+								value={selectedCourse}
+								onChange={(e) => setSelectedCourse(e.target.value)}
+								label="Filter by Course"
+								disabled={loading}
+							>
+								<MenuItem value="">
+									<em>All Courses</em>
+								</MenuItem>
+								{courses.map((course) => (
+									<MenuItem key={course.id} value={course.course_id}>
+										{course.course_id} - {course.course_title}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
+
+						{/* Search Filter */}
+						<div className="w-full md:col-span-3">
+							<SearchInput
+								value={searchQuery}
+								onChange={setSearchQuery}
+								placeholder="Search by title or student name..."
+							/>
+						</div>
+					</Box>
+
+					{/* Pending Requests */}
+					<div className="w-full">
+						<PendingRequest
+							key={refreshKey}
+							limit={10}
+							course={selectedCourse}
+							searchQuery={searchQuery}
+							showPagination={true}
+						/>
+					</div>
+				</div>
+			)
+		},
+		{
+			id: "extension-requests",
+			label: "Extension Requests",
+			content: (
+				<div className="w-full">
+					<ExtensionApprovalManager
+						key={refreshKey}
+						limit={10}
+						showPagination={true}
+					/>
+				</div>
+			)
+		}
+	];
+
 	return (
 		<RoleGuard allowedRoles={[Role.Staff]}>
 			<div className="flex flex-col items-center justify-center gap-4">
 				<div className="w-full flex items-center justify-between">
 					<PageHeader
 						title="Pending Approvals"
-						description="Review and approve student requests for virtual machines."
+						description="Review and approve student requests for virtual machines and extensions."
 					/>
 					<Button
 						variant="outlined"
@@ -89,46 +156,12 @@ export default function ApprovalsPage() {
 					</Button>
 				</div>
 
-				{/* Filters */}
-				<Box className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-					{/* Course Filter */}
-					<FormControl className="w-full" size="small">
-						<InputLabel>Filter by Course</InputLabel>
-						<Select
-							value={selectedCourse}
-							onChange={(e) => setSelectedCourse(e.target.value)}
-							label="Filter by Course"
-							disabled={loading}
-						>
-							<MenuItem value="">
-								<em>All Courses</em>
-							</MenuItem>
-							{courses.map((course) => (
-								<MenuItem key={course.id} value={course.course_id}>
-									{course.course_id} - {course.course_title}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-
-					{/* Search Filter */}
-					<div className="w-full md:col-span-3">
-						<SearchInput
-							value={searchQuery}
-							onChange={setSearchQuery}
-							placeholder="Search by title or student name..."
-						/>
-					</div>
-				</Box>
-
-				{/* Pending Requests */}
+				{/* Tabs */}
 				<div className="w-full">
-					<PendingRequest
-						key={refreshKey}
-						limit={10}
-						course={selectedCourse}
-						searchQuery={searchQuery}
-						showPagination={true}
+					<Tabs
+						tabs={tabs}
+						defaultTab="pending-requests"
+						className="w-full"
 					/>
 				</div>
 			</div>

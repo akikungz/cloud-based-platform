@@ -3,6 +3,7 @@ import { ClipboardList, Database, Users, Book, Plus, RefreshCw } from "lucide-re
 import TrendCard from "@midori/components/ui/TrendCard";
 import { CoursesCard } from "@midori/components/ui";
 import PendingRequest from "./PendingRequest";
+import ExtendsRequest from "./ExtendsRequest";
 import { StaffInstances } from "./StaffInstances";
 import { PageHeader } from "@midori/components/ui";
 import { momoi_client } from "@midori/libs/momoi";
@@ -14,6 +15,7 @@ export default function StaffDashboard() {
 		totalRequests: 0,
 		activeInstances: 0,
 		totalStudents: 0,
+		extensionRequests: 0,
 	});
 	const [courses, setCourses] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -48,6 +50,7 @@ export default function StaffDashboard() {
 				let totalRequests = 0;
 				let activeInstances = 0;
 				let totalStudents = 0;
+				let extensionRequests = 0;
 
 			// Process approvals data
 			if (!approvalsResult.error) {
@@ -56,7 +59,8 @@ export default function StaffDashboard() {
 
 			// Process extends data
 			if (!extendsResult.error) {
-				totalRequests += extendsResult.data?.data?.count || 0;
+				extensionRequests = extendsResult.data?.data?.count || 0;
+				totalRequests += extensionRequests;
 			}
 
 			// Process instances stats
@@ -86,6 +90,7 @@ export default function StaffDashboard() {
 					totalRequests,
 					activeInstances,
 					totalStudents,
+					extensionRequests,
 				});
 			} catch (error) {
 				console.error("Error fetching dashboard data:", error);
@@ -94,6 +99,7 @@ export default function StaffDashboard() {
 					totalRequests: 0,
 					activeInstances: 0,
 					totalStudents: 0,
+					extensionRequests: 0,
 				});
 				setCourses([]);
 		} finally {
@@ -119,7 +125,7 @@ export default function StaffDashboard() {
 			<div className="flex items-center justify-between w-full">
 				<PageHeader
 					title="Dashboard"
-					description="Monitor and manage student requests and approvals."
+					description="Monitor and manage student requests, approvals, and instances."
 				/>
 				<div className="flex items-center space-x-3">
 					<button
@@ -172,6 +178,11 @@ export default function StaffDashboard() {
 			{/* Pending Requests */}
 			<div className="w-full">
 				<PendingRequest limit={3} dashboard />
+			</div>
+
+			{/* Extension Requests */}
+			<div className="w-full">
+				<ExtendsRequest limit={3} dashboard />
 			</div>
 
 			{/* Recent Instances */}

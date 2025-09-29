@@ -5,7 +5,6 @@ import { env } from "@midori/libs/env";
 const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
-    instrumentationHook: false,
     serverComponentsExternalPackages: ['@opentelemetry/api'],
   },
   telemetry: {

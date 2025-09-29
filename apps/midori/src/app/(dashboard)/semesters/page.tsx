@@ -37,7 +37,6 @@ export default function SemestersPage() {
     active: false,
   });
 
-
   // Fetch semesters data
   const fetchSemesters = async () => {
     setLoading(true);
@@ -53,21 +52,22 @@ export default function SemestersPage() {
       if (semestersResult.error) {
         throw new Error(semestersResult.error.value.message || 'Failed to fetch semesters');
       }
-      if (activeResult.error) {
-        throw new Error(activeResult.error.value.message || 'Failed to fetch active semester');
-      }
 
       // Handle the API response structure: { message: string, data: Semester[] }
       const semestersData = semestersResult.data?.data || semestersResult.data;
-      const activeData = activeResult.data?.data || activeResult.data;
 
       setSemesters(Array.isArray(semestersData) ? semestersData : []);
       // Only set activeSemester if we have valid data with an id
+
+      if (activeResult.error) {
+        throw new Error(activeResult.error.value.message || 'Failed to fetch active semester');
+      }
+      const activeData = activeResult.data?.data || activeResult.data;
       setActiveSemester(activeData && typeof activeData === 'object' && 'id' in activeData ? activeData as Semester : null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 
-                          typeof err === 'string' ? err : 
-                          JSON.stringify(err);
+      const errorMessage = err instanceof Error ? err.message :
+        typeof err === 'string' ? err :
+          JSON.stringify(err);
       setError(errorMessage);
     } finally {
       setLoading(false);

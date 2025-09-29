@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@midori/utils/format";
 import { Button, Pagination, Box, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
-import { ClipboardList, SearchX, RefreshCw } from "lucide-react";
+import { ClipboardList, SearchX, RefreshCw, Clock, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -37,6 +37,31 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalCount, setTotalCount] = useState(0);
 	const [pageSize, setPageSize] = useState(limit);
+	const [stats, setStats] = useState({
+		totalRequests: 0,
+		pendingRequests: 0,
+		processedRequests: 0,
+	});
+
+	// Fetch statistics
+	const fetchStats = async () => {
+		try {
+			const result = await momoi_client.api.v1.staff.approval.stats.get();
+
+			if (!result.error) {
+				const statsData = result.data?.data;
+				if (statsData) {
+					setStats({
+						totalRequests: statsData.instanceRequests.total,
+						pendingRequests: statsData.instanceRequests.pending,
+						processedRequests: statsData.instanceRequests.processed,
+					});
+				}
+			}
+		} catch (err) {
+			console.error("Error fetching stats:", err);
+		}
+	};
 
 	// Fetch real requests from API
 	const fetchRequests = async (isRefresh = false) => {
@@ -82,6 +107,7 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 						memory: req.memory,
 						storage: req.disk,
 					},
+					created_at: new Date(req.created_at),
 				}));
 
 					// Apply filters
@@ -118,6 +144,7 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 	// Handle refresh
 	const handleRefresh = () => {
 		fetchRequests(true);
+		fetchStats();
 	};
 
 	// Handle page change
@@ -135,40 +162,84 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 
 	useEffect(() => {
 		fetchRequests();
+		fetchStats();
 	}, [pageSize, currentPage, course, searchQuery]);
 
 	return (
-		<div className={
-			cn(
-				"w-full bg-vm-orange-50 p-4 rounded-lg shadow-md",
-				"flex flex-col gap-2",
-				dashboard ? "h-full" : "min-h-96",
-			)
-		}>
-			<div className={cn(dashboard ? "flex" : "hidden", "items-center justify-between gap-2 mb-2")}>
-				<div className="flex items-center gap-2">
-					<ClipboardList className="text-vm-orange-600 w-6 h-6" />
-					<h3 className="text-2xl font-semibold">Pending Requests</h3>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<Button
-						variant="outlined"
-						color="secondary"
-						size="small"
-						onClick={handleRefresh}
-						disabled={isRefreshing}
-						startIcon={<RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />}
-					>
-						{isRefreshing ? "Refreshing..." : "Refresh"}
-					</Button>
-					<Link href="/approvals" passHref>
-						<Button variant="outlined" color="secondary" size="small">
-							View All
+		<div className="w-full bg-white p-6 rounded-lg shadow-md">
+			{dashboard && (
+				<div className="flex items-center justify-between gap-2 mb-4">
+					<div className="flex items-center gap-2">
+						<ClipboardList className="text-vm-orange-600 w-6 h-6" />
+						<div>
+							<h3 className="text-2xl font-semibold">Pending Requests</h3>
+							<p className="text-vm-orange-600 text-sm">New virtual machine requests awaiting approval</p>
+						</div>
+					</div>
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outlined"
+							color="secondary"
+							size="small"
+							onClick={handleRefresh}
+							disabled={isRefreshing}
+							startIcon={<RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />}
+						>
+							{isRefreshing ? "Refreshing..." : "Refresh"}
 						</Button>
-					</Link>
+						<Link href="/approvals" passHref>
+							<Button variant="outlined" color="primary" size="small">
+								View All
+							</Button>
+						</Link>
+					</div>
 				</div>
-			</div>
+			)}
+
+			{/* Statistics Cards */}
+			{!dashboard && (
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+					{/* Total Requests Card */}
+					<div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+						<div className="flex items-center gap-3">
+							<div className="p-2 bg-orange-100 rounded-lg">
+								<Clock className="h-6 w-6 text-orange-600" />
+							</div>
+							<div>
+								<p className="text-sm font-medium text-orange-600">Total Requests</p>
+								<p className="text-2xl font-bold text-orange-900">{stats.totalRequests}</p>
+							</div>
+						</div>
+					</div>
+
+					{/* Pending Requests Card */}
+					<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+						<div className="flex items-center gap-3">
+							<div className="p-2 bg-blue-100 rounded-lg">
+								<AlertCircle className="h-6 w-6 text-blue-600" />
+							</div>
+							<div>
+								<p className="text-sm font-medium text-blue-600">Pending</p>
+								<p className="text-2xl font-bold text-blue-900">{stats.pendingRequests}</p>
+							</div>
+						</div>
+					</div>
+
+					{/* Processed Requests Card */}
+					<div className="bg-green-50 border border-green-200 rounded-lg p-4">
+						<div className="flex items-center gap-3">
+							<div className="p-2 bg-green-100 rounded-lg">
+								<CheckCircle className="h-6 w-6 text-green-600" />
+							</div>
+							<div>
+								<p className="text-sm font-medium text-green-600">Processed</p>
+								<p className="text-2xl font-bold text-green-900">{stats.processedRequests}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
 			{
 				isLoading ? (
 					<LoadingSpinner size="lg" centered text="Loading requests..." />
@@ -180,14 +251,16 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 					/>
 				) : requests.length > 0 ? (
 					<>
-						{requests.map((request) => (
-							<PendingRequestItem 
-								key={request.id} 
-								{...request} 
-								onRequestUpdate={fetchRequests}
-							/>
-						))}
-						
+						<div className="space-y-4">
+							{requests.map((request) => (
+								<PendingRequestItem 
+									key={request.id} 
+									{...request} 
+									onRequestUpdate={fetchRequests}
+								/>
+							))}
+						</div>
+							
 						{/* Material-UI Pagination */}
 						{showPagination && (
 							<Box className="mt-6 space-y-4">
@@ -226,7 +299,6 @@ export const PendingRequest: React.FC<PendingRequestProps> = ({
 										boundaryCount={1}
 									/>
 								</Box>
-							
 							</Box>
 						)}
 					</>

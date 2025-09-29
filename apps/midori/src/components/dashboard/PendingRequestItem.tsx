@@ -1,10 +1,10 @@
 "use client";
-import { Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from "@mui/material";
-import { Calendar, Clock, User, Book, Cpu, HardDrive, MemoryStick, Edit } from "lucide-react";
-import { cn } from "@midori/utils/format";
-import { SpecBadge } from "@midori/components/ui";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@midori/components/ui";
+import { Button } from "@mui/material";
+import { Check, X, ClipboardList, User, Calendar, FileText, AlertCircle, Cpu, MemoryStick, HardDrive, Edit } from "lucide-react";
 import { momoi_client } from "@midori/libs/momoi";
-import { useState } from "react";
+import { formatDate } from "@midori/utils/format";
 import { EditRequestDialog, type EditRequestData } from "./EditRequestDialog";
 
 export interface PendingRequestItemProps {
@@ -28,6 +28,7 @@ export interface PendingRequestItemProps {
 		memory: number;
 		storage: number;
 	};
+	created_at?: Date;
 	onRequestUpdate?: () => void;
 }
 
@@ -39,6 +40,7 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 	requestedBy,
 	course,
 	spec,
+	created_at,
 	onRequestUpdate,
 }) => {
 	const [isApproving, setIsApproving] = useState(false);
@@ -190,148 +192,178 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 	};
 	return (
 		<>
-		{/* Backdrop overlay when modals are open */}
-		{(rejectDialogOpen || editDialogOpen) && (
-			<div className="fixed inset-0 bg-black bg-opacity-50 z-40" />
-		)}
-		
-		<div className={cn(
-			"bg-white p-4 rounded-lg border border-vm-blue-200 hover:shadow-md transition-shadow",
-			(rejectDialogOpen || editDialogOpen) && "opacity-50"
-		)}>
-			<div className="flex flex-col gap-3">
-				{/* Header */}
-				<div className="flex items-start justify-between">
-					<div className="flex-1">
-						<h4 className="text-lg font-semibold text-vm-blue-900 mb-1">
-							{title}
-						</h4>
-						<p className="text-sm text-vm-blue-600 line-clamp-2">
-							{description}
+			<Card className="w-full border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
+				<CardHeader className="pb-3">
+					<div className="flex items-start justify-between">
+						<div className="flex-1">
+							<CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+								<ClipboardList className="h-5 w-5 text-blue-500" />
+								{title}
+							</CardTitle>
+							<p className="text-sm text-gray-600 mt-1">
+								VM instance request for {course.name}
+							</p>
+						</div>
+						<div className="flex items-center gap-2">
+							<span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+								Pending Request
+							</span>
+						</div>
+					</div>
+				</CardHeader>
+
+				<CardContent className="pt-0">
+					<div className="space-y-4">
+						{/* Description */}
+						<div className="flex items-start gap-3">
+							<FileText className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+							<div className="flex-1">
+								<p className="text-sm text-gray-700">{description}</p>
+							</div>
+						</div>
+
+						{/* Hostname */}
+						{hostname && (
+							<div className="flex items-center gap-3">
+								<AlertCircle className="h-4 w-4 text-gray-400 flex-shrink-0" />
+								<div className="flex-1">
+									<p className="text-sm text-gray-600">
+										<span className="font-medium">Hostname:</span> {hostname}
+									</p>
+								</div>
+							</div>
+						)}
+
+						{/* Specifications */}
+						<div className="flex items-start gap-3">
+							<Cpu className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+							<div className="flex-1">
+								<div className="flex flex-wrap gap-4">
+									<div className="flex items-center gap-2">
+										<Cpu className="h-3 w-3 text-gray-400" />
+										<span className="text-sm text-gray-600">{spec.cpu} CPU</span>
+									</div>
+									<div className="flex items-center gap-2">
+										<MemoryStick className="h-3 w-3 text-gray-400" />
+										<span className="text-sm text-gray-600">{spec.memory / 1024}GB RAM</span>
+									</div>
+									<div className="flex items-center gap-2">
+										<HardDrive className="h-3 w-3 text-gray-400" />
+										<span className="text-sm text-gray-600">{spec.storage}GB Storage</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{/* Requested By */}
+						<div className="flex items-center gap-3">
+							<User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+							<div className="flex-1">
+								<p className="text-sm text-gray-600">
+									<span className="font-medium">Requested by:</span> {requestedBy.name} ({requestedBy.email})
+								</p>
+							</div>
+						</div>
+
+						{/* Course */}
+						<div className="flex items-center gap-3">
+							<AlertCircle className="h-4 w-4 text-gray-400 flex-shrink-0" />
+							<div className="flex-1">
+								<p className="text-sm text-gray-600">
+									<span className="font-medium">Course:</span> {course.name} ({course.code})
+								</p>
+							</div>
+						</div>
+
+						{/* Created Date */}
+						{created_at && (
+							<div className="flex items-center gap-3">
+								<Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+								<div className="flex-1">
+									<p className="text-sm text-gray-600">
+										<span className="font-medium">Requested:</span> {formatDate(created_at)}
+									</p>
+								</div>
+							</div>
+						)}
+
+						{/* Action Buttons */}
+						<div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+							<Button
+								variant="outlined"
+								color="primary"
+								size="small"
+								onClick={() => setEditDialogOpen(true)}
+								disabled={isApproving || isRejecting || isEditing}
+								startIcon={<Edit className="h-4 w-4" />}
+							>
+								{isEditing ? "Editing..." : "Edit"}
+							</Button>
+							<Button
+								variant="outlined"
+								color="error"
+								size="small"
+								onClick={() => setRejectDialogOpen(true)}
+								disabled={isApproving || isRejecting || isEditing}
+								startIcon={<X className="h-4 w-4" />}
+							>
+								{isRejecting ? "Rejecting..." : "Reject"}
+							</Button>
+							<Button
+								variant="contained"
+								color="success"
+								size="small"
+								onClick={handleApprove}
+								disabled={isApproving || isRejecting || isEditing}
+								startIcon={<Check className="h-4 w-4" />}
+							>
+								{isApproving ? "Approving..." : "Approve"}
+							</Button>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+
+			{/* Reject Dialog */}
+			{rejectDialogOpen && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+						<h3 className="text-lg font-semibold text-gray-900 mb-4">
+							Reject Request
+						</h3>
+						<p className="text-sm text-gray-600 mb-4">
+							Please provide a reason for rejecting this request:
 						</p>
-					</div>
-					<Chip
-						label="Pending"
-						color="warning"
-						size="small"
-						className="ml-2"
-					/>
-				</div>
-
-				{/* Request Details */}
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-					{/* User Info */}
-					<div className="flex items-center gap-2 text-sm">
-						<User className="w-4 h-4 text-vm-blue-500" />
-						<span className="text-vm-blue-700">
-							{requestedBy.name} ({requestedBy.email})
-						</span>
-					</div>
-
-					{/* Course Info */}
-					<div className="flex items-center gap-2 text-sm">
-						<Book className="w-4 h-4 text-vm-blue-500" />
-						<span className="text-vm-blue-700">
-							{course.name} ({course.code})
-						</span>
-					</div>
-				</div>
-
-				{/* Specs */}
-				<div className="flex flex-wrap gap-2">
-					<SpecBadge
-						icon={Cpu}
-						label={`${spec.cpu} CPU`}
-						variant="blue"
-					/>
-					<SpecBadge
-						icon={MemoryStick}
-						label={`${spec.memory / 1024}GB RAM`}
-						variant="blue"
-					/>
-					<SpecBadge
-						icon={HardDrive}
-						label={`${spec.storage}GB Storage`}
-						variant="blue"
-					/>
-					<SpecBadge
-						icon={Book}
-						label={spec.os}
-						variant="orange"
-					/>
-				</div>
-
-				{/* Actions */}
-				<div className="flex items-center justify-between pt-2 border-t border-vm-blue-100">
-					<div className="flex items-center gap-2 text-xs text-vm-blue-500">
-						<Clock className="w-3 h-3" />
-						<span>Requested 2 hours ago</span>
-					</div>
-					<div className="flex gap-2">
-						<Button
-							variant="outlined"
-							color="primary"
-							size="small"
-							onClick={() => setEditDialogOpen(true)}
-							disabled={isApproving || isRejecting || isEditing}
-							startIcon={<Edit className="w-4 h-4" />}
-						>
-							Edit
-						</Button>
-						<Button
-							variant="outlined"
-							color="error"
-							size="small"
-							onClick={() => setRejectDialogOpen(true)}
-							disabled={isApproving || isRejecting || isEditing}
-						>
-							{isRejecting ? "Rejecting..." : "Reject"}
-						</Button>
-						<Button
-							variant="contained"
-							color="success"
-							size="small"
-							onClick={handleApprove}
-							disabled={isApproving || isRejecting || isEditing}
-						>
-							{isApproving ? "Approving..." : "Approve"}
-						</Button>
+						<textarea
+							value={rejectReason}
+							onChange={(e) => setRejectReason(e.target.value)}
+							placeholder="Enter rejection reason..."
+							className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+							rows={4}
+						/>
+						<div className="flex items-center justify-end gap-3 mt-6">
+							<Button
+								variant="outlined"
+								onClick={() => {
+									setRejectDialogOpen(false);
+									setRejectReason("");
+								}}
+								disabled={isRejecting}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="contained"
+								color="error"
+								onClick={handleReject}
+								disabled={isRejecting || !rejectReason.trim()}
+							>
+								{isRejecting ? "Rejecting..." : "Reject Request"}
+							</Button>
+						</div>
 					</div>
 				</div>
-			</div>
-		</div>
-
-		{/* Reject Dialog */}
-		<Dialog 
-			open={rejectDialogOpen} 
-			onClose={() => setRejectDialogOpen(false)}
-			sx={{ zIndex: 50 }}
-		>
-			<DialogTitle>Reject Request</DialogTitle>
-			<DialogContent>
-				<TextField
-					autoFocus
-					margin="dense"
-					label="Reason for rejection"
-					fullWidth
-					multiline
-					rows={3}
-					value={rejectReason}
-					onChange={(e) => setRejectReason(e.target.value)}
-					placeholder="Please provide a reason for rejecting this request..."
-				/>
-			</DialogContent>
-			<DialogActions>
-				<Button onClick={() => setRejectDialogOpen(false)}>Cancel</Button>
-				<Button 
-					onClick={handleReject} 
-					color="error"
-					disabled={isRejecting}
-				>
-					{isRejecting ? "Rejecting..." : "Reject"}
-				</Button>
-			</DialogActions>
-		</Dialog>
+			)}
 
 		{/* Edit Dialog */}
 		<EditRequestDialog
@@ -351,19 +383,25 @@ export const PendingRequestItem: React.FC<PendingRequestItemProps> = ({
 			approveLoading={isApprovingFromEdit}
 		/>
 
-		{/* Snackbar for notifications */}
-		<Snackbar
-			open={snackbar.open}
-			autoHideDuration={6000}
-			onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-		>
-			<Alert 
-				onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
-				severity={snackbar.severity}
-			>
-				{snackbar.message}
-			</Alert>
-		</Snackbar>
+			{/* Snackbar */}
+			{snackbar.open && (
+				<div className="fixed bottom-4 right-4 z-50">
+					<div className={`px-4 py-3 rounded-md shadow-lg ${
+						snackbar.severity === "success" 
+							? "bg-green-100 text-green-800 border border-green-200" 
+							: "bg-red-100 text-red-800 border border-red-200"
+					}`}>
+						<div className="flex items-center gap-2">
+							{snackbar.severity === "success" ? (
+								<Check className="h-4 w-4" />
+							) : (
+								<X className="h-4 w-4" />
+							)}
+							<span className="text-sm font-medium">{snackbar.message}</span>
+						</div>
+					</div>
+				</div>
+			)}
 	</>
 	);
 };

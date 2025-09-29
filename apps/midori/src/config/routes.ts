@@ -62,8 +62,8 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
 		title: "Storage",
 		description: "Manage storage resources",
 	},
-	"/samesters": {
-		path: "/samesters",
+	"/semesters": {
+		path: "/semesters",
 		allowedRoles: [Role.Staff],
 		title: "Semesters",
 		description: "Manage academic semesters",
