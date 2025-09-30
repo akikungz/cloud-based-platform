@@ -6,13 +6,10 @@
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
 		"module": "esnext",
-		"moduleResolution": "node",
-		"types": ["bun-types", "@types/amqplib"],
+		"moduleResolution": "bundler",
 		"forceConsistentCasingInFileNames": true,
 		"paths": {
 			"@yuzu/*": ["./src/*"]
 		}
 	},
-	"include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
-	"exclude": ["node_modules"]
 }

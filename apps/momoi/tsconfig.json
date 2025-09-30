@@ -7,7 +7,6 @@
     "paths": {
       "@momoi/*": ["./src/*"]
     },
-    "types": ["bun-types", "@types/amqplib"],
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "forceConsistentCasingInFileNames": true,
