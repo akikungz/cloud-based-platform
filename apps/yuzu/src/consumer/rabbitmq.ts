@@ -1,4 +1,4 @@
-import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
+import amqp, { Channel, ConsumeMessage } from 'amqplib';
 import { env } from '@yuzu/libs/env';
 import { logger } from '../libs/log';
 
@@ -10,7 +10,7 @@ export interface RabbitMQConfig {
 }
 
 export class RabbitMQConsumer {
-  private connection: Connection | null = null;
+  private connection: Awaited<ReturnType<typeof amqp.connect>> | null = null;
   private channel: Channel | null = null;
   private config: RabbitMQConfig;
 
