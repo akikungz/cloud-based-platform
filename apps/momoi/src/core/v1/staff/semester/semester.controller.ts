@@ -6,11 +6,15 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { SemesterService } from "./semester.service";
 
 import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const SemesterController = new Elysia({
   name: "staff.semester.controller",
-  prefix: "/semester"
+  prefix: "/semester",
+  detail: {
+    tags: ["Semester", "Staff"],
+    description: "Staff semester related endpoints"
+  }
 })
   .use(env.NODE_ENV === "test" ? mockAuthStaff : auth_service)
   .guard({ auth: true })
@@ -18,12 +22,10 @@ export const SemesterController = new Elysia({
     if (!isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, query }) => {
-    const [err, semesters] = await create_callback<
-      BadRequestError, typeof SemesterService.getSemesters
-    >(SemesterService.getSemesters, query?.skip, query?.take);
+    const [err, semesters] = await warpper(SemesterService.getSemesters, [query?.skip, query?.take]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -39,12 +41,10 @@ export const SemesterController = new Elysia({
     )
   })
   .post("/", async ({ status, body }) => {
-    const [err, semester] = await create_callback<
-      BadRequestError | ConflictError, typeof SemesterService.createSemester
-    >(SemesterService.createSemester, body);
+    const [err, semester] = await warpper(SemesterService.createSemester, [body]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(201, {
@@ -60,13 +60,10 @@ export const SemesterController = new Elysia({
     })
   })
   .get("/active", async ({ status }) => {
-    const [err, activeSemester] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError,
-      typeof SemesterService.getActiveSemester
-    >(SemesterService.getActiveSemester);
+    const [err, activeSemester] = await warpper(SemesterService.getActiveSemester);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!activeSemester) {
@@ -79,13 +76,10 @@ export const SemesterController = new Elysia({
     });
   })
   .put("/:id", async ({ status, params, body }) => {
-    const [err, semester] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError,
-      typeof SemesterService.updateSemester
-    >(SemesterService.updateSemester, params.id, body);
+    const [err, semester] = await warpper(SemesterService.updateSemester, [params.id, body]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -104,12 +98,10 @@ export const SemesterController = new Elysia({
     })
   })
   .post("/:id/activate", async ({ status, params }) => {
-    const [err, semester] = await create_callback<
-      BadRequestError | NotFoundError, typeof SemesterService.activateSemester
-    >(SemesterService.activateSemester, params.id);
+    const [err, semester] = await warpper(SemesterService.activateSemester, [params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -122,12 +114,10 @@ export const SemesterController = new Elysia({
     })
   })
   .delete("/:id", async ({ status, params }) => {
-    const [err, deletedSemester] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, typeof SemesterService.deleteSemester
-    >(SemesterService.deleteSemester, params.id);
+    const [err, deletedSemester] = await warpper(SemesterService.deleteSemester, [params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {

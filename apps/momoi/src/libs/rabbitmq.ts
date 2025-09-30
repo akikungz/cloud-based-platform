@@ -1,4 +1,4 @@
-import amqp, { Connection, Channel } from 'amqplib';
+import amqp, { Channel } from 'amqplib';
 import { env } from './env';
 import { logger } from './log';
 
@@ -58,7 +58,7 @@ export interface VMStatusMessage {
 export type VMMessage = VMCreateMessage | VMDeleteMessage | VMResizeMessage | VMStatusMessage;
 
 export class RabbitMQPublisher {
-  private connection: Connection | null = null;
+  private connection: Awaited<ReturnType<typeof amqp.connect>> | null = null;
   private channel: Channel | null = null;
   private isConnected = false;
 
@@ -70,10 +70,10 @@ export class RabbitMQPublisher {
       logger.info(`Connecting to RabbitMQ... URL: ${env.RABBITMQ_URL}`);
 
       this.connection = await amqp.connect(env.RABBITMQ_URL);
-      this.channel = await this.connection.createChannel();
+      this.channel = await this.connection!.createChannel();
 
       // Assert the exchange exists
-      await this.channel.assertExchange(env.RABBITMQ_EXCHANGE, 'topic', {
+      await this.channel!.assertExchange(env.RABBITMQ_EXCHANGE, 'topic', {
         durable: true
       });
 
@@ -81,12 +81,12 @@ export class RabbitMQPublisher {
       logger.info('Successfully connected to RabbitMQ');
 
       // Handle connection close
-      this.connection.on('close', () => {
+      this.connection!.on('close', () => {
         logger.warn('RabbitMQ connection closed');
         this.isConnected = false;
       });
 
-      this.connection.on('error', (error) => {
+      this.connection!.on('error', (error) => {
         logger.error('RabbitMQ connection error:', error);
         this.isConnected = false;
       });

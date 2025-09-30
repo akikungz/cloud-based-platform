@@ -7,11 +7,15 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { StaffInstanceService } from "./instances.service";
 
 import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const StaffInstancesController = new Elysia({
   name: "staff.instances.controller",
-  prefix: "/instances"
+  prefix: "/instances",
+  detail: {
+    tags: ["Instances", "Staff"],
+    description: "Staff instances related endpoints"
+  }
 })
   .use(env.NODE_ENV === "test" ? mockAuthStaff : auth_service)
   .guard({ auth: true })
@@ -19,12 +23,10 @@ export const StaffInstancesController = new Elysia({
     if (!isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, query }) => {
-    const [err, instances] = await create_callback<
-      BadRequestError, typeof StaffInstanceService.getAllInstances
-    >(StaffInstanceService.getAllInstances);
+    const [err, instances] = await warpper(StaffInstanceService.getAllInstances);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!instances) {
@@ -54,12 +56,10 @@ export const StaffInstancesController = new Elysia({
     }))
   })
   .get("/stats", async ({ status }) => {
-    const [err, stats] = await create_callback<
-      BadRequestError, typeof StaffInstanceService.getInstancesStats
-    >(StaffInstanceService.getInstancesStats);
+    const [err, stats] = await warpper(StaffInstanceService.getInstancesStats);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!stats) {
@@ -73,12 +73,10 @@ export const StaffInstancesController = new Elysia({
     });
   })
   .get("/:id", async ({ status, params }) => {
-    const [err, instance] = await create_callback<
-      BadRequestError | NotFoundError, typeof StaffInstanceService.getInstanceById
-    >(StaffInstanceService.getInstanceById, params.id);
+    const [err, instance] = await warpper(StaffInstanceService.getInstanceById, [params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!instance) {
@@ -93,12 +91,10 @@ export const StaffInstancesController = new Elysia({
     })
   })
   .post("/create", async ({ status, body }) => {
-    const [err, instance] = await create_callback<
-      BadRequestError | ConflictError, typeof StaffInstanceService.createInstanceDirectly
-    >(StaffInstanceService.createInstanceDirectly, body);
+    const [err, instance] = await warpper(StaffInstanceService.createInstanceDirectly, [body]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!instance) {
@@ -126,12 +122,10 @@ export const StaffInstancesController = new Elysia({
     })
   })
   .get("/templates", async ({ status }) => {
-    const [err, templates] = await create_callback<
-      BadRequestError, typeof StaffInstanceService.getAvailableTemplates
-    >(StaffInstanceService.getAvailableTemplates);
+    const [err, templates] = await warpper(StaffInstanceService.getAvailableTemplates);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -140,12 +134,10 @@ export const StaffInstancesController = new Elysia({
     });
   })
   .get("/courses", async ({ status }) => {
-    const [err, courses] = await create_callback<
-      BadRequestError, typeof StaffInstanceService.getAvailableCourses
-    >(StaffInstanceService.getAvailableCourses);
+    const [err, courses] = await warpper(StaffInstanceService.getAvailableCourses);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -154,12 +146,10 @@ export const StaffInstancesController = new Elysia({
     });
   })
   .get("/semesters", async ({ status }) => {
-    const [err, semesters] = await create_callback<
-      BadRequestError, typeof StaffInstanceService.getAvailableSemesters
-    >(StaffInstanceService.getAvailableSemesters);
+    const [err, semesters] = await warpper(StaffInstanceService.getAvailableSemesters);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {

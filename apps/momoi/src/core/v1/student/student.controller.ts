@@ -5,7 +5,11 @@ import { RequestsController } from "@momoi/core/v1/student/requests/requests.con
 
 export const StudentController = new Elysia({
   name: "student.controller",
-  prefix: "/student"
+  prefix: "/student",
+  detail: {
+    tags: ["Student"],
+    description: "Student related endpoints"
+  }
 })
   .use(InstancesController)
   .use(RequestsController);

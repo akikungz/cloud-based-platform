@@ -7,11 +7,15 @@ import { mockAuthStudent } from "@momoi/core/auth/auth.service-test";
 import { InstanceService } from "./instances.service";
 
 import { BadRequestError, NotFoundError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const InstancesController = new Elysia({
   name: "student.instances.controller",
-  prefix: "/instances"
+  prefix: "/instances",
+  detail: {
+    tags: ["Instances", "Student"],
+    description: "Student instances related endpoints"
+  }
 })
   .use(env.NODE_ENV === "test" ? mockAuthStudent : auth_service)
   .guard({ auth: true })
@@ -19,12 +23,10 @@ export const InstancesController = new Elysia({
     if (isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, user }) => {
-    const [err, instances] = await create_callback<
-      BadRequestError, typeof InstanceService.getInstances
-    >(InstanceService.getInstances, user.id);
+    const [err, instances] = await warpper(InstanceService.getInstances, [user.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!instances) {
@@ -35,12 +37,10 @@ export const InstancesController = new Elysia({
     return status(200, { message: "Instances fetched successfully", data: instances });
   })
   .get("/:id", async ({ status, user, params }) => {
-    const [err, instance] = await create_callback<
-      BadRequestError | NotFoundError, typeof InstanceService.getInstanceById
-    >(InstanceService.getInstanceById, user.id, params.id);
+    const [err, instance] = await warpper(InstanceService.getInstanceById, [user.id, params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!instance) {
@@ -55,12 +55,10 @@ export const InstancesController = new Elysia({
     })
   })
   .delete("/:id", async ({ status, user, params }) => {
-    const [err, result] = await create_callback<
-      BadRequestError | NotFoundError, typeof InstanceService.deleteInstance
-    >(InstanceService.deleteInstance, user.id, params.id);
+    const [err, result] = await warpper(InstanceService.deleteInstance, [user.id, params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {

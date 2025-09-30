@@ -6,13 +6,17 @@ import { auth_service } from "@momoi/core/auth/auth.service";
 
 import { BadRequestError, ForbiddenError, NotFoundError } from "@momoi/shared/errors";
 
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 import { ApprovalService } from "./approval.service";
 
 export const ApprovalController = new Elysia({
   name: "staff.approval.controller",
-  prefix: "/approval"
+  prefix: "/approval",
+  detail: {
+    tags: ["Approval", "Staff"],
+    description: "Staff approval related endpoints"
+  }
 })
   .use(env.NODE_ENV === "test" ? mockAuthStaff : auth_service)
   .guard({ auth: true })
@@ -59,10 +63,10 @@ export const ApprovalController = new Elysia({
     const staff_id = 'staff_id' in user ? user.staff_id : undefined;
     if (!staff_id) return status(403, { message: "Forbidden" });
     const { request_id } = body;
-    const [err, approval] = await create_callback<BadRequestError, typeof ApprovalService.approveRequest>(ApprovalService.approveRequest, { request_id }, staff_id);
+    const [err, approval] = await warpper(ApprovalService.approveRequest, [{ request_id }, staff_id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!approval) {
@@ -80,10 +84,10 @@ export const ApprovalController = new Elysia({
   })
   .post("/extends/approve", async ({ body, status }) => {
     const { request_id } = body;
-    const [err, approval] = await create_callback<BadRequestError, typeof ApprovalService.approveExtendsRequest>(ApprovalService.approveExtendsRequest, { request_id });
+    const [err, approval] = await warpper(ApprovalService.approveExtendsRequest, [{ request_id }]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!approval) {
@@ -103,10 +107,10 @@ export const ApprovalController = new Elysia({
     if (!staff_id) return status(403, { message: "Forbidden" });
     const { request_id, reason } = body;
 
-    const [err, rejection] = await create_callback<BadRequestError, typeof ApprovalService.rejectRequest>(ApprovalService.rejectRequest, { request_id, reason }, staff_id);
+    const [err, rejection] = await warpper(ApprovalService.rejectRequest, [{ request_id, reason }, staff_id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!rejection) {
@@ -124,10 +128,10 @@ export const ApprovalController = new Elysia({
   })
   .post("/extends/reject", async ({ body, status }) => {
     const { request_id, reason } = body;
-    const [err, rejection] = await create_callback<BadRequestError, typeof ApprovalService.rejectExtendsRequest>(ApprovalService.rejectExtendsRequest, { request_id, reason });
+    const [err, rejection] = await warpper(ApprovalService.rejectExtendsRequest, [{ request_id, reason }]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!rejection) {
@@ -148,10 +152,10 @@ export const ApprovalController = new Elysia({
     if (!staff_id) return status(403, { message: "Forbidden" });
     const { request_id, cpus, memory, disk } = body;
 
-    const [err, updatedRequest] = await create_callback<BadRequestError, typeof ApprovalService.editRequest>(ApprovalService.editRequest, { request_id, cpus, memory, disk }, staff_id);
+    const [err, updatedRequest] = await warpper(ApprovalService.editRequest, [{ request_id, cpus, memory, disk }, staff_id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!updatedRequest) {
@@ -173,10 +177,10 @@ export const ApprovalController = new Elysia({
     const staff_id = 'staff_id' in user ? user.staff_id : undefined;
     if (!staff_id) return status(403, { message: "Forbidden" });
 
-    const [err, stats] = await create_callback<BadRequestError, typeof ApprovalService.getApprovalStats>(ApprovalService.getApprovalStats, staff_id);
+    const [err, stats] = await warpper(ApprovalService.getApprovalStats, [staff_id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {

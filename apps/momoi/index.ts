@@ -1,7 +1,7 @@
 import { cors } from "@elysiajs/cors";
-import { openapi } from "@elysiajs/openapi";
-// @ts-ignore
-import { fromTypes } from "@elysiajs/openapi/gen";
+import { openapi, fromTypes } from "@elysiajs/openapi";
+// // @ts-ignore
+// import { fromTypes } from "@elysiajs/openapi/gen";
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import prometheusPlugin from "elysia-prometheus";
 
@@ -67,7 +67,7 @@ app.use(openapi({
     ]
   },
   references: env.NODE_ENV === "development" ?
-    fromTypes("src/index.ts") : undefined
+    fromTypes("index.ts") : undefined
 }))
 
 app.use(cors({

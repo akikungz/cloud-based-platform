@@ -7,12 +7,17 @@
     "paths": {
       "@momoi/*": ["./src/*"]
     },
-    "types": ["bun-types"],
+    "types": ["bun-types", "@types/amqplib"],
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "declaration": false,
+    "noErrorTruncation": true
+  },
+  "exclude": [
+    "../../packages/database/generated/prismabox/**"
+  ]
 }

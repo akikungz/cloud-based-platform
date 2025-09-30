@@ -7,11 +7,15 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { PersonsService } from "./persons.service";
 
 import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const PersonsController = new Elysia({
   name: "persons.controller",
-  prefix: "/persons"
+  prefix: "/persons",
+  detail: {
+    tags: ["Persons", "Staff"],
+    description: "Staff persons related endpoints"
+  }
 })
   .use(env.NODE_ENV === "test" ? mockAuthStaff : auth_service)
   .guard({ auth: true })
@@ -19,12 +23,10 @@ export const PersonsController = new Elysia({
     if (!isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, query }) => {
-    const [err, persons] = await create_callback<
-      BadRequestError, typeof PersonsService.getPersons
-    >(PersonsService.getPersons, query?.skip, query?.take);
+    const [err, persons] = await warpper(PersonsService.getPersons, [query?.skip, query?.take]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!persons) {
@@ -40,12 +42,10 @@ export const PersonsController = new Elysia({
     }))
   })
   .get("/search", async ({ status, query }) => {
-    const [err, person] = await create_callback<
-      BadRequestError | NotFoundError, typeof PersonsService.getPersonsByEmail
-    >(PersonsService.getPersonsByEmail, query.email);
+    const [err, person] = await warpper(PersonsService.getPersonsByEmail, [query.email]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!person) {
@@ -60,12 +60,10 @@ export const PersonsController = new Elysia({
     })
   })
   .post("/", async ({ status, body }) => {
-    const [err, person] = await create_callback<
-      BadRequestError | ConflictError, typeof PersonsService.createPerson
-    >(PersonsService.createPerson, body.email);
+    const [err, person] = await warpper(PersonsService.createPerson, [body.email]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(201, { message: "Create a new person", data: person });
@@ -75,12 +73,10 @@ export const PersonsController = new Elysia({
     })
   })
   .delete("/", async ({ status, body }) => {
-    const [err, person] = await create_callback<
-      BadRequestError | NotFoundError, typeof PersonsService.deletePerson
-    >(PersonsService.deletePerson, body.email);
+    const [err, person] = await warpper(PersonsService.deletePerson, [body.email]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, { message: "Delete a person", data: person });

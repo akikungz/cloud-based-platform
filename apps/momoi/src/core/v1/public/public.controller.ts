@@ -2,17 +2,21 @@ import { Elysia } from "elysia";
 
 import { SemesterService } from "@momoi/core/v1/staff/semester/semester.service";
 import { BadRequestError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const PublicController = new Elysia({
   name: "public.controller",
-  prefix: "/public"
+  prefix: "/public",
+  detail: {
+    tags: ["Public"],
+    description: "Publicly accessible endpoints"
+  }
 })
   .get("/active-semester", async ({ status }) => {
-    const [err, activeSemester] = await create_callback<BadRequestError, typeof SemesterService.getActiveSemester>(SemesterService.getActiveSemester);
+    const [err, activeSemester] = await warpper(SemesterService.getActiveSemester);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!activeSemester) {
@@ -25,10 +29,10 @@ export const PublicController = new Elysia({
     });
   })
   .get("/next-semester", async ({ status }) => {
-    const [err, nextSemester] = await create_callback<BadRequestError, typeof SemesterService.getNextSemester>(SemesterService.getNextSemester);
+    const [err, nextSemester] = await warpper(SemesterService.getNextSemester);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!nextSemester) {

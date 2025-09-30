@@ -2,17 +2,21 @@ import { Elysia } from "elysia";
 import { AutoCompleteService } from "./autocomplete.service";
 
 import { BadRequestError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const AutocompleteController = new Elysia({
   name: "autocomplete.controller",
-  prefix: "/autocomplete"
+  prefix: "/autocomplete",
+  detail: {
+    tags: ["Autocomplete"],
+    description: "Autocomplete related endpoints"
+  }
 })
   .get("/course", async ({ status }) => {
-    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getCourse>(AutoCompleteService.getCourse);
+    const [err, result] = await warpper(AutoCompleteService.getCourse);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {
@@ -26,10 +30,10 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/staff", async ({ status }) => {
-    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getStaff>(AutoCompleteService.getStaff);
+    const [err, result] = await warpper(AutoCompleteService.getStaff);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {
@@ -43,10 +47,10 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/staff/emails", async ({ status }) => {
-    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getStaffEmails>(AutoCompleteService.getStaffEmails);
+    const [err, result] = await warpper(AutoCompleteService.getStaffEmails);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {
@@ -60,10 +64,10 @@ export const AutocompleteController = new Elysia({
     });
   })
   .get("/template", async ({ status }) => {
-    const [err, result] = await create_callback<BadRequestError, typeof AutoCompleteService.getTemplate>(AutoCompleteService.getTemplate);
+    const [err, result] = await warpper(AutoCompleteService.getTemplate);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {

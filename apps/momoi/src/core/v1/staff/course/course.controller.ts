@@ -6,11 +6,15 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { CourseService } from "./course.service";
 
 import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const CourseController = new Elysia({
   name: "staff.course.controller",
-  prefix: "/course"
+  prefix: "/course",
+  detail: {
+    tags: ["Course", "Staff"],
+    description: "Staff course related endpoints"
+  }
 })
   .use(env.NODE_ENV === "test" ? mockAuthStaff : auth_service)
   .guard({ auth: true })
@@ -18,12 +22,10 @@ export const CourseController = new Elysia({
     if (!isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, query }) => {
-    const [err, courses] = await create_callback<
-      BadRequestError, typeof CourseService.getCourses
-    >(CourseService.getCourses, query?.skip, query?.take);
+    const [err, courses] = await warpper(CourseService.getCourses, [query?.skip, query?.take]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -41,12 +43,10 @@ export const CourseController = new Elysia({
       return status(400, { message: "Search query 'q' is required" });
     }
 
-    const [err, courses] = await create_callback<
-      BadRequestError, typeof CourseService.searchCourses
-    >(CourseService.searchCourses, query.q!, query?.skip, query?.take);
+    const [err, courses] = await warpper(CourseService.searchCourses, [query.q!, query?.skip, query?.take]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -63,12 +63,10 @@ export const CourseController = new Elysia({
   .get("/my-courses", async ({ status, user }) => {
     const staff_id = 'staff_id' in user ? user.staff_id : undefined;
     if (!staff_id) return status(403, { message: "Forbidden" });
-    const [err, courses] = await create_callback<
-      BadRequestError, typeof CourseService.getCoursesByStaff
-    >(CourseService.getCoursesByStaff, staff_id);
+    const [err, courses] = await warpper(CourseService.getCoursesByStaff, [staff_id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -77,12 +75,10 @@ export const CourseController = new Elysia({
     });
   })
   .get("/staff/:staffId", async ({ status, params }) => {
-    const [err, courses] = await create_callback<
-      BadRequestError, typeof CourseService.getCoursesByStaff
-    >(CourseService.getCoursesByStaff, params.staffId);
+    const [err, courses] = await warpper(CourseService.getCoursesByStaff, [params.staffId]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -95,12 +91,10 @@ export const CourseController = new Elysia({
     })
   })
   .get("/course-id/:courseId", async ({ status, params }) => {
-    const [err, course] = await create_callback<
-      BadRequestError | NotFoundError, typeof CourseService.getCourseByCourseId
-    >(CourseService.getCourseByCourseId, params.courseId);
+    const [err, course] = await warpper(CourseService.getCourseByCourseId, [params.courseId]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -113,12 +107,10 @@ export const CourseController = new Elysia({
     })
   })
   .get("/:id/stats", async ({ status, params }) => {
-    const [err, stats] = await create_callback<
-      BadRequestError | NotFoundError, typeof CourseService.getCourseStats
-    >(CourseService.getCourseStats, params.id);
+    const [err, stats] = await warpper(CourseService.getCourseStats, [params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -131,12 +123,10 @@ export const CourseController = new Elysia({
     })
   })
   .get("/:id", async ({ status, params }) => {
-    const [err, course] = await create_callback<
-      BadRequestError | NotFoundError, typeof CourseService.getCourseById
-    >(CourseService.getCourseById, params.id);
+    const [err, course] = await warpper(CourseService.getCourseById, [params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -149,12 +139,10 @@ export const CourseController = new Elysia({
     })
   })
   .post("/", async ({ status, body }) => {
-    const [err, course] = await create_callback<
-      BadRequestError | ConflictError, typeof CourseService.createCourse
-    >(CourseService.createCourse, body);
+    const [err, course] = await warpper(CourseService.createCourse, [body]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(201, {
@@ -172,12 +160,10 @@ export const CourseController = new Elysia({
     })
   })
   .put("/:id", async ({ status, params, body }) => {
-    const [err, course] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, typeof CourseService.updateCourse
-    >(CourseService.updateCourse, params.id, body);
+    const [err, course] = await warpper(CourseService.updateCourse, [params.id, body]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {
@@ -198,12 +184,10 @@ export const CourseController = new Elysia({
     })
   })
   .delete("/:id", async ({ status, params }) => {
-    const [err, deletedCourse] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, typeof CourseService.deleteCourse
-    >(CourseService.deleteCourse, params.id);
+    const [err, deletedCourse] = await warpper(CourseService.deleteCourse, [params.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     return status(200, {

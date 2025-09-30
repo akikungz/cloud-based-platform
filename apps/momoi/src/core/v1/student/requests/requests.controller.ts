@@ -9,11 +9,15 @@ import { db } from "@momoi/libs/db";
 import { RequestsService } from "./requests.service";
 
 import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
-import { create_callback } from "utils/functions/callback";
+import { warpper } from "@akikungz/warpper-ts";
 
 export const RequestsController = new Elysia({
   name: "student.requests.controller",
-  prefix: "/requests"
+  prefix: "/requests",
+  detail: {
+    tags: ["Requests", "Student"],
+    description: "Student requests related endpoints"
+  }
 })
   .use(env.NODE_ENV === "test" ? mockAuthStudent : auth_service)
   .guard({ auth: true })
@@ -21,12 +25,10 @@ export const RequestsController = new Elysia({
     if (isStaff) return status(403, { message: "Forbidden" });
   })
   .get("/", async ({ status, user }) => {
-    const [err1, requests] = await create_callback<
-      BadRequestError, typeof RequestsService.getRequests
-    >(RequestsService.getRequests, user.id);
+    const [err1, requests] = await warpper(RequestsService.getRequests, [user.id]);
 
     if (err1) {
-      return status(err1.code, { message: err1.message });
+      return status(500, { message: err1.message });
     }
 
     if (!requests) {
@@ -34,12 +36,10 @@ export const RequestsController = new Elysia({
       return status(error.code, { message: error.message });
     }
 
-    const [err2, extend_requests] = await create_callback<
-      BadRequestError, typeof RequestsService.getExtendRequests
-    >(RequestsService.getExtendRequests, user.id);
+    const [err2, extend_requests] = await warpper(RequestsService.getExtendRequests, [user.id]);
 
     if (err2) {
-      return status(err2.code, { message: err2.message });
+      return status(500, { message: err2.message });
     }
 
     if (!extend_requests) {
@@ -50,12 +50,10 @@ export const RequestsController = new Elysia({
     return status(200, { message: "Student requests controller", data: { requests, extend_requests } });
   })
   .post("/", async ({ status, user, body }) => {
-    const [err, result] = await create_callback<
-      BadRequestError | ConflictError, typeof RequestsService.createRequest
-    >(RequestsService.createRequest, user.id, body);
+    const [err, result] = await warpper(RequestsService.createRequest, [user.id, body]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {
@@ -78,14 +76,10 @@ export const RequestsController = new Elysia({
     })
   })
   .post("/extends", async ({ status, body, user }) => {
-    const [err, result] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, Awaited<ReturnType<typeof RequestsService.createRequestExtends>>
-    >(
-      () => RequestsService.createRequestExtends(body, user.id, db)
-    );
+    const [err, result] = await warpper(() => RequestsService.createRequestExtends(body, user.id, db));
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {
@@ -102,12 +96,10 @@ export const RequestsController = new Elysia({
     })
   })
   .post("/create-instance", async ({ status, user, body }) => {
-    const [err, result] = await create_callback<
-      BadRequestError | NotFoundError | ConflictError, typeof RequestsService.createInstanceFromRequest
-    >(RequestsService.createInstanceFromRequest, body.request_id, user.id);
+    const [err, result] = await warpper(RequestsService.createInstanceFromRequest, [body.request_id, user.id]);
 
     if (err) {
-      return status(err.code, { message: err.message });
+      return status(500, { message: err.message });
     }
 
     if (!result) {

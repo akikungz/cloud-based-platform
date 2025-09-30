@@ -8,7 +8,11 @@ import { StaffInstancesController } from "./instances/instances.controller";
 
 export const StaffController = new Elysia({
   name: "staff.controller",
-  prefix: "/staff"
+  prefix: "/staff",
+  detail: {
+    tags: ["Staff"],
+    description: "Staff related endpoints"
+  }
 })
   .use(ApprovalController)
   .use(CourseController)

@@ -1,9 +1,9 @@
 import { db } from "@momoi/libs/db";
 import { env } from "@momoi/libs/env";
 
-import { auth as auth_server } from "auth/server";
+import { auth as auth_server, type AuthServer } from "auth/server";
 
-export const auth = auth_server(db, {
+export const auth: AuthServer = auth_server(db, {
   base_url: env.API_URL,
   base_path: "/api/auth",
   frontend_url: env.FRONTEND_BASE_URL,
