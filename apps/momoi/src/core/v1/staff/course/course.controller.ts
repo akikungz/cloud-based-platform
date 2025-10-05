@@ -5,7 +5,7 @@ import { auth_service } from "@momoi/core/auth/auth.service";
 import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { CourseService } from "./course.service";
 
-import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
+import { BaseError } from "@momoi/shared/errors";
 import { warpper } from "@akikungz/warpper-ts";
 
 export const CourseController = new Elysia({
@@ -25,6 +25,10 @@ export const CourseController = new Elysia({
     const [err, courses] = await warpper(CourseService.getCourses, [query?.skip, query?.take]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -36,7 +40,22 @@ export const CourseController = new Elysia({
     query: t.Optional(t.Object({
       skip: t.Optional(t.Number()),
       take: t.Optional(t.Number())
-    }))
+    })),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Array(t.Any())
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .get("/search", async ({ status, query }) => {
     if (!query?.q) {
@@ -46,6 +65,10 @@ export const CourseController = new Elysia({
     const [err, courses] = await warpper(CourseService.searchCourses, [query.q!, query?.skip, query?.take]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -58,7 +81,22 @@ export const CourseController = new Elysia({
       q: t.String({ minLength: 1 }),
       skip: t.Optional(t.Number()),
       take: t.Optional(t.Number())
-    }))
+    })),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Array(t.Any())
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .get("/my-courses", async ({ status, user }) => {
     const staff_id = 'staff_id' in user ? user.staff_id : undefined;
@@ -66,6 +104,10 @@ export const CourseController = new Elysia({
     const [err, courses] = await warpper(CourseService.getCoursesByStaff, [staff_id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -73,11 +115,31 @@ export const CourseController = new Elysia({
       message: "Courses fetched for current staff successfully",
       data: courses
     });
+  }, {
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Array(t.Any())
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .get("/staff/:staffId", async ({ status, params }) => {
     const [err, courses] = await warpper(CourseService.getCoursesByStaff, [params.staffId]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -88,12 +150,31 @@ export const CourseController = new Elysia({
   }, {
     params: t.Object({
       staffId: t.Number()
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Array(t.Any())
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .get("/course-id/:courseId", async ({ status, params }) => {
     const [err, course] = await warpper(CourseService.getCourseByCourseId, [params.courseId]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -104,12 +185,34 @@ export const CourseController = new Elysia({
   }, {
     params: t.Object({
       courseId: t.String()
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .get("/:id/stats", async ({ status, params }) => {
     const [err, stats] = await warpper(CourseService.getCourseStats, [params.id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -120,12 +223,34 @@ export const CourseController = new Elysia({
   }, {
     params: t.Object({
       id: t.Number()
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .get("/:id", async ({ status, params }) => {
     const [err, course] = await warpper(CourseService.getCourseById, [params.id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -136,12 +261,34 @@ export const CourseController = new Elysia({
   }, {
     params: t.Object({
       id: t.Number()
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .post("/", async ({ status, body }) => {
     const [err, course] = await warpper(CourseService.createCourse, [body]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -157,12 +304,34 @@ export const CourseController = new Elysia({
       assistant_staff_1: t.Optional(t.Number()),
       assistant_staff_2: t.Optional(t.Number()),
       assistant_staff_3: t.Optional(t.Number())
-    })
+    }),
+    response: {
+      201: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .put("/:id", async ({ status, params, body }) => {
     const [err, course] = await warpper(CourseService.updateCourse, [params.id, body]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -181,12 +350,37 @@ export const CourseController = new Elysia({
       assistant_staff_1: t.Optional(t.Number()),
       assistant_staff_2: t.Optional(t.Number()),
       assistant_staff_3: t.Optional(t.Number())
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .delete("/:id", async ({ status, params }) => {
     const [err, deletedCourse] = await warpper(CourseService.deleteCourse, [params.id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -197,5 +391,26 @@ export const CourseController = new Elysia({
   }, {
     params: t.Object({
       id: t.Number()
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   });

@@ -548,4 +548,340 @@ export class StaffInstanceService {
       throw new BadRequestError("Failed to fetch semesters");
     }
   }
+
+  /**
+   * Archive an instance (mark as permanent storage)
+   * Archived instances are not deleted during semester cleanup
+   */
+  public static async archiveInstance(id: number) {
+    try {
+      const instance = await db.instance.findFirst({
+        where: { 
+          id,
+          NOT: { state: "deleted" }
+        }
+      });
+
+      if (!instance) {
+        throw new NotFoundError("Instance not found or already deleted");
+      }
+
+      if (instance.state === "archived") {
+        throw new BadRequestError("Instance is already archived");
+      }
+
+      await db.instance.update({
+        where: { id },
+        data: { 
+          state: "archived",
+          updated_at: new Date()
+        }
+      });
+
+      // Fetch updated instance with relations
+      const updatedInstance = await db.instance.findUnique({
+        where: { id },
+        include: {
+          user: true,
+          course: true,
+          semester: true
+        }
+      });
+
+      if (!updatedInstance) {
+        throw new BadRequestError("Failed to retrieve updated instance");
+      }
+
+      return {
+        id: updatedInstance.id,
+        title: updatedInstance.title,
+        hostname: updatedInstance.hostname,
+        state: updatedInstance.state,
+        status: updatedInstance.status,
+        user: {
+          id: updatedInstance.user.id,
+          email: updatedInstance.user.email,
+          name: updatedInstance.user.name
+        },
+        course: {
+          id: updatedInstance.course.id,
+          title: updatedInstance.course.course_title
+        },
+        semester: updatedInstance.semester ? {
+          id: updatedInstance.semester.id,
+          name: updatedInstance.semester.name
+        } : null,
+        updated_at: updatedInstance.updated_at
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
+        throw error;
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Failed to archive instance");
+    }
+  }
+
+  /**
+   * Unarchive an instance (restore to active state)
+   */
+  public static async unarchiveInstance(id: number) {
+    try {
+      const instance = await db.instance.findFirst({
+        where: { 
+          id,
+          state: "archived"
+        }
+      });
+
+      if (!instance) {
+        throw new NotFoundError("Archived instance not found");
+      }
+
+      await db.instance.update({
+        where: { id },
+        data: { 
+          state: "active",
+          updated_at: new Date()
+        }
+      });
+
+      // Fetch updated instance with relations
+      const updatedInstance = await db.instance.findUnique({
+        where: { id },
+        include: {
+          user: true,
+          course: true,
+          semester: true
+        }
+      });
+
+      if (!updatedInstance) {
+        throw new BadRequestError("Failed to retrieve updated instance");
+      }
+
+      return {
+        id: updatedInstance.id,
+        title: updatedInstance.title,
+        hostname: updatedInstance.hostname,
+        state: updatedInstance.state,
+        status: updatedInstance.status,
+        user: {
+          id: updatedInstance.user.id,
+          email: updatedInstance.user.email,
+          name: updatedInstance.user.name
+        },
+        course: {
+          id: updatedInstance.course.id,
+          title: updatedInstance.course.course_title
+        },
+        semester: updatedInstance.semester ? {
+          id: updatedInstance.semester.id,
+          name: updatedInstance.semester.name
+        } : null,
+        updated_at: updatedInstance.updated_at
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Failed to unarchive instance");
+    }
+  }
+
+  /**
+   * Delete an instance (staff can delete any instance)
+   * This sends a delete message to RabbitMQ to remove the VM from Proxmox
+   */
+  public static async deleteInstance(id: number) {
+    try {
+      const instance = await db.instance.findFirst({
+        where: { 
+          id,
+          NOT: { state: "deleted" }
+        }
+      });
+
+      if (!instance) {
+        throw new NotFoundError("Instance not found or already deleted");
+      }
+
+      // Update instance state to deleted
+      const deletedInstance = await db.instance.update({
+        where: { id },
+        data: { 
+          state: "deleted",
+          updated_at: new Date()
+        }
+      });
+
+      // Send VM deletion message to RabbitMQ queue (skip in test environment)
+      if (process.env.NODE_ENV !== 'test') {
+        try {
+          const publisher = await getRabbitMQPublisher();
+          
+          const vmMessage = {
+            type: 'vm.delete' as const,
+            data: {
+              vmid: instance.vm_id,
+              node: instance.pve_node
+            },
+            requestId: `staff-delete-${instance.id}`,
+            userId: 'staff' // Staff-initiated deletion
+          };
+
+          await publisher.publishMessage(vmMessage);
+          console.log(`VM deletion message sent for instance ${instance.id}`);
+        } catch (rabbitError) {
+          console.error('Failed to send VM deletion message:', rabbitError);
+          // Don't fail the entire operation if RabbitMQ is down
+          // The instance is marked as deleted in the database
+        }
+      }
+
+      return {
+        id: deletedInstance.id,
+        title: deletedInstance.title,
+        hostname: deletedInstance.hostname,
+        state: deletedInstance.state,
+        vm_id: deletedInstance.vm_id,
+        pve_node: deletedInstance.pve_node,
+        deleted_at: deletedInstance.updated_at
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Failed to delete instance");
+    }
+  }
+
+  /**
+   * Change VM status (start, stop, suspend, resume, reboot)
+   * This sends a status change message to RabbitMQ
+   */
+  public static async changeVMStatus(id: number, action: 'start' | 'stop' | 'suspend' | 'resume' | 'reboot') {
+    try {
+      const instance = await db.instance.findFirst({
+        where: { 
+          id,
+          NOT: { state: "deleted" }
+        }
+      });
+
+      if (!instance) {
+        throw new NotFoundError("Instance not found or deleted");
+      }
+
+      // Send VM status change message to RabbitMQ queue (skip in test environment)
+      if (process.env.NODE_ENV !== 'test') {
+        try {
+          const publisher = await getRabbitMQPublisher();
+          
+          const vmMessage = {
+            type: 'vm.status' as const,
+            data: {
+              vmid: instance.vm_id,
+              node: instance.pve_node,
+              state: action
+            },
+            requestId: `staff-status-${instance.id}-${Date.now()}`,
+            userId: 'staff'
+          };
+
+          await publisher.publishMessage(vmMessage);
+          console.log(`VM status change message sent for instance ${instance.id}: ${action}`);
+        } catch (rabbitError) {
+          console.error('Failed to send VM status change message:', rabbitError);
+          throw new BadRequestError('Failed to send status change request to VM manager');
+        }
+      }
+
+      // Update the expected status in the database
+      const statusMap: Record<typeof action, 'running' | 'stopped' | 'pending'> = {
+        'start': 'running',
+        'stop': 'stopped',
+        'suspend': 'stopped',
+        'resume': 'running',
+        'reboot': 'running'
+      };
+
+      await db.instance.update({
+        where: { id },
+        data: { 
+          status: statusMap[action],
+          updated_at: new Date()
+        }
+      });
+
+      // Fetch updated instance with relations
+      const updatedInstance = await db.instance.findUnique({
+        where: { id },
+        include: {
+          user: true,
+          course: true
+        }
+      });
+
+      if (!updatedInstance) {
+        throw new BadRequestError("Failed to retrieve updated instance");
+      }
+
+      return {
+        id: updatedInstance.id,
+        title: updatedInstance.title,
+        hostname: updatedInstance.hostname,
+        status: updatedInstance.status,
+        action: action,
+        vm_id: updatedInstance.vm_id,
+        pve_node: updatedInstance.pve_node,
+        user: {
+          id: updatedInstance.user.id,
+          email: updatedInstance.user.email,
+          name: updatedInstance.user.name
+        },
+        updated_at: updatedInstance.updated_at
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
+        throw error;
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Failed to change VM status");
+    }
+  }
 }

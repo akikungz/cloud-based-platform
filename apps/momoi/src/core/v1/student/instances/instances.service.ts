@@ -1,6 +1,7 @@
 import { db } from "@momoi/libs/db";
 import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
 import { Prisma } from "database/generated/prisma-client/client";
+import { getRabbitMQPublisher } from "@momoi/libs/rabbitmq";
 
 export class InstanceService {
 
@@ -126,6 +127,97 @@ export class InstanceService {
       }
 
       throw new BadRequestError("Failed to delete instance");
+    }
+  }
+
+  /**
+   * Change VM status (start, stop, suspend, resume, reboot)
+   * Students can only control their own VMs
+   */
+  public static async changeVMStatus(userId: string, id: number, action: 'start' | 'stop' | 'suspend' | 'resume' | 'reboot') {
+    try {
+      const instance = await db.instance.findFirst({
+        where: { 
+          user_id: userId,
+          id,
+          NOT: { state: "deleted" }
+        }
+      });
+
+      if (!instance) {
+        throw new NotFoundError("Instance not found or you don't have permission to control it");
+      }
+
+      // Archived instances cannot be controlled
+      if (instance.state === "archived") {
+        throw new BadRequestError("Cannot control archived instances. Please contact staff to unarchive first.");
+      }
+
+      // Send VM status change message to RabbitMQ queue (skip in test environment)
+      if (process.env.NODE_ENV !== 'test') {
+        try {
+          const publisher = await getRabbitMQPublisher();
+          
+          const vmMessage = {
+            type: 'vm.status' as const,
+            data: {
+              vmid: instance.vm_id,
+              node: instance.pve_node,
+              state: action
+            },
+            requestId: `student-status-${instance.id}-${Date.now()}`,
+            userId: userId
+          };
+
+          await publisher.publishMessage(vmMessage);
+          console.log(`VM status change message sent for instance ${instance.id}: ${action}`);
+        } catch (rabbitError) {
+          console.error('Failed to send VM status change message:', rabbitError);
+          throw new BadRequestError('Failed to send status change request to VM manager');
+        }
+      }
+
+      // Update the expected status in the database
+      const statusMap: Record<typeof action, 'running' | 'stopped' | 'pending'> = {
+        'start': 'running',
+        'stop': 'stopped',
+        'suspend': 'stopped',
+        'resume': 'running',
+        'reboot': 'running'
+      };
+
+      const updatedInstance = await db.instance.update({
+        where: { id },
+        data: { 
+          status: statusMap[action],
+          updated_at: new Date()
+        }
+      });
+
+      return {
+        id: updatedInstance.id,
+        title: updatedInstance.title,
+        hostname: updatedInstance.hostname,
+        status: updatedInstance.status,
+        action: action,
+        vm_id: updatedInstance.vm_id,
+        pve_node: updatedInstance.pve_node,
+        updated_at: updatedInstance.updated_at
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
+        throw error;
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestError(error.message);
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestError(error.message);
+      }
+
+      throw new BadRequestError("Failed to change VM status");
     }
   }
 }

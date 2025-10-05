@@ -261,4 +261,440 @@ describe("Staff Instance Service", () => {
       expect(semester).toHaveProperty("active");
     });
   });
+
+  describe("archiveInstance", () => {
+    it("should archive an active instance", async () => {
+      // Create an instance first
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Archive Instance",
+        hostname: "test-archive-vm",
+        description: "Instance to be archived",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+      expect(createdInstance.id).toBeDefined();
+
+      // Archive the instance
+      const result = await StaffInstanceService.archiveInstance(createdInstance.id);
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe(createdInstance.id);
+      expect(result.state).toBe("archived");
+      expect(result.title).toBe("Test Archive Instance");
+      expect(result.hostname).toBe("test-archive-vm");
+
+      // Verify in database
+      const dbInstance = await db.instance.findUnique({
+        where: { id: createdInstance.id }
+      });
+      expect(dbInstance!.state).toBe("archived");
+    });
+
+    it("should throw error when archiving non-existent instance", async () => {
+      await expect(StaffInstanceService.archiveInstance(999999))
+        .rejects.toThrow("Instance not found or already deleted");
+    });
+
+    it("should throw error when archiving already archived instance", async () => {
+      // Create and archive an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Double Archive",
+        hostname: "test-double-archive-vm",
+        description: "Instance to test double archive",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+      await StaffInstanceService.archiveInstance(createdInstance.id);
+
+      // Try to archive again
+      await expect(StaffInstanceService.archiveInstance(createdInstance.id))
+        .rejects.toThrow("Instance is already archived");
+    });
+
+    it("should not archive deleted instances", async () => {
+      // Create and delete an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Archive Deleted",
+        hostname: "test-archive-deleted-vm",
+        description: "Deleted instance",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+      await StaffInstanceService.deleteInstance(createdInstance.id);
+
+      // Try to archive deleted instance
+      await expect(StaffInstanceService.archiveInstance(createdInstance.id))
+        .rejects.toThrow("Instance not found or already deleted");
+    });
+  });
+
+  describe("unarchiveInstance", () => {
+    it("should unarchive an archived instance", async () => {
+      // Create and archive an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Unarchive Instance",
+        hostname: "test-unarchive-vm",
+        description: "Instance to be unarchived",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+      await StaffInstanceService.archiveInstance(createdInstance.id);
+
+      // Unarchive the instance
+      const result = await StaffInstanceService.unarchiveInstance(createdInstance.id);
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe(createdInstance.id);
+      expect(result.state).toBe("active");
+      expect(result.title).toBe("Test Unarchive Instance");
+
+      // Verify in database
+      const dbInstance = await db.instance.findUnique({
+        where: { id: createdInstance.id }
+      });
+      expect(dbInstance!.state).toBe("active");
+    });
+
+    it("should throw error when unarchiving non-archived instance", async () => {
+      // Create an active instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Unarchive Active",
+        hostname: "test-unarchive-active-vm",
+        description: "Active instance",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+
+      // Try to unarchive active instance
+      await expect(StaffInstanceService.unarchiveInstance(createdInstance.id))
+        .rejects.toThrow("Archived instance not found");
+    });
+
+    it("should throw error when unarchiving non-existent instance", async () => {
+      await expect(StaffInstanceService.unarchiveInstance(999999))
+        .rejects.toThrow("Archived instance not found");
+    });
+  });
+
+  describe("deleteInstance", () => {
+    it("should delete an instance", async () => {
+      // Create an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Delete Instance",
+        hostname: "test-delete-vm",
+        description: "Instance to be deleted",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+
+      // Delete the instance
+      const result = await StaffInstanceService.deleteInstance(createdInstance.id);
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe(createdInstance.id);
+      expect(result.state).toBe("deleted");
+      expect(result.title).toBe("Test Delete Instance");
+      expect(result.hostname).toBe("test-delete-vm");
+      expect(result.vm_id).toBeDefined();
+      expect(result.pve_node).toBeDefined();
+
+      // Verify in database
+      const dbInstance = await db.instance.findUnique({
+        where: { id: createdInstance.id }
+      });
+      expect(dbInstance!.state).toBe("deleted");
+    });
+
+    it("should throw error when deleting non-existent instance", async () => {
+      await expect(StaffInstanceService.deleteInstance(999999))
+        .rejects.toThrow("Instance not found or already deleted");
+    });
+
+    it("should throw error when deleting already deleted instance", async () => {
+      // Create and delete an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Double Delete",
+        hostname: "test-double-delete-vm",
+        description: "Instance to test double delete",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+      await StaffInstanceService.deleteInstance(createdInstance.id);
+
+      // Try to delete again
+      await expect(StaffInstanceService.deleteInstance(createdInstance.id))
+        .rejects.toThrow("Instance not found or already deleted");
+    });
+
+    it("should be able to delete archived instances", async () => {
+      // Create and archive an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Delete Archived",
+        hostname: "test-delete-archived-vm",
+        description: "Archived instance to be deleted",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+      await StaffInstanceService.archiveInstance(createdInstance.id);
+
+      // Delete the archived instance
+      const result = await StaffInstanceService.deleteInstance(createdInstance.id);
+
+      expect(result).toBeDefined();
+      expect(result.state).toBe("deleted");
+
+      // Verify in database
+      const dbInstance = await db.instance.findUnique({
+        where: { id: createdInstance.id }
+      });
+      expect(dbInstance!.state).toBe("deleted");
+    });
+  });
+
+  describe("changeVMStatus", () => {
+    it("should change VM status to start", async () => {
+      // Create an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Status Change",
+        hostname: "test-status-vm",
+        description: "Instance for status change",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+
+      // Change status to start
+      const result = await StaffInstanceService.changeVMStatus(createdInstance.id, 'start');
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe(createdInstance.id);
+      expect(result.status).toBe("running");
+      expect(result.action).toBe("start");
+      expect(result.vm_id).toBeDefined();
+      expect(result.pve_node).toBeDefined();
+
+      // Verify in database
+      const dbInstance = await db.instance.findUnique({
+        where: { id: createdInstance.id }
+      });
+      expect(dbInstance!.status).toBe("running");
+    });
+
+    it("should change VM status to stop", async () => {
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Stop Status",
+        hostname: "test-stop-vm",
+        description: "Instance for stop test",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+
+      // Change status to stop
+      const result = await StaffInstanceService.changeVMStatus(createdInstance.id, 'stop');
+
+      expect(result).toBeDefined();
+      expect(result.status).toBe("stopped");
+      expect(result.action).toBe("stop");
+    });
+
+    it("should change VM status to reboot", async () => {
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Reboot Status",
+        hostname: "test-reboot-vm",
+        description: "Instance for reboot test",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+
+      // Change status to reboot
+      const result = await StaffInstanceService.changeVMStatus(createdInstance.id, 'reboot');
+
+      expect(result).toBeDefined();
+      expect(result.status).toBe("running");
+      expect(result.action).toBe("reboot");
+    });
+
+    it("should throw error when changing status of non-existent instance", async () => {
+      await expect(StaffInstanceService.changeVMStatus(999999, 'start'))
+        .rejects.toThrow("Instance not found or deleted");
+    });
+
+    it("should throw error when changing status of deleted instance", async () => {
+      // Create and delete an instance
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const instanceData = {
+        user_id: user!.id,
+        title: "Test Status Deleted",
+        hostname: "test-status-deleted-vm",
+        description: "Deleted instance",
+        type: "course" as const,
+        course_id: course!.id,
+        template_id: template!.id,
+        cpus: 2,
+        memory: 2048,
+        disk: 20
+      };
+
+      const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+      await StaffInstanceService.deleteInstance(createdInstance.id);
+
+      // Try to change status
+      await expect(StaffInstanceService.changeVMStatus(createdInstance.id, 'start'))
+        .rejects.toThrow("Instance not found or deleted");
+    });
+
+    it("should handle all status actions correctly", async () => {
+      const user = await db.user.findFirst();
+      const course = await db.instance_course.findFirst();
+      const template = await db.instance_template.findFirst();
+
+      const actions: Array<'start' | 'stop' | 'suspend' | 'resume' | 'reboot'> = 
+        ['start', 'stop', 'suspend', 'resume', 'reboot'];
+
+      for (const action of actions) {
+        const instanceData = {
+          user_id: user!.id,
+          title: `Test ${action} Status`,
+          hostname: `test-${action}-vm`,
+          description: `Instance for ${action} test`,
+          type: "course" as const,
+          course_id: course!.id,
+          template_id: template!.id,
+          cpus: 2,
+          memory: 2048,
+          disk: 20
+        };
+
+        const createdInstance = await StaffInstanceService.createInstanceDirectly(instanceData);
+        const result = await StaffInstanceService.changeVMStatus(createdInstance.id, action);
+
+        expect(result).toBeDefined();
+        expect(result.action).toBe(action);
+        expect(result.status).toBeDefined();
+      }
+    });
+  });
 });

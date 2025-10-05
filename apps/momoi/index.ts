@@ -67,7 +67,7 @@ app.use(openapi({
     ]
   },
   references: env.NODE_ENV === "development" ?
-    fromTypes("index.ts") : undefined
+    fromTypes("src/app.ts") : undefined
 }))
 
 app.use(cors({

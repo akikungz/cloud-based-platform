@@ -6,7 +6,7 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 
 import { PersonsService } from "./persons.service";
 
-import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
+import { BaseError } from "@momoi/shared/errors";
 import { warpper } from "@akikungz/warpper-ts";
 
 export const PersonsController = new Elysia({
@@ -26,12 +26,15 @@ export const PersonsController = new Elysia({
     const [err, persons] = await warpper(PersonsService.getPersons, [query?.skip, query?.take]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
     if (!persons) {
-      const error = new NotFoundError("Persons not found");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Persons not found" });
     }
 
     return status(200, { message: "Get all persons", data: persons });
@@ -45,12 +48,15 @@ export const PersonsController = new Elysia({
     const [err, person] = await warpper(PersonsService.getPersonsByEmail, [query.email]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
     if (!person) {
-      const error = new NotFoundError("Person not found");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Person not found" });
     }
 
     return status(200, { message: "Get person by email", data: person });
@@ -63,6 +69,10 @@ export const PersonsController = new Elysia({
     const [err, person] = await warpper(PersonsService.createPerson, [body.email]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -76,6 +86,10 @@ export const PersonsController = new Elysia({
     const [err, person] = await warpper(PersonsService.deletePerson, [body.email]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 

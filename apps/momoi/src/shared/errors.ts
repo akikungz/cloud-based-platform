@@ -1,14 +1,23 @@
-export interface AppError {
+export interface AppError<T extends number = number> {
   message: string;
-  code: number;
+  code: T;
 }
 
-export class BadRequestError extends Error implements AppError {
+export class BaseError extends Error implements AppError<number> {
   code: number;
 
   constructor(message: string, code = 400) {
     super(message);
     this.code = code;
+    this.message = message;
+  }
+}
+
+export class BadRequestError extends BaseError implements AppError<400> {
+  declare code: 400;
+
+  constructor(message: string) {
+    super(message, 400);
   }
 
   toJSON() {
@@ -19,12 +28,11 @@ export class BadRequestError extends Error implements AppError {
   }
 }
 
-export class NotFoundError extends Error implements AppError {
-  code: number;
+export class NotFoundError extends BaseError implements AppError<404> {
+  declare code: 404;
 
-  constructor(message: string, code = 404) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 404);
   }
 
   toJSON() {
@@ -35,12 +43,11 @@ export class NotFoundError extends Error implements AppError {
   }
 }
 
-export class ForbiddenError extends Error implements AppError {
-  code: number;
+export class ForbiddenError extends BaseError implements AppError<403> {
+  declare code: 403;
 
-  constructor(message: string, code = 403) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 403);
   }
 
   toJSON() {
@@ -51,12 +58,11 @@ export class ForbiddenError extends Error implements AppError {
   }
 }
 
-export class InternalServerError extends Error implements AppError {
-  code: number;
+export class InternalServerError extends BaseError implements AppError<500> {
+  declare code: 500;
 
-  constructor(message: string, code = 500) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 500);
   }
 
   toJSON() {
@@ -67,12 +73,11 @@ export class InternalServerError extends Error implements AppError {
   }
 }
 
-export class UnauthorizedError extends Error implements AppError {
-  code: number;
+export class UnauthorizedError extends BaseError implements AppError<401> {
+  declare code: 401;
 
-  constructor(message: string, code = 401) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 401);
   }
 
   toJSON() {
@@ -83,12 +88,11 @@ export class UnauthorizedError extends Error implements AppError {
   }
 }
 
-export class ConflictError extends Error implements AppError {
-  code: number;
+export class ConflictError extends BaseError implements AppError<409> {
+  declare code: 409;
 
-  constructor(message: string, code = 409) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 409);
   }
 
   toJSON() {
@@ -99,12 +103,11 @@ export class ConflictError extends Error implements AppError {
   }
 }
 
-export class UnprocessableEntityError extends Error implements AppError {
-  code: number;
+export class UnprocessableEntityError extends BaseError implements AppError<422> {
+  declare code: 422;
 
-  constructor(message: string, code = 422) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 422);
   }
 
   toJSON() {
@@ -115,12 +118,11 @@ export class UnprocessableEntityError extends Error implements AppError {
   }
 }
 
-export class ServiceUnavailableError extends Error implements AppError {
-  code: number;
+export class ServiceUnavailableError extends BaseError implements AppError<503> {
+  declare code: 503;
 
-  constructor(message: string, code = 503) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 503);
   }
 
   toJSON() {
@@ -131,12 +133,11 @@ export class ServiceUnavailableError extends Error implements AppError {
   }
 }
 
-export class GatewayTimeoutError extends Error implements AppError {
-  code: number;
+export class GatewayTimeoutError extends BaseError implements AppError<504> {
+  declare code: 504;
 
-  constructor(message: string, code = 504) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 504);
   }
 
   toJSON() {
@@ -147,12 +148,11 @@ export class GatewayTimeoutError extends Error implements AppError {
   }
 }
 
-export class NotImplementedError extends Error implements AppError {
-  code: number;
+export class NotImplementedError extends BaseError implements AppError<501> {
+  declare code: 501;
 
-  constructor(message: string, code = 501) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 501);
   }
 
   toJSON() {
@@ -163,12 +163,11 @@ export class NotImplementedError extends Error implements AppError {
   }
 }
 
-export class BadGatewayError extends Error implements AppError {
-  code: number;
+export class BadGatewayError extends BaseError implements AppError<502> {
+  declare code: 502;
 
-  constructor(message: string, code = 502) {
-    super(message);
-    this.code = code;
+  constructor(message: string) {
+    super(message, 502);
   }
 
   toJSON() {
@@ -179,13 +178,12 @@ export class BadGatewayError extends Error implements AppError {
   }
 }
 
-export class ConflictResourceError extends Error implements AppError {
-  code: number;
+export class ConflictResourceError extends BaseError implements AppError<409> {
+  declare code: 409;
   resource: string;
 
-  constructor(message: string, resource: string, code = 409) {
-    super(message);
-    this.code = code;
+  constructor(message: string, resource: string) {
+    super(message, 409);
     this.resource = resource;
   }
 

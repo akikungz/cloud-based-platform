@@ -8,7 +8,7 @@ import { db } from "@momoi/libs/db";
 
 import { RequestsService } from "./requests.service";
 
-import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
+import { BaseError } from "@momoi/shared/errors";
 import { warpper } from "@akikungz/warpper-ts";
 
 export const RequestsController = new Elysia({
@@ -28,37 +28,62 @@ export const RequestsController = new Elysia({
     const [err1, requests] = await warpper(RequestsService.getRequests, [user.id]);
 
     if (err1) {
+      if (err1 instanceof BaseError) {
+        return status(err1.code as 400 | 403 | 404 | 500, { message: err1.message });
+      }
       return status(500, { message: err1.message });
     }
 
     if (!requests) {
-      const error = new NotFoundError("Requests not found");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Requests not found" });
     }
 
     const [err2, extend_requests] = await warpper(RequestsService.getExtendRequests, [user.id]);
 
     if (err2) {
+      if (err2 instanceof BaseError) {
+        return status(err2.code as 400 | 403 | 404 | 500, { message: err2.message });
+      }
       return status(500, { message: err2.message });
     }
 
     if (!extend_requests) {
-      const error = new NotFoundError("Requests not found");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Requests not found" });
     }
 
     return status(200, { message: "Student requests controller", data: { requests, extend_requests } });
+  }, {
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .post("/", async ({ status, user, body }) => {
     const [err, result] = await warpper(RequestsService.createRequest, [user.id, body]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 409 | 500, { message: err.message });
+      }
       return status(500, { message: err.message });
     }
 
     if (!result) {
-      const error = new NotFoundError("Request creation failed");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Request creation failed" });
     }
 
     return status(201, { message: "Create a new request", data: result });
@@ -73,18 +98,41 @@ export const RequestsController = new Elysia({
       cpus: t.Number({ minimum: 1, maximum: 8 }),
       memory: t.Number({ minimum: 256, maximum: 8192 }),
       disk: t.Number({ minimum: 8, maximum: 32 }),
-    })
+    }),
+    response: {
+      201: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .post("/extends", async ({ status, body, user }) => {
     const [err, result] = await warpper(() => RequestsService.createRequestExtends(body, user.id, db));
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 409 | 500, { message: err.message });
+      }
       return status(500, { message: err.message });
     }
 
     if (!result) {
-      const error = new NotFoundError("Request creation failed");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Request creation failed" });
     }
 
     return status(201, { message: "Create a new extends request", data: result });
@@ -93,18 +141,41 @@ export const RequestsController = new Elysia({
       instance_id: t.Number(),
       title: t.String(),
       description: t.String(),
-    })
+    }),
+    response: {
+      201: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .post("/create-instance", async ({ status, user, body }) => {
     const [err, result] = await warpper(RequestsService.createInstanceFromRequest, [body.request_id, user.id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 409 | 500, { message: err.message });
+      }
       return status(500, { message: err.message });
     }
 
     if (!result) {
-      const error = new NotFoundError("Instance creation failed");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Instance creation failed" });
     }
 
     // Return the request data in the format expected by the frontend/tests
@@ -128,5 +199,26 @@ export const RequestsController = new Elysia({
   }, {
     body: t.Object({
       request_id: t.Number()
-    })
+    }),
+    response: {
+      201: t.Object({
+        message: t.String(),
+        data: t.Any()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })

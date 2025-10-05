@@ -5,7 +5,7 @@ import { auth_service } from "@momoi/core/auth/auth.service";
 import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 import { SemesterService } from "./semester.service";
 
-import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
+import { BaseError } from "@momoi/shared/errors";
 import { warpper } from "@akikungz/warpper-ts";
 
 export const SemesterController = new Elysia({
@@ -25,6 +25,10 @@ export const SemesterController = new Elysia({
     const [err, semesters] = await warpper(SemesterService.getSemesters, [query?.skip, query?.take]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -38,12 +42,42 @@ export const SemesterController = new Elysia({
         skip: t.Optional(t.Number()),
         take: t.Optional(t.Number())
       })
-    )
+    ),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Array(t.Object({
+          id: t.Number(),
+          name: t.String(),
+          created_at: t.Date(),
+          updated_at: t.Date(),
+          start_at: t.Date(),
+          end_at: t.Date(),
+          active: t.Boolean()
+        }))
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .post("/", async ({ status, body }) => {
     const [err, semester] = await warpper(SemesterService.createSemester, [body]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 409, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -57,12 +91,42 @@ export const SemesterController = new Elysia({
       start_at: t.Date(),
       end_at: t.Date(),
       active: t.Optional(t.Boolean())
-    })
+    }),
+    response: {
+      201: t.Object({
+        message: t.String(),
+        data: t.Object({
+          id: t.Number(),
+          name: t.String(),
+          created_at: t.Date(),
+          updated_at: t.Date(),
+          start_at: t.Date(),
+          end_at: t.Date(),
+          active: t.Boolean()
+        })
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .get("/active", async ({ status }) => {
     const [err, activeSemester] = await warpper(SemesterService.getActiveSemester);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 404 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -74,11 +138,45 @@ export const SemesterController = new Elysia({
       message: "Active semester fetched successfully",
       data: activeSemester
     });
+  }, {
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Object({
+          id: t.Number(),
+          name: t.String(),
+          created_at: t.Date(),
+          updated_at: t.Date(),
+          start_at: t.Date(),
+          end_at: t.Date(),
+          active: t.Boolean()
+        })
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .put("/:id", async ({ status, params, body }) => {
     const [err, semester] = await warpper(SemesterService.updateSemester, [params.id, body]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 404 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -95,12 +193,45 @@ export const SemesterController = new Elysia({
       start_at: t.Optional(t.Date()),
       end_at: t.Optional(t.Date()),
       active: t.Optional(t.Boolean())
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Object({
+          id: t.Number(),
+          name: t.String(),
+          created_at: t.Date(),
+          updated_at: t.Date(),
+          start_at: t.Date(),
+          end_at: t.Date(),
+          active: t.Boolean()
+        })
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .post("/:id/activate", async ({ status, params }) => {
     const [err, semester] = await warpper(SemesterService.activateSemester, [params.id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 404 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -111,12 +242,45 @@ export const SemesterController = new Elysia({
   }, {
     params: t.Object({
       id: t.Number()
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String(),
+        data: t.Object({
+          id: t.Number(),
+          name: t.String(),
+          created_at: t.Date(),
+          updated_at: t.Date(),
+          start_at: t.Date(),
+          end_at: t.Date(),
+          active: t.Boolean()
+        })
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   })
   .delete("/:id", async ({ status, params }) => {
     const [err, deletedSemester] = await warpper(SemesterService.deleteSemester, [params.id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 404 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -126,5 +290,25 @@ export const SemesterController = new Elysia({
   }, {
     params: t.Object({
       id: t.Number()
-    })
+    }),
+    response: {
+      200: t.Object({
+        message: t.String()
+      }),
+      400: t.Object({
+        message: t.String()
+      }),
+      403: t.Object({
+        message: t.String()
+      }),
+      404: t.Object({
+        message: t.String()
+      }),
+      409: t.Object({
+        message: t.String()
+      }),
+      500: t.Object({
+        message: t.String()
+      })
+    }
   });

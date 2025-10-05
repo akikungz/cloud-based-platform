@@ -6,7 +6,7 @@ import { mockAuthStaff } from "@momoi/core/auth/auth.service-test";
 
 import { StaffInstanceService } from "./instances.service";
 
-import { BadRequestError, NotFoundError, ConflictError } from "@momoi/shared/errors";
+import { BaseError } from "@momoi/shared/errors";
 import { warpper } from "@akikungz/warpper-ts";
 
 export const StaffInstancesController = new Elysia({
@@ -26,12 +26,15 @@ export const StaffInstancesController = new Elysia({
     const [err, instances] = await warpper(StaffInstanceService.getAllInstances);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
     if (!instances) {
-      const error = new NotFoundError("Instances not found");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Instances not found" });
     }
 
     // Apply pagination if provided
@@ -59,12 +62,15 @@ export const StaffInstancesController = new Elysia({
     const [err, stats] = await warpper(StaffInstanceService.getInstancesStats);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
     if (!stats) {
-      const error = new NotFoundError("Instance statistics not found");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Instance statistics not found" });
     }
 
     return status(200, {
@@ -76,12 +82,15 @@ export const StaffInstancesController = new Elysia({
     const [err, instance] = await warpper(StaffInstanceService.getInstanceById, [params.id]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
     if (!instance) {
-      const error = new NotFoundError("Instance not found");
-      return status(error.code, { message: error.message });
+      return status(404, { message: "Instance not found" });
     }
 
     return status(200, { message: "Instance fetched successfully", data: instance });
@@ -94,12 +103,15 @@ export const StaffInstancesController = new Elysia({
     const [err, instance] = await warpper(StaffInstanceService.createInstanceDirectly, [body]);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 409 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
     if (!instance) {
-      const error = new BadRequestError("Instance creation failed");
-      return status(error.code, { message: error.message });
+      return status(400, { message: "Instance creation failed" });
     }
 
     return status(201, {
@@ -125,6 +137,10 @@ export const StaffInstancesController = new Elysia({
     const [err, templates] = await warpper(StaffInstanceService.getAvailableTemplates);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -137,6 +153,10 @@ export const StaffInstancesController = new Elysia({
     const [err, courses] = await warpper(StaffInstanceService.getAvailableCourses);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -149,6 +169,10 @@ export const StaffInstancesController = new Elysia({
     const [err, semesters] = await warpper(StaffInstanceService.getAvailableSemesters);
 
     if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 500, { message: err.message });
+      }
+
       return status(500, { message: err.message });
     }
 
@@ -156,4 +180,113 @@ export const StaffInstancesController = new Elysia({
       message: "Semesters fetched successfully",
       data: semesters
     });
+  })
+  .post("/:id/archive", async ({ status, params }) => {
+    const [err, instance] = await warpper(StaffInstanceService.archiveInstance, [params.id]);
+
+    if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
+      return status(500, { message: err.message });
+    }
+
+    if (!instance) {
+      return status(404, { message: "Instance not found" });
+    }
+
+    return status(200, {
+      message: "Instance archived successfully (marked as permanent storage)",
+      data: instance
+    });
+  }, {
+    description: "Archive an instance to mark it as permanent storage. Archived instances are not deleted during semester cleanup.",
+    params: t.Object({
+      id: t.Number()
+    })
+  })
+  .post("/:id/unarchive", async ({ status, params }) => {
+    const [err, instance] = await warpper(StaffInstanceService.unarchiveInstance, [params.id]);
+
+    if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
+      return status(500, { message: err.message });
+    }
+
+    if (!instance) {
+      return status(404, { message: "Archived instance not found" });
+    }
+
+    return status(200, {
+      message: "Instance unarchived successfully (restored to active state)",
+      data: instance
+    });
+  }, {
+    description: "Unarchive an instance to restore it to active state",
+    params: t.Object({
+      id: t.Number()
+    })
+  })
+  .delete("/:id", async ({ status, params }) => {
+    const [err, instance] = await warpper(StaffInstanceService.deleteInstance, [params.id]);
+
+    if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
+      return status(500, { message: err.message });
+    }
+
+    if (!instance) {
+      return status(404, { message: "Instance not found" });
+    }
+
+    return status(200, {
+      message: "Instance deleted successfully. VM deletion request sent to Proxmox.",
+      data: instance
+    });
+  }, {
+    description: "Delete an instance. This will remove the VM from Proxmox and mark it as deleted in the database.",
+    params: t.Object({
+      id: t.Number()
+    })
+  })
+  .post("/:id/status", async ({ status, params, body }) => {
+    const [err, instance] = await warpper(StaffInstanceService.changeVMStatus, [params.id, body.action]);
+
+    if (err) {
+      if (err instanceof BaseError) {
+        return status(err.code as 400 | 403 | 404 | 500, { message: err.message });
+      }
+
+      return status(500, { message: err.message });
+    }
+
+    if (!instance) {
+      return status(404, { message: "Instance not found" });
+    }
+
+    return status(200, {
+      message: `VM ${body.action} request sent successfully`,
+      data: instance
+    });
+  }, {
+    description: "Change VM status (start, stop, suspend, resume, reboot)",
+    params: t.Object({
+      id: t.Number()
+    }),
+    body: t.Object({
+      action: t.Union([
+        t.Literal('start'),
+        t.Literal('stop'),
+        t.Literal('suspend'),
+        t.Literal('resume'),
+        t.Literal('reboot')
+      ])
+    })
   });

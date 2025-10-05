@@ -338,4 +338,215 @@ describe("Student/Instances Module", () => {
       });
     });
   });
+
+  describe("VM Status Management (Student)", () => {
+    it("should start a VM", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "start"
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data).toBeDefined();
+      expect(response.data!.message).toContain("start");
+      expect(response.data!.data).toHaveProperty("status", "running");
+      expect(response.data!.data).toHaveProperty("action", "start");
+    });
+
+    it("should stop a VM", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "stop"
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data).toBeDefined();
+      expect(response.data!.message).toContain("stop");
+      expect(response.data!.data).toHaveProperty("status", "stopped");
+      expect(response.data!.data).toHaveProperty("action", "stop");
+    });
+
+    it("should reboot a VM", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "reboot"
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data).toBeDefined();
+      expect(response.data!.message).toContain("reboot");
+      expect(response.data!.data).toHaveProperty("status", "running");
+      expect(response.data!.data).toHaveProperty("action", "reboot");
+    });
+
+    it("should suspend a VM", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "suspend"
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data).toBeDefined();
+      expect(response.data!.message).toContain("suspend");
+      expect(response.data!.data).toHaveProperty("status", "stopped");
+      expect(response.data!.data).toHaveProperty("action", "suspend");
+    });
+
+    it("should resume a VM", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "resume"
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data).toBeDefined();
+      expect(response.data!.message).toContain("resume");
+      expect(response.data!.data).toHaveProperty("status", "running");
+      expect(response.data!.data).toHaveProperty("action", "resume");
+    });
+
+    it("should return 404 when changing status of non-existent VM", async () => {
+      const response = await api.instances({ id: 999999 }).status.post({
+        action: "start"
+      });
+
+      expect(response.status).toBe(404);
+      if (response.data) {
+        expect(response.data).toHaveProperty("message");
+      }
+    });
+
+    it("should reject invalid action", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "invalid_action" as any
+      });
+
+      expect(response.status).toBe(422); // Validation error
+    });
+
+    it("should handle multiple status changes in sequence", async () => {
+      // Start VM
+      const startResponse = await api.instances({ id: 1 }).status.post({
+        action: "start"
+      });
+      expect(startResponse.status).toBe(200);
+
+      // Stop VM
+      const stopResponse = await api.instances({ id: 1 }).status.post({
+        action: "stop"
+      });
+      expect(stopResponse.status).toBe(200);
+
+      // Start again
+      const restartResponse = await api.instances({ id: 1 }).status.post({
+        action: "start"
+      });
+      expect(restartResponse.status).toBe(200);
+    });
+
+    it("should handle concurrent status changes", async () => {
+      const promises = [
+        api.instances({ id: 1 }).status.post({ action: "start" }),
+        api.instances({ id: 1 }).status.post({ action: "stop" }),
+        api.instances({ id: 1 }).status.post({ action: "reboot" })
+      ];
+
+      const responses = await Promise.all(promises);
+
+      responses.forEach(response => {
+        expect([200, 500]).toContain(response.status);
+        if (response.data) {
+          expect(response.data).toHaveProperty("message");
+        }
+      });
+    });
+
+    it("should return proper error for deleted instance status change", async () => {
+      // Delete instance first
+      await api.instances({ id: 1 }).delete();
+
+      // Try to change status
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "start"
+      });
+
+      expect(response.status).toBe(404);
+      if (response.data) {
+        expect(response.data).toHaveProperty("message");
+      }
+    });
+
+    it("should validate all action types", async () => {
+      const validActions = ["start", "stop", "suspend", "resume", "reboot"];
+
+      for (const action of validActions) {
+        const response = await api.instances({ id: 1 }).status.post({
+          action: action as any
+        });
+
+        expect([200, 404, 500]).toContain(response.status);
+        if (response.data) {
+          expect(response.data).toHaveProperty("message");
+        }
+      }
+    });
+
+    it("should include VM details in response", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "start"
+      });
+
+      if (response.status === 200) {
+        expect(response.data!.data).toHaveProperty("id");
+        expect(response.data!.data).toHaveProperty("title");
+        expect(response.data!.data).toHaveProperty("hostname");
+        expect(response.data!.data).toHaveProperty("status");
+        expect(response.data!.data).toHaveProperty("action");
+        expect(response.data!.data).toHaveProperty("vm_id");
+        expect(response.data!.data).toHaveProperty("pve_node");
+        expect(response.data!.data).toHaveProperty("updated_at");
+      }
+    });
+
+    it("should handle missing action parameter", async () => {
+      const response = await api.instances({ id: 1 }).status.post({} as any);
+
+      expect(response.status).toBe(422); // Validation error
+    });
+
+    it("should handle null action parameter", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: null as any
+      });
+
+      expect(response.status).toBe(422); // Validation error
+    });
+
+    it("should handle empty string action", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: "" as any
+      });
+
+      expect(response.status).toBe(422); // Validation error
+    });
+
+    it("should handle numeric action parameter", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: 123 as any
+      });
+
+      expect(response.status).toBe(422); // Validation error
+    });
+
+    it("should handle array action parameter", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: ["start"] as any
+      });
+
+      expect(response.status).toBe(422); // Validation error
+    });
+
+    it("should handle object action parameter", async () => {
+      const response = await api.instances({ id: 1 }).status.post({
+        action: { type: "start" } as any
+      });
+
+      expect(response.status).toBe(422); // Validation error
+    });
+  });
 });
