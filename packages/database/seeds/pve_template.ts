@@ -46,19 +46,6 @@ async function main() {
         name: "pve-10",
         status: "online"
       },
-      // Add the expected node names from example messages
-      {
-        name: "pve-node-01",
-        status: "online"
-      },
-      {
-        name: "pve-node-02",
-        status: "online"
-      },
-      {
-        name: "pve-node-03",
-        status: "online"
-      },
     ]
   });
 

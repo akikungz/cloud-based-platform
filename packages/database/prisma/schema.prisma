@@ -252,7 +252,7 @@ model instance {
   description              String
   type                     instance_request_type
   course_id                Int
-  course                   instance_course            @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  course                   instance_course?           @relation(fields: [course_id], references: [id], onDelete: Cascade)
   semester_id              Int?
   semester                 semester?                  @relation(fields: [semester_id], references: [id], onDelete: Cascade)
   template_id              Int
