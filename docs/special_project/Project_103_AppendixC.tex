@@ -1,0 +1,297 @@
+%*************************************
+% ภาคผนวก ค.
+%*************************************
+\appendixChapterTitle{ค}{การติดตั้งและใช้งาน Cloud-Based Platform}
+\section{การติดตั้งและใช้งาน Cloud-Based Platform}
+\hspace*{1.5em}
+ในการติดตั้งและใช้งาน Cloud-Based Platform สำหรับการสนับสนุนกิจกรรมการเรียนการสอนและกิจกรรมทางวิชาการ ผู้ใช้งานจำเป็นต้องเตรียมความพร้อมของระบบและทำการติดตั้งตามขั้นตอนดังนี้
+
+\vspace{0.5em}
+\textbf{ข้อกำหนดของระบบ (System Requirements)}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item \textbf{ซอฟต์แวร์ที่จำเป็น:}
+    \begin{mycustomenum2}
+        \item Bun 1.2.0 หรือสูงกว่า (\href{https://bun.sh/}{https://bun.sh/})
+        \item Docker และ Docker Compose (\href{https://www.docker.com/}{https://www.docker.com/})
+        \item PostgreSQL 15 หรือสูงกว่า
+        \item RabbitMQ 3.12 หรือสูงกว่า
+        \item Proxmox VE (สำหรับการใช้งานจริง)
+    \end{mycustomenum2}
+
+    \item \textbf{ข้อกำหนดของฮาร์ดแวร์:}
+    \begin{mycustomenum2}
+        \item RAM: อย่างน้อย 8 GB (แนะนำ 16 GB หรือมากกว่า)
+        \item CPU: อย่างน้อย 4 cores
+        \item พื้นที่เก็บข้อมูล: อย่างน้อย 50 GB
+        \item เชื่อมต่ออินเทอร์เน็ตเสถียร
+    \end{mycustomenum2}
+\end{mycustomenum2}
+
+\vspace{0.5em}
+\textbf{การดาวน์โหลดและติดตั้งโปรเจ็กต์}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item เปิด Terminal หรือ Command Prompt และทำการโคลนโปรเจ็กต์จาก GitHub Repository
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        git clone https://github.com/akikungz/cloud-based-platform.git\\
+        cd cloud-based-platform
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{คำสั่งสำหรับโคลนโปรเจ็กต์}}
+\label{figC:GitClone}
+\end{figure}
+
+    \item ติดตั้ง Dependencies ของโปรเจ็กต์
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        bun install
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{คำสั่งสำหรับติดตั้ง Dependencies}}
+\label{figC:BunInstall}
+\end{figure}
+
+    \item ตั้งค่า Environment Variables โดยคัดลอกไฟล์ตัวอย่าง
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        cp .env.example .env\\
+        \# แก้ไขไฟล์ .env ตามการตั้งค่าที่ต้องการ
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การตั้งค่า Environment Variables}}
+\label{figC:EnvSetup}
+\end{figure}
+\end{mycustomenum2}
+
+\section{การเริ่มต้นใช้งานระบบ}
+\hspace*{1.5em}
+หลังจากติดตั้งโปรเจ็กต์เรียบร้อยแล้ว สามารถเริ่มต้นใช้งานระบบได้ดังนี้
+
+\vspace{0.5em}
+\textbf{การรันระบบในโหมด Development}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item เริ่มต้น Infrastructure Services ด้วย Docker Compose
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        docker-compose up -d
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การเริ่มต้น Infrastructure Services}}
+\label{figC:DockerUp}
+\end{figure}
+
+    \item เริ่มต้น Midori (Frontend Application)
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        cd apps/midori\\
+        bun dev
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การเริ่มต้น Midori Frontend}}
+\label{figC:MidoriDev}
+\end{figure}
+
+    \item เริ่มต้น Momoi (API Service) ใน Terminal ใหม่
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        cd apps/momoi\\
+        bun dev
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การเริ่มต้น Momoi API Service}}
+\label{figC:MomoiDev}
+\end{figure}
+
+    \item เริ่มต้น Yuzu (VM Operations Service) ใน Terminal ใหม่
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        cd apps/yuzu\\
+        bun dev
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การเริ่มต้น Yuzu VM Operations Service}}
+\label{figC:YuzuDev}
+\end{figure}
+
+    \item เข้าใช้งานระบบผ่าน Web Browser ที่ \url{http://localhost:3000}
+\end{mycustomenum2}
+
+\section{การใช้งานส่วนประกอบต่างๆ ของระบบ}
+\hspace*{1.5em}
+ระบบ Cloud-Based Platform ประกอบด้วยส่วนประกอบหลัก 3 ส่วน ดังนี้
+
+\vspace{0.5em}
+\textbf{Midori - Frontend Application}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item เป็น Web Application ที่พัฒนาด้วย Next.js 15.5
+    \item ใช้ Material UI 7.3 และ Tailwind CSS 4 สำหรับส่วน User Interface
+    \item รองรับการใช้งานบนอุปกรณ์ Desktop และ Mobile
+    \item มีฟีเจอร์หลัก ดังนี้:
+    \begin{mycustomenum2}
+        \item การจัดการ Virtual Machines (สร้าง, ติดตาม, จัดการ)
+        \item Dashboard สำหรับดูการใช้งานทรัพยากร
+        \item ระบบ Authentication และการจัดการบัญชีผู้ใช้
+        \item รองรับการใช้งานแบบ Responsive Design
+    \end{mycustomenum2}
+    \item URL สำหรับการเข้าใช้งาน: \url{http://localhost:3000}
+\end{mycustomenum2}
+
+\vspace{0.5em}
+\textbf{Momoi - API Service}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item เป็น Core API Service ที่พัฒนาด้วย Elysia.js
+    \item ทำหน้าที่เป็นตัวกลางระหว่าง Frontend และ VM Operations Service
+    \item มีฟีเจอร์หลัก ดังนี้:
+    \begin{mycustomenum2}
+        \item RESTful API สำหรับการทำงานของแพลตฟอร์ม
+        \item OpenAPI Documentation แบบอัตโนมัติ
+        \item การติดตาม Telemetry ด้วย Jaeger และ Prometheus
+        \item การเชื่อมต่อกับ RabbitMQ สำหรับการประมวลผลแบบ Asynchronous
+    \end{mycustomenum2}
+    \item URL สำหรับ API: \url{http://localhost:3001}
+\end{mycustomenum2}
+
+\vspace{0.5em}
+\textbf{Yuzu - VM Operations Service}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item เป็น Service สำหรับจัดการ Virtual Machines ใน Proxmox VE
+    \item ประมวลผลคำขอผ่าน RabbitMQ Message Queue
+    \item มีฟีเจอร์หลัก ดังนี้:
+    \begin{mycustomenum2}
+        \item จัดการ VM Lifecycle (สร้าง, เริ่ม, หยุด, ลบ VMs)
+        \item การ Provisioning แบบ Template-based
+        \item การจัดการ IP Address แบบอัตโนมัติ
+        \item ระบบ Logging ที่ครอบคลุมด้วย Pino
+    \end{mycustomenum2}
+\end{mycustomenum2}
+
+\section{การตรวจสอบและติดตามระบบ}
+\hspace*{1.5em}
+ระบบมี Services สำหรับการตรวจสอบและติดตามการทำงานดังนี้
+
+\vspace{0.5em}
+\textbf{Monitoring Services}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item \textbf{Prometheus} - การเก็บข้อมูล Metrics
+    \begin{mycustomenum2}
+        \item URL: \url{http://localhost:9090}
+        \item ใช้สำหรับติดตามประสิทธิภาพของระบบ
+    \end{mycustomenum2}
+
+    \item \textbf{Jaeger} - การติดตาม Distributed Tracing
+    \begin{mycustomenum2}
+        \item URL: \url{http://localhost:16686}
+        \item ใช้สำหรับติดตามการทำงานของ API calls
+    \end{mycustomenum2}
+
+    \item \textbf{Grafana} - Dashboard สำหรับการแสดงผล
+    \begin{mycustomenum2}
+        \item URL: \url{http://localhost:3002}
+        \item Username/Password: admin/admin (ค่าเริ่มต้น)
+        \item ใช้สำหรับแสดงข้อมูลสถิติและ Metrics
+    \end{mycustomenum2}
+
+    \item \textbf{RabbitMQ Management} - การจัดการ Message Queue
+    \begin{mycustomenum2}
+        \item URL: \url{http://localhost:15672}
+        \item Username/Password: user/password (ค่าเริ่มต้น)
+        \item ใช้สำหรับตรวจสอบ Message Queue
+    \end{mycustomenum2}
+\end{mycustomenum2}
+
+\section{การแก้ไขปัญหาเบื้องต้น}
+\hspace*{1.5em}
+หากพบปัญหาในการใช้งาน สามารถแก้ไขได้ดังนี้
+
+\vspace{0.5em}
+\textbf{ปัญหาที่พบบ่อยและวิธีแก้ไข}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item \textbf{Port ถูกใช้งานแล้ว}
+    \begin{mycustomenum2}
+        \item ตรวจสอบ Port ที่ใช้งานด้วยคำสั่ง: \texttt{lsof -i :3000} (สำหรับ macOS/Linux)
+        \item หยุดกระบวนการที่ใช้ Port หรือเปลี่ยน Port ในไฟล์ \texttt{.env}
+    \end{mycustomenum2}
+
+    \item \textbf{Docker Services ไม่สามารถเริ่มได้}
+    \begin{mycustomenum2}
+        \item ตรวจสอบสถานะด้วยคำสั่ง: \texttt{docker-compose ps}
+        \item ดู Log ด้วยคำสั่ง: \texttt{docker-compose logs [service\_name]}
+        \item รีสตาร์ท Services ด้วยคำสั่ง: \texttt{docker-compose restart}
+    \end{mycustomenum2}
+
+    \item \textbf{Database Connection Error}
+    \begin{mycustomenum2}
+        \item ตรวจสอบว่า PostgreSQL Container ทำงานอยู่
+        \item ตรวจสอบการตั้งค่าใน Environment Variables
+        \item รันคำสั่ง Database Migration (หากจำเป็น)
+    \end{mycustomenum2}
+
+    \item \textbf{Frontend ไม่สามารถเชื่อมต่อ API ได้}
+    \begin{mycustomenum2}
+        \item ตรวจสอบว่า Momoi API Service ทำงานอยู่ที่ Port 3001
+        \item ตรวจสอบการตั้งค่า API URL ในไฟล์ Environment
+        \item ตรวจสอบ CORS Settings ใน API Service
+    \end{mycustomenum2}
+\end{mycustomenum2}
+
+\vspace{0.5em}
+\textbf{การเข้าถึงข้อมูลเพิ่มเติม}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item อ่าน Documentation เพิ่มเติมใน \texttt{README.md} ของแต่ละ Component
+    \item ตรวจสอบ Log Files สำหรับข้อมูลการ Debug
+    \item ใช้ Jaeger UI สำหรับติดตามการทำงานของ API
+    \item ใช้ Grafana Dashboard สำหรับติดตามประสิทธิภาพระบบ
+\end{mycustomenum2}

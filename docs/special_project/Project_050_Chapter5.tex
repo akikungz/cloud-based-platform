@@ -1,0 +1,35 @@
+%*************************************
+% บทที่ 5
+%*************************************
+\chapterTitle{5}{สรุปผลการดำเนินงาน}
+
+\section{สรุปผลการดำเนินงาน}
+\hspace*{1.5em}
+โครงการ "Cloud-Based Platform for Supporting Teaching and Academic Activities" ได้พัฒนาแพลตฟอร์มคลาวด์สำหรับสนับสนุนการเรียนการสอนและกิจกรรมทางวิชาการในภาควิชาเทคโนโลยีสารสนเทศ โดยใช้สถาปัตยกรรมแบบ Microservices ที่ประกอบด้วย 3 ส่วนหลัก ได้แก่ Midori (Frontend), Momoi (API Service), และ Yuzu (VM Operations) ผลลัพธ์ที่สำคัญของโครงการคือการสร้างระบบจัดการเครื่องเสมือน (Virtual Machine) ที่สมบูรณ์ ซึ่งสามารถสร้าง กำหนดค่า เริ่มต้น หยุด และลบเครื่องเสมือนได้ตามความต้องการ พร้อมระบบควบคุมการเข้าถึงแบบ Role-Based Access Control (RBAC) สำหรับนักศึกษา อาจารย์ และผู้ดูแลระบบ ทำให้สามารถใช้ทรัพยากรเซิร์ฟเวอร์ภายในภาควิชาได้อย่างมีประสิทธิภาพ และช่วยเพิ่มความสะดวกในการจัดการสภาพแวดล้อมการเรียนรู้แบบดิจิทัลให้กับอาจารย์และนักศึกษา
+
+\section{ปัญหาและอุปสรรค}
+\begin{mycustomenum}[label=5.2.\arabic*] 
+    \item ความซับซ้อนของการจัดการ Microservices Architecture เนื่องจากระบบประกอบด้วยหลายส่วนที่ต้องทำงานร่วมกันผ่าน API และ Message Queue ทำให้การดีบักและแก้ไขปัญหาเป็นเรื่องที่ท้าทาย
+    \item การจัดการ Virtual Machine ผ่าน Proxmox VE API ที่มีความซับซ้อนในการสื่อสารและจัดการ State ของ VM รวมถึงการจัดสรร IP Address และ Resource อย่างอัตโนมัติ
+    \item การออกแบบระบบ Role-Based Access Control (RBAC) ที่ปลอดภัยและครอบคลุมผู้ใช้งานทุกระดับ ตั้งแต่นักศึกษา อาจารย์ และผู้ดูแลระบบ โดยต้องคำนึงถึงความปลอดภัยและการจำกัดสิทธิ์การเข้าถึง
+    \item การใช้เทคโนโลยีใหม่ เช่น Bun Runtime, Elysia.js Framework และ RabbitMQ Message Queue ที่ต้องใช้เวลาในการศึกษาและทำความเข้าใจการทำงาน
+    \item การจัดการ Monitoring และ Observability ด้วย OpenTelemetry, Jaeger, Prometheus และ Grafana เพื่อติดตามประสิทธิภาพของระบบ
+\end{mycustomenum}
+
+\section{การแก้ปัญหา}
+\begin{mycustomenum}[label=5.3.\arabic*] 
+    \item ใช้ Docker และ Docker Compose ในการจัดการ Microservices เพื่อให้แต่ละ Service สามารถทำงานแยกกันได้อย่างเป็นอิสระ และจัดทำ API Documentation ด้วย OpenAPI เพื่อให้การสื่อสารระหว่าง Service เป็นมาตรฐาน
+    \item พัฒนา Yuzu Service ที่ทำหน้าที่เป็น Wrapper สำหรับ Proxmox VE API โดยใช้ RabbitMQ เป็น Message Queue เพื่อจัดการ VM Operations แบบ Asynchronous และสร้างระบบจัดการ IP Pool อัตโนมัติ
+    \item ออกแบบ Database Schema ด้วย Prisma ORM เพื่อจัดการข้อมูลผู้ใช้และสิทธิ์การเข้าถึง และใช้ JWT Token สำหรับ Authentication พร้อมกำหนด Role และ Permission ที่ชัดเจน
+    \item จัดทำ Documentation และ Example Code ที่ครอบคลุม พร้อมใช้ TypeScript เป็นหลักในการพัฒนาเพื่อให้ได้ Type Safety และลดข้อผิดพลาดในการพัฒนา
+    \item ใช้ OpenTelemetry เป็น Standard สำหรับ Observability และติดตั้ง Monitoring Stack ประกอบด้วย Jaeger สำหรับ Distributed Tracing, Prometheus สำหรับ Metrics Collection และ Grafana สำหรับ Visualization
+\end{mycustomenum}
+
+\section{ข้อเสนอแนะ}
+\begin{mycustomenum}[label=5.4.\arabic*] 
+    \item พัฒนาระบบ Auto-scaling และ Load Balancing เพื่อรองรับจำนวนผู้ใช้งานที่เพิ่มขึ้น และเพิ่มความสามารถในการจัดการ Resource Allocation ให้มีประสิทธิภาพมากขึ้น
+    \item เพิ่มฟีเจอร์ VM Template Management เพื่อให้อาจารย์สามารถสร้างและจัดการ Template สำหรับรายวิชาต่างๆ ได้ตามความต้องการ และเพิ่มระบบ Backup และ Snapshot Management
+    \item พัฒนา Mobile Application หรือ Progressive Web App (PWA) เพื่อให้สามารถเข้าถึงระบบได้จากอุปกรณ์มือถือ และเพิ่มระบบ Notification เพื่อแจ้งเตือนสถานะของ VM
+    \item เพิ่มระบบ CI/CD Pipeline สำหรับการ Deploy และ Testing อัตโนมัติ และจัดทำ Comprehensive Testing Suite ประกอบด้วย Unit Tests, Integration Tests และ End-to-End Tests
+    \item ศึกษาการใช้ Kubernetes สำหรับการจัดการ Container Orchestration เพื่อเพิ่มความยืดหยุ่นและ Scalability
+\end{mycustomenum}

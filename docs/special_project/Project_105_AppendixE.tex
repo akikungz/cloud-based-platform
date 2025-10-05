@@ -1,0 +1,507 @@
+%*************************************
+% ภาคผนวก จ.
+%*************************************
+\appendixChapterTitle{จ}{การ Deploy และการตั้งค่าสำหรับ Production}
+\section{การ Deploy และการตั้งค่าสำหรับ Production}
+\hspace*{1.5em}
+การนำระบบ Cloud-Based Platform ไปใช้งานจริง (Production) ต้องมีการตั้งค่าและการเตรียมการที่แตกต่างจากการใช้งานในโหมด Development โดยมีรายละเอียดดังนี้
+
+\vspace{0.5em}
+\textbf{การเตรียมสภาพแวดล้อม Production}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item \textbf{ข้อกำหนดของ Server:}
+    \begin{mycustomenum2}
+        \item CPU: อย่างน้อย 8 cores (แนะนำ 16 cores หรือมากกว่า)
+        \item RAM: อย่างน้อย 32 GB (แนะนำ 64 GB หรือมากกว่า)
+        \item Storage: SSD อย่างน้อย 500 GB สำหรับ OS และ Applications
+        \item Storage: HDD/SSD เพิ่มเติมสำหรับ VM Storage
+        \item Network: การเชื่อมต่อเครือข่ายความเร็วสูงและเสถียร
+    \end{mycustomenum2}
+
+    \item \textbf{การติดตั้ง Proxmox VE:}
+    \begin{mycustomenum2}
+        \item ดาวน์โหลด Proxmox VE ISO จาก \url{https://www.proxmox.com/}
+        \item ติดตั้งบน Server Hardware หรือ Virtual Machine
+        \item ตั้งค่า Network และ Storage Pool
+        \item สร้าง VM Templates สำหรับการใช้งาน
+    \end{mycustomenum2}
+
+    \item \textbf{การติดตั้งซอฟต์แวร์พื้นฐาน:}
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \# Update system\\
+        sudo apt update \&\& sudo apt upgrade -y\\
+        \\
+        \# Install Docker\\
+        curl -fsSL https://get.docker.com -o get-docker.sh\\
+        sudo sh get-docker.sh\\
+        \\
+        \# Install Docker Compose\\
+        sudo apt install docker-compose-plugin\\
+        \\
+        \# Install Bun\\
+        curl -fsSL https://bun.sh/install | bash
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การติดตั้งซอฟต์แวร์พื้นฐานสำหรับ Production}}
+\label{figE:SoftwareInstall}
+\end{figure}
+\end{mycustomenum2}
+
+\section{การตั้งค่า Environment Variables สำหรับ Production}
+\hspace*{1.5em}
+การตั้งค่า Environment Variables ที่เหมาะสมสำหรับการใช้งานจริง
+
+\vspace{0.5em}
+\textbf{ไฟล์ .env สำหรับ Production}
+\vspace{0.5em}
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\scriptsize
+        \# Database Configuration\\
+        DB\_HOST=localhost\\
+        DB\_PORT=5432\\
+        DB\_USER=cloudplatform\\
+        DB\_PASSWORD=\{strong\_password\_here\}\\
+        DB\_NAME=cloudplatform\_prod\\
+        \\
+        \# RabbitMQ Configuration\\
+        RABBITMQ\_HOST=localhost\\
+        RABBITMQ\_PORT=5672\\
+        RABBITMQ\_USER=cloudplatform\\
+        RABBITMQ\_PASSWORD=\{strong\_password\_here\}\\
+        \\
+        \# Proxmox Configuration\\
+        PROXMOX\_HOST=\{proxmox\_server\_ip\}\\
+        PROXMOX\_USERNAME=\{api\_username\}\\
+        PROXMOX\_PASSWORD=\{api\_password\}\\
+        PROXMOX\_NODE=\{proxmox\_node\_name\}\\
+        \\
+        \# Application Ports\\
+        MIDORI\_PORT=3000\\
+        MOMOI\_PORT=3001\\
+        \\
+        \# Security\\
+        JWT\_SECRET=\{very\_strong\_jwt\_secret\}\\
+        ENCRYPTION\_KEY=\{32\_char\_encryption\_key\}\\
+        \\
+        \# Monitoring\\
+        JAEGER\_ENDPOINT=http://localhost:14268/api/traces\\
+        PROMETHEUS\_PORT=9090\\
+        LOKI\_ENDPOINT=http://localhost:3100
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{ตัวอย่างการตั้งค่า Environment Variables สำหรับ Production}}
+\label{figE:EnvProduction}
+\end{figure}
+
+\section{การ Deploy ด้วย Docker Compose}
+\hspace*{1.5em}
+การใช้ Docker Compose สำหรับการ Deploy ระบบแบบ Production
+
+\vspace{0.5em}
+\textbf{การสร้าง Production Docker Compose}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item สร้างไฟล์ \texttt{docker-compose.prod.yml}
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\scriptsize
+        version: '3.8'\\
+        \\
+        services:\\
+        \hspace*{1em}midori:\\
+        \hspace*{2em}build:\\
+        \hspace*{3em}context: .\\
+        \hspace*{3em}dockerfile: docker/midori.dockerfile\\
+        \hspace*{2em}ports:\\
+        \hspace*{3em}- "\$\{MIDORI\_PORT:-3000\}:3000"\\
+        \hspace*{2em}environment:\\
+        \hspace*{3em}- NODE\_ENV=production\\
+        \hspace*{3em}- MOMOI\_API\_URL=http://momoi:3001\\
+        \hspace*{2em}depends\_on:\\
+        \hspace*{3em}- momoi\\
+        \hspace*{2em}restart: unless-stopped\\
+        \\
+        \hspace*{1em}momoi:\\
+        \hspace*{2em}build:\\
+        \hspace*{3em}context: .\\
+        \hspace*{3em}dockerfile: docker/momoi.dockerfile\\
+        \hspace*{2em}ports:\\
+        \hspace*{3em}- "\$\{MOMOI\_PORT:-3001\}:3001"\\
+        \hspace*{2em}environment:\\
+        \hspace*{3em}- NODE\_ENV=production\\
+        \hspace*{2em}depends\_on:\\
+        \hspace*{3em}- db\\
+        \hspace*{3em}- queue\\
+        \hspace*{2em}restart: unless-stopped
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{ตัวอย่าง Docker Compose สำหรับ Production}}
+\label{figE:DockerComposeProduction}
+\end{figure}
+
+    \item รันคำสั่งสำหรับ Deploy
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \# Build และ Start Services\\
+        docker-compose -f docker-compose.prod.yml up -d --build\\
+        \\
+        \# ตรวจสอบสถานะ Services\\
+        docker-compose -f docker-compose.prod.yml ps\\
+        \\
+        \# ดู Logs\\
+        docker-compose -f docker-compose.prod.yml logs -f
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{คำสั่งสำหรับ Deploy ด้วย Docker Compose}}
+\label{figE:DockerDeployCommands}
+\end{figure}
+\end{mycustomenum2}
+
+\section{การตั้งค่า Reverse Proxy และ SSL}
+\hspace*{1.5em}
+การตั้งค่า Nginx เป็น Reverse Proxy และการติดตั้ง SSL Certificate
+
+\vspace{0.5em}
+\textbf{การติดตั้งและตั้งค่า Nginx}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item ติดตั้ง Nginx
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        sudo apt install nginx\\
+        sudo systemctl enable nginx\\
+        sudo systemctl start nginx
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การติดตั้ง Nginx}}
+\label{figE:NginxInstall}
+\end{figure}
+
+    \item สร้างไฟล์ Configuration สำหรับ Site
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\scriptsize
+        server \{\\
+        \hspace*{1em}listen 80;\\
+        \hspace*{1em}server\_name your-domain.com;\\
+        \\
+        \hspace*{1em}location / \{\\
+        \hspace*{2em}proxy\_pass http://localhost:3000;\\
+        \hspace*{2em}proxy\_http\_version 1.1;\\
+        \hspace*{2em}proxy\_set\_header Upgrade \$http\_upgrade;\\
+        \hspace*{2em}proxy\_set\_header Connection 'upgrade';\\
+        \hspace*{2em}proxy\_set\_header Host \$host;\\
+        \hspace*{2em}proxy\_set\_header X-Real-IP \$remote\_addr;\\
+        \hspace*{2em}proxy\_set\_header X-Forwarded-For \$proxy\_add\_x\_forwarded\_for;\\
+        \hspace*{2em}proxy\_set\_header X-Forwarded-Proto \$scheme;\\
+        \hspace*{2em}proxy\_cache\_bypass \$http\_upgrade;\\
+        \hspace*{1em}\}\\
+        \\
+        \hspace*{1em}location /api \{\\
+        \hspace*{2em}proxy\_pass http://localhost:3001;\\
+        \hspace*{2em}proxy\_set\_header Host \$host;\\
+        \hspace*{2em}proxy\_set\_header X-Real-IP \$remote\_addr;\\
+        \hspace*{2em}proxy\_set\_header X-Forwarded-For \$proxy\_add\_x\_forwarded\_for;\\
+        \hspace*{2em}proxy\_set\_header X-Forwarded-Proto \$scheme;\\
+        \hspace*{1em}\}\\
+        \}
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การตั้งค่า Nginx Reverse Proxy}}
+\label{figE:NginxConfig}
+\end{figure}
+
+    \item ติดตั้ง SSL Certificate ด้วย Let's Encrypt
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \# ติดตั้ง Certbot\\
+        sudo apt install certbot python3-certbot-nginx\\
+        \\
+        \# ขอ SSL Certificate\\
+        sudo certbot --nginx -d your-domain.com\\
+        \\
+        \# ตั้งค่า Auto-renewal\\
+        sudo crontab -e\\
+        \# เพิ่มบรรทัด: 0 12 * * * /usr/bin/certbot renew --quiet
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การติดตั้ง SSL Certificate}}
+\label{figE:SSLInstall}
+\end{figure>
+\end{mycustomenum2}
+
+\section{การตั้งค่า Database สำหรับ Production}
+\hspace*{1.5em}
+การเตรียม PostgreSQL Database สำหรับการใช้งานจริง
+
+\vspace{0.5em}
+\textbf{การตั้งค่า PostgreSQL}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item การตั้งค่า Database User และ Permissions
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \# เข้าสู่ PostgreSQL\\
+        sudo -u postgres psql\\
+        \\
+        \# สร้าง Database และ User\\
+        CREATE DATABASE cloudplatform\_prod;\\
+        CREATE USER cloudplatform WITH ENCRYPTED PASSWORD 'strong\_password';\\
+        GRANT ALL PRIVILEGES ON DATABASE cloudplatform\_prod TO cloudplatform;\\
+        \\
+        \# ออกจาก PostgreSQL\\
+        \\q
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การตั้งค่า PostgreSQL Database}}
+\label{figE:PostgreSQLSetup}
+\end{figure}
+
+    \item การรัน Database Migration
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \# เข้าไปใน Momoi directory\\
+        cd apps/momoi\\
+        \\
+        \# รัน Prisma Migration\\
+        bunx prisma migrate deploy\\
+        \\
+        \# Generate Prisma Client\\
+        bunx prisma generate
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การรัน Database Migration}}
+\label{figE:DatabaseMigration}
+\end{figure}
+
+    \item การตั้งค่า Database Backup
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \#!/bin/bash\\
+        \# สร้างไฟล์ backup-db.sh\\
+        \\
+        DB\_NAME="cloudplatform\_prod"\\
+        DB\_USER="cloudplatform"\\
+        BACKUP\_DIR="/backups/postgresql"\\
+        DATE=\$(date +\%Y\%m\%d\_\%H\%M\%S)\\
+        \\
+        \# สร้าง directory หากไม่มี\\
+        mkdir -p \$BACKUP\_DIR\\
+        \\
+        \# สำรอง Database\\
+        pg\_dump -h localhost -U \$DB\_USER -d \$DB\_NAME > \\
+        \hspace*{1em}\$BACKUP\_DIR/backup\_\$DATE.sql\\
+        \\
+        \# ลบไฟล์ backup เก่าที่เก็บเกิน 7 วัน\\
+        find \$BACKUP\_DIR -name "backup\_*.sql" -mtime +7 -delete
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{สคริปต์สำหรับ Database Backup}}
+\label{figE:DatabaseBackup}
+\end{figure}
+\end{mycustomenum2}
+
+\section{การตรวจสอบและบำรุงรักษาระบบ}
+\hspace*{1.5em}
+การตรวจสอบและบำรุงรักษาระบบเพื่อให้ทำงานได้อย่างเสถียร
+
+\vspace{0.5em}
+\textbf{การตรวจสอบสถานะระบบ}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item สร้างสคริปต์ตรวจสอบสถานะ Services
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \#!/bin/bash\\
+        \# สร้างไฟล์ health-check.sh\\
+        \\
+        echo "=== System Health Check ==="\\
+        \\
+        \# ตรวจสอบ Docker Services\\
+        echo "Docker Services Status:"\\
+        docker-compose -f docker-compose.prod.yml ps\\
+        \\
+        \# ตรวจสอบ Nginx\\
+        echo "Nginx Status:"\\
+        systemctl status nginx --no-pager\\
+        \\
+        \# ตรวจสอบ Disk Space\\
+        echo "Disk Usage:"\\
+        df -h\\
+        \\
+        \# ตรวจสอบ Memory\\
+        echo "Memory Usage:"\\
+        free -h\\
+        \\
+        \# ตรวจสอบการเชื่อมต่อ Database\\
+        echo "Database Connection:"\\
+        pg\_isready -h localhost -p 5432
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{สคริปต์ตรวจสอบสถานะระบบ}}
+\label{figE:HealthCheck}
+\end{figure}
+
+    \item ตั้งค่า Cron Job สำหรับการตรวจสอบอัตโนมัติ
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \# แก้ไข Crontab\\
+        crontab -e\\
+        \\
+        \# เพิ่มงานตรวจสอบทุก 5 นาที\\
+        */5 * * * * /path/to/health-check.sh >> /var/log/health-check.log\\
+        \\
+        \# สำรอง Database ทุกวันเวลา 2:00 น.\\
+        0 2 * * * /path/to/backup-db.sh\\
+        \\
+        \# ทำความสะอาด Docker images เก่าทุกอาทิตย์\\
+        0 3 * * 0 docker system prune -f
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{การตั้งค่า Cron Jobs}}
+\label{figE:CronJobs}
+\end{figure}
+\end{mycustomenum2}
+
+\vspace{0.5em}
+\textbf{การอัปเดตระบบ}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item การอัปเดตแอปพลิเคชัน
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \begin{minipage}{0.85\textwidth}
+        \texttt{\footnotesize
+        \#!/bin/bash\\
+        \# สร้างไฟล์ update-app.sh\\
+        \\
+        echo "Starting application update..."\\
+        \\
+        \# Pull latest code\\
+        git pull origin main\\
+        \\
+        \# Install dependencies\\
+        bun install\\
+        \\
+        \# Build และ restart services\\
+        docker-compose -f docker-compose.prod.yml down\\
+        docker-compose -f docker-compose.prod.yml up -d --build\\
+        \\
+        \# ตรวจสอบสถานะหลัง update\\
+        sleep 30\\
+        docker-compose -f docker-compose.prod.yml ps\\
+        \\
+        echo "Update completed!"
+        }
+    \end{minipage}
+}
+\caption{\fontSixTeen{สคริปต์สำหรับอัปเดตแอปพลิเคชัน}}
+\label{figE:UpdateApp}
+\end{figure}
+\end{mycustomenum2}
+
+\section{การแก้ไขปัญหาใน Production}
+\hspace*{1.5em}
+วิธีการแก้ไขปัญหาที่อาจเกิดขึ้นในการใช้งานจริง
+
+\vspace{0.5em}
+\textbf{ปัญหาที่พบบ่อยและวิธีแก้ไข}
+\vspace{0.5em}
+
+\begin{mycustomenum2}
+    \item \textbf{Service ไม่ตอบสนอง}
+    \begin{mycustomenum2}
+        \item ตรวจสอบ Logs: \texttt{docker-compose logs [service\_name]}
+        \item รีสตาร์ท Service: \texttt{docker-compose restart [service\_name]}
+        \item ตรวจสอบ Resource Usage: \texttt{docker stats}
+    \end{mycustomenum2}
+
+    \item \textbf{Database Connection Error}
+    \begin{mycustomenum2}
+        \item ตรวจสอบ PostgreSQL Service: \texttt{systemctl status postgresql}
+        \item ตรวจสอบ Connection Pool: ดู Logs ของ Momoi Service
+        \item รีสตาร์ท Database: \texttt{sudo systemctl restart postgresql}
+    \end{mycustomenum2}
+
+    \item \textbf{Out of Disk Space}
+    \begin{mycustomenum2}
+        \item ทำความสะอาด Docker: \texttt{docker system prune -a}
+        \item ลบ Log files เก่า: \texttt{find /var/log -name "*.log" -mtime +30 -delete}
+        \item ตรวจสอบ VM Storage ใน Proxmox
+    \end{mycustomenum2}
+
+    \item \textbf{SSL Certificate หมดอายุ}
+    \begin{mycustomenum2}
+        \item ต่ออายุ Certificate: \texttt{sudo certbot renew}
+        \item รีโหลด Nginx: \texttt{sudo nginx -s reload}
+        \item ตรวจสอบวันหมดอายุ: \texttt{sudo certbot certificates}
+    \end{mycustomenum2}
+\end{mycustomenum2}

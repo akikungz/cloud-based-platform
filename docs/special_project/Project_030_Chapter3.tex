@@ -1,0 +1,273 @@
+%*************************************
+% บทที่ 3
+%*************************************
+\chapterTitle{3}{วิธีการดำเนินงานและการออกแบบระบบ}
+
+% Project Methodology
+\section{ขั้นตอนการดำเนินงาน}
+
+\hspace*{1.5em} %ย่อหน้า
+การพัฒนาแพลตฟอร์มคลัสเตอร์เสมือนสำหรับการศึกษามีขั้นตอนการดำเนินงานที่เป็นระบบ โดยแบ่งออกเป็น 5 ขั้นตอนหลัก ดังนี้
+
+\begin{mycustomenum2}
+    \item \textbf{การศึกษาและวิเคราะห์ความต้องการ} การสำรวจความต้องการของผู้ใช้งาน การศึกษาระบบที่มีอยู่เดิม และการกำหนดข้อกำหนดของระบบ
+    \item \textbf{การออกแบบสถาปัตยกรรมระบบ} การออกแบบโครงสร้างระบบทั้งหมด การเลือกเทคโนโลยีที่เหมาะสม และการออกแบบฐานข้อมูล
+    \item \textbf{การพัฒนาระบบ} การพัฒนาส่วนต่าง ๆ ของระบบตามสถาปัตยกรรมที่ออกแบบไว้
+    \item \textbf{การทดสอบระบบ} การทดสอบการทำงานของระบบ การทดสอบประสิทธิภาพ และการทดสอบความปลอดภัย
+    \item \textbf{การประเมินผลและปรับปรุง} การประเมินผลการใช้งานจริง และการปรับปรุงระบบตามผลการประเมิน
+\end{mycustomenum2}
+
+% Research and Requirements Analysis
+\section{การศึกษาและวิเคราะห์ความต้องการ}
+
+% 3.2.1
+\subsection{การสำรวจความต้องการผู้ใช้งาน}
+
+\hspace*{1.5em} %ย่อหน้า
+ผู้จัดทำได้ดำเนินการสำรวจความต้องการจากกลุ่มผู้ใช้งานในภาควิชาเทคโนโลยีสารสนเทศ ได้แก่
+
+\begin{mycustomitem}
+    \item \textbf{อาจารย์} ต้องการระบบจัดการเครื่องเสมือนที่ใช้งานง่าย สำหรับการสอนและการวิจัย
+    \item \textbf{นักศึกษา} ต้องการเข้าถึงเครื่องเสมือนสำหรับการเรียนและทำโครงงาน
+    \item \textbf{ผู้ดูแลระบบ} ต้องการเครื่องมือติดตามและจัดการระบบที่มีประสิทธิภาพ
+\end{mycustomitem}
+
+% 3.2.2
+\subsection{การวิเคราะห์ระบบเดิม}
+
+\hspace*{1.5em} %ย่อหน้า
+จากการศึกษาระบบที่มีอยู่เดิม พบปัญหาและข้อจำกัดดังนี้
+
+\begin{mycustomitem}
+    \item \textbf{การใช้งานที่ซับซ้อน} ต้องใช้ความรู้ทางเทคนิคสูงในการจัดการเครื่องเสมือน
+    \item \textbf{ขาดระบบจัดการผู้ใช้} ไม่มีการแยกสิทธิ์การใช้งานตามบทบาท
+    \item \textbf{ประสิทธิภาพต่ำ} การสร้างและลบเครื่องเสมือนใช้เวลานาน
+    \item \textbf{ขาดการติดตาม} ไม่มีระบบ Monitoring การใช้ทรัพยากร
+\end{mycustomitem}
+
+% 3.2.3
+\subsection{ข้อกำหนดของระบบ}
+
+\hspace*{1.5em} %ย่อหน้า
+จากการวิเคราะห์ความต้องการ ได้กำหนดข้อกำหนดของระบบดังนี้
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{ข้อกำหนดเชิงหน้าที่ (Functional Requirements)}
+\begin{mycustomitem}
+    \item ระบบต้องสามารถสร้าง แก้ไข และลบเครื่องเสมือนได้
+    \item ระบบต้องรองรับการจัดการผู้ใช้แบบ Role-Based Access Control
+    \item ระบบต้องมีระบบยืนยันตัวตนผ่าน OAuth 2.0
+    \item ระบบต้องสามารถติดตามการใช้ทรัพยากรแบบ Real-time
+    \item ระบบต้องส่งการแจ้งเตือนเมื่อมีการเปลี่ยนแปลงสถานะ
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{ข้อกำหนดที่ไม่เกี่ยวกับหน้าที่ (Non-Functional Requirements)}
+\begin{mycustomitem}
+    \item \textbf{ประสิทธิภาพ} การสร้างเครื่องเสมือนต้องใช้เวลาไม่เกิน 3 นาที
+    \item \textbf{ความพร้อมใช้งาน} ระบบต้องพร้อมใช้งานอย่างน้อย 99.5% ของเวลา
+    \item \textbf{ความปลอดภัย} ข้อมูลต้องได้รับการเข้ารหัสและจัดเก็บอย่างปลอดภัย
+    \item \textbf{ความยืดหยุ่น} ระบบต้องรองรับการขยายทรัพยากรได้ในอนาคต
+\end{mycustomitem}
+
+% System Architecture Design
+\section{การออกแบบสถาปัตยกรรมระบบ}
+
+% 3.3.1
+\subsection{สถาปัตยกรรมระบบโดยรวม}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/web/context_diagram.png}
+    \caption{แผนภาพบริบทของระบบแพลตฟอร์มคลัสเตอร์เสมือน}
+    \label{fig:context_diagram}
+\end{figure}
+
+\hspace*{1.5em} %ย่อหน้า
+ระบบแพลตฟอร์มคลัสเตอร์เสมือนได้รับการออกแบบในรูปแบบ Microservices Architecture โดยแบ่งเป็นส่วนประกอบหลัก 3 ส่วน คือ
+
+\begin{mycustomitem}
+    \item \textbf{Frontend} เว็บแอปพลิเคชันสำหรับผู้ใช้งาน พัฒนาด้วย Next.js และ React
+    \item \textbf{Backend} เซิร์ฟเวอร์ API สำหรับการจัดการข้อมูลและการยืนยันตัวตน พัฒนาด้วย Elysia.js
+    \item \textbf{Instance Management} เซอร์วิสจัดการเครื่องเสมือนและการสื่อสารกับ Proxmox VE
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+จากภาพที่ \ref{fig:context_diagram} แผนภาพบริบทข้างต้นแสดงให้เห็นถึงการเชื่อมต่อและการสื่อสารระหว่างส่วนประกอบต่าง ๆ ของระบบ โดยผู้ใช้งานสามารถเข้าถึงระบบผ่านเว็บแอปพลิเคชัน ที่จะสื่อสารกับ Backend API และระบบจัดการเครื่องเสมือนเพื่อให้บริการที่สมบูรณ์
+
+% 3.3.2
+\subsection{การออกแบบฐานข้อมูล}
+
+\hspace*{1.5em} %ย่อหน้า
+ระบบใช้ PostgreSQL เป็นฐานข้อมูลหลัก โดยออกแบบตารางหลักดังนี้
+
+\begin{mycustomitem}
+    \item \textbf{User Table} เก็บข้อมูลผู้ใช้งาน บทบาท และสิทธิ์การเข้าถึง
+    \item \textbf{Instance Table} เก็บข้อมูลเครื่องเสมือน การกำหนดค่า และสถานะ
+    \item \textbf{Template Table} เก็บข้อมูล Template สำหรับการสร้างเครื่องเสมือน
+    \item \textbf{Activity Log Table} เก็บประวัติการใช้งานและการเปลี่ยนแปลง
+    \item \textbf{Resource Usage Table} เก็บข้อมูลการใช้ทรัพยากรแบบ Time-series
+\end{mycustomitem}
+
+% 3.3.3
+\subsection{การออกแบบ API และการสื่อสาร}
+
+\hspace*{1.5em} %ย่อหน้า
+ระบบใช้ RESTful API เป็นหลักในการสื่อสารระหว่างส่วนประกอบต่าง ๆ โดยมีการออกแบบดังนี้
+
+\begin{mycustomitem}
+    \item \textbf{Authentication Endpoints} สำหรับการ Login, Logout และ Token Management
+    \item \textbf{Instance Management Endpoints} สำหรับการจัดการเครื่องเสมือน (CRUD Operations)
+    \item \textbf{Monitoring Endpoints} สำหรับการติดตามการใช้ทรัพยากร
+\end{mycustomitem}
+
+% 3.3.4
+\subsection{การออกแบบระบบ Message Queue}
+
+\hspace*{1.5em} %ย่อหน้า
+เพื่อรองรับการประมวลผลแบบ Asynchronous ระบบใช้ RabbitMQ เป็น Message Broker โดยออกแบบ Queue หลักดังนี้
+
+\begin{mycustomitem}
+    \item \textbf{Instance Creation Queue} สำหรับงานการสร้างเครื่องเสมือน
+    \item \textbf{Instance Deletion Queue} สำหรับงานการลบเครื่องเสมือน
+\end{mycustomitem}
+
+% Tools and Technologies Used
+\section{เครื่องมือและเทคโนโลยีที่ใช้ในการพัฒนา}
+
+% 3.4.1
+\subsection{เทคโนโลยี Frontend}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Next.js 14} เป็น React Framework ที่เลือกใช้เนื่องจากคุณสมบัติดังนี้
+\begin{mycustomitem}
+    \item \textbf{App Router} สำหรับการจัดการ Routing แบบใหม่
+    \item \textbf{Server Components} ลดปริมาณ JavaScript ที่ส่งไปยัง Client
+    \item \textbf{Static Site Generation} เพิ่มประสิทธิภาพการโหลดหน้าเว็บ
+    \item \textbf{Built-in TypeScript Support} รองรับ Type Safety
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Tailwind CSS} ใช้สำหรับการจัดการ Styling เนื่องจาก
+\begin{mycustomitem}
+    \item \textbf{Utility-first} เขียน CSS ได้เร็วและมีประสิทธิภาพ
+    \item \textbf{Responsive Design} รองรับการแสดงผลบนอุปกรณ์ต่าง ๆ
+\end{mycustomitem}
+
+% 3.4.2
+\subsection{เทคโนโลยี Backend}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Elysia.js} เป็น Web Framework ที่ใช้กับ Bun Runtime โดยมีเหตุผลในการเลือกใช้ดังนี้
+\begin{mycustomitem}
+    \item \textbf{High Performance} มีประสิทธิภาพสูงกว่า Node.js Framework ทั่วไป
+    \item \textbf{Type Safety} รองรับ TypeScript แบบเต็มรูปแบบ
+    \item \textbf{OpenAPI Integration} สร้าง API Documentation อัตโนมัติ
+    \item \textbf{Plugin Ecosystem} มี Plugin หลากหลายสำหรับการพัฒนา
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Prisma ORM} ใช้สำหรับการจัดการฐานข้อมูล เนื่องจาก
+\begin{mycustomitem}
+    \item \textbf{Type-safe Database Client} ป้องกันข้อผิดพลาดในการเขียน Query
+    \item \textbf{Database Migrations} จัดการการเปลี่ยนแปลง Schema อย่างเป็นระบบ
+    \item \textbf{Database Introspection} สร้าง Schema จากฐานข้อมูลที่มีอยู่
+\end{mycustomitem}
+
+% 3.4.3
+\subsection{Infrastructure และ DevOps}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Docker} ใช้สำหรับการ Containerization ของแอปพลิเคชัน เพื่อ
+\begin{mycustomitem}
+    \item \textbf{Environment Consistency} สภาพแวดล้อมการพัฒนาและ Production เหมือนกัน
+    \item \textbf{Easy Deployment} ง่ายต่อการ Deploy และ Scale
+    \item \textbf{Resource Isolation} แยกทรัพยากรระหว่างแอปพลิเคชัน
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Docker Compose} ใช้สำหรับการจัดการ Multi-container Application
+\begin{mycustomitem}
+    \item \textbf{Service Orchestration} จัดการการเริ่มต้นและหยุดทำงานของ Service
+    \item \textbf{Network Management} จัดการเครือข่ายระหว่าง Container
+    \item \textbf{Volume Management} จัดการการแชร์ข้อมูลระหว่าง Container
+\end{mycustomitem}
+
+% 3.4.4
+\subsection{เครื่องมือการพัฒนา}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Version Control และ Collaboration}
+\begin{mycustomitem}
+    \item \textbf{Git} สำหรับการควบคุมเวอร์ชันของโค้ด
+    \item \textbf{GitHub} สำหรับการเก็บโค้ดและการทำงานร่วมกัน
+    \item \textbf{GitHub Actions} สำหรับ CI/CD Pipeline
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Code Quality และ Testing}
+\begin{mycustomitem}
+    \item \textbf{ESLint และ Prettier} สำหรับการตรวจสอบและจัดรูปแบบโค้ด
+    \item \textbf{TypeScript} สำหรับ Static Type Checking
+    \item \textbf{Jest} สำหรับ Unit Testing
+\end{mycustomitem}
+
+% Planning and Project Management
+\section{การวางแผนการพัฒนาและการจัดการโครงการ}
+
+% 3.5.1
+\subsection{วิธีการพัฒนา (Development Methodology)}
+
+\hspace*{1.5em} %ย่อหน้า
+โครงงานนี้ใช้วิธีการพัฒนาแบบ Agile Development โดยแบ่งการพัฒนาเป็น Sprint ขนาด 2 สัปดาห์ แต่ละ Sprint จะมีขั้นตอนดังนี้
+
+\begin{mycustomenum2}
+    \item \textbf{Sprint Planning} วางแผนงานที่จะทำใน Sprint นั้น ๆ
+    \item \textbf{Daily Standup} ติดตามความคืบหน้าและปัญหาที่เกิดขึ้น  
+    \item \textbf{Development} การพัฒนาตาม User Stories ที่กำหนด
+    \item \textbf{Testing} การทดสอบฟีเจอร์ที่พัฒนาเสร็จ
+    \item \textbf{Sprint Review} ทบทวนผลงานและรับ Feedback
+    \item \textbf{Sprint Retrospective} หาจุดปรับปรุงสำหรับ Sprint ถัดไป
+\end{mycustomenum2}
+
+% 3.5.2
+\subsection{แผนการพัฒนาตามระยะเวลา}
+
+\hspace*{1.5em} %ย่อหน้า
+การพัฒนาแบ่งออกเป็น 4 Phase หลัก ตามลำดับดังนี้
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Phase 1: Foundation (สัปดาห์ที่ 1-4)}
+\begin{mycustomitem}
+    \item ตั้งค่า Development Environment
+    \item พัฒนาระบบ Authentication และ User Management
+    \item สร้าง Database Schema และ API พื้นฐาน
+    \item พัฒนา UI Components พื้นฐาน
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Phase 2: Core Features (สัปดาห์ที่ 5-8)}
+\begin{mycustomitem}
+    \item พัฒนาระบบจัดการเครื่องเสมือนพื้นฐาน (Create, Read, Update, Delete)
+    \item เชื่อมต่อกับ Proxmox VE API
+    \item พัฒนา Message Queue System
+    \item สร้าง Dashboard หลักสำหรับผู้ใช้งาน
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Phase 3: Advanced Features (สัปดาห์ที่ 9-12)}
+\begin{mycustomitem}
+    \item พัฒนาระบบ Monitoring และ Resource Tracking
+    \item เพิ่มระบบ Notification
+    \item พัฒนา Advanced VM Management Features
+    \item เพิ่มระบบ Template Management
+\end{mycustomitem}
+
+\hspace*{1.5em} %ย่อหน้า
+\textbf{Phase 4: Testing และ Optimization (สัปดาห์ที่ 13-16)}
+\begin{mycustomitem}
+    \item Integration Testing และ Performance Testing
+    \item Security Testing และ Load Testing  
+    \item UI/UX Improvements
+    \item Documentation และ Deployment Preparation
+\end{mycustomitem}
