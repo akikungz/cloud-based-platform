@@ -60,16 +60,14 @@ export function CurrentStaffInstances({ limit = 10 }: CurrentStaffInstancesProps
           
           // Filter instances to show only:
           // 1. Instances belonging to the current user
-          // 2. Staff instances (type: 'project', not 'course')
+          // 2. Staff instances (type: 'personal', not 'course')
           const filteredInstances = allInstances.filter((instance: Instance) => {
             // Check if the instance belongs to the current user
-            const belongsToCurrentUser = instance.user.id.toString() === user.id;
+            const instanceUserId = instance.user?.id?.toString();
+            const currentUserId = user.id?.toString();
+            const belongsToCurrentUser = instanceUserId === currentUserId;
             
-            // Check if it's a staff instance (type: 'project' or no type specified)
-            // Course instances (type: 'course') are for students
-            const isStaffInstance = !instance.type || instance.type === 'project';
-            
-            return belongsToCurrentUser && isStaffInstance;
+            return belongsToCurrentUser;
           });
           
           setInstances(filteredInstances);
@@ -141,6 +139,14 @@ export function CurrentStaffInstances({ limit = 10 }: CurrentStaffInstancesProps
           title="No staff instances found"
           description="You don't have any personal staff instances yet. Create one to get started."
         />
+        <div className="text-center">
+          <a
+            href="/instances/staff/create"
+            className="inline-flex items-center px-4 py-2 bg-vm-blue-600 text-white rounded-md hover:bg-vm-blue-700 transition-colors"
+          >
+            Create Instance
+          </a>
+        </div>
       </SectionCard>
     );
   }

@@ -43,7 +43,7 @@ export default function StaffPage() {
         throw new Error(result.error.value.message || 'Failed to fetch staff members');
       }
       // Handle the API response structure: { message: string, data: Person[] }
-      const personsData = result.data?.data || result.data;
+      const personsData = (result.data! as unknown as any).data || result.data;
       setPersons(Array.isArray(personsData) ? personsData : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch staff members");
@@ -119,8 +119,8 @@ export default function StaffPage() {
       />
 
       {error && (
-        <AlertMessage 
-          type="error" 
+        <AlertMessage
+          type="error"
           message={error}
           dismissible
           onDismiss={() => setError(null)}
@@ -217,11 +217,10 @@ export default function StaffPage() {
             {filteredPersons.map((person) => (
               <div
                 key={person.staff_id}
-                className={`border rounded-lg p-4 hover:bg-gray-50 ${
-                  person.status === 'pending' 
-                    ? 'border-yellow-200 bg-yellow-50' 
+                className={`border rounded-lg p-4 hover:bg-gray-50 ${person.status === 'pending'
+                    ? 'border-yellow-200 bg-yellow-50'
                     : 'border-gray-200 bg-white'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -229,11 +228,10 @@ export default function StaffPage() {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {person.status === 'pending' ? 'Pending Staff Member' : (person.name || 'No name provided')}
                       </h3>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        person.status === 'pending'
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${person.status === 'pending'
                           ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-green-100 text-green-800'
-                      }`}>
+                        }`}>
                         {person.status === 'pending' ? 'Pending' : 'Active'}
                       </span>
                     </div>

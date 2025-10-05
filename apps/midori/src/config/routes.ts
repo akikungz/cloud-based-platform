@@ -26,6 +26,12 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
 		title: "Manage Instances",
 		description: "View and manage all virtual machine instances",
 	},
+	"/instances/[id]": {
+		path: "/instances/[id]",
+		allowedRoles: [Role.Staff, Role.Student],
+		title: "Instance Details",
+		description: "View detailed information about a specific instance",
+	},
 	"/instances/staff/create": {
 		path: "/instances/staff/create",
 		allowedRoles: [Role.Staff],
@@ -103,7 +109,7 @@ export function canAccessRoute(path: string, userRole: Role): boolean {
  * @returns Array of route configurations the user can access
  */
 export function getAccessibleRoutes(userRole: Role): RouteConfig[] {
-	return Object.values(ROUTE_CONFIG).filter(route => 
+	return Object.values(ROUTE_CONFIG).filter(route =>
 		route.allowedRoles.includes(userRole)
 	);
 }
@@ -120,6 +126,6 @@ export function getDefaultRoute(userRole: Role): string {
 		case Role.Student:
 			return "/dashboard";
 		default:
-			return "/dashboard";
+			return "/";
 	}
 }

@@ -4,8 +4,11 @@ import { Role } from "auth/utils/role";
 import { env } from "@midori/libs/env";
 import { momoi_client } from "@midori/libs/momoi";
 import { useEffect, useState } from "react";
-import { Button, Chip } from "@mui/material";
-import { Play, Square, Trash2, ExternalLink, Database, Cpu, MemoryStick, HardDrive, Monitor, Globe } from "lucide-react";
+import { Button, Chip, Menu, MenuItem, IconButton } from "@mui/material";
+import {
+	Play, Square, Trash2, ExternalLink, Database, Cpu,
+	MemoryStick, HardDrive, Monitor, Globe, RotateCw, Pause, MoreVertical
+} from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@midori/utils/format";
 
@@ -39,6 +42,11 @@ export default function StudentInstancesPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// NEW: Add these states
+	const [actionLoading, setActionLoading] = useState<number | null>(null);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const [selectedInstance, setSelectedInstance] = useState<number | null>(null);
+
 	useEffect(() => {
 		const fetchInstances = async () => {
 			try {
@@ -48,7 +56,7 @@ export default function StudentInstancesPage() {
 					setError(result.error.value.message || 'Failed to fetch instances');
 				} else if (result.data) {
 					// Handle the API response structure: { message: string, data: T }
-					const instancesData = result.data?.data || result.data;
+					const instancesData = (result.data as any)?.data || result.data;
 					setInstances(Array.isArray(instancesData) ? instancesData : []);
 				} else {
 					setError('No data received');
@@ -69,6 +77,7 @@ export default function StudentInstancesPage() {
 			return;
 		}
 
+		setActionLoading(instanceId); // Add this
 		try {
 			const result = await momoi_client.api.v1.student.instances({ id: instanceId }).delete();
 
@@ -77,11 +86,51 @@ export default function StudentInstancesPage() {
 			} else {
 				// Remove the instance from the list
 				setInstances(prev => prev.filter(instance => instance.id !== instanceId));
+				alert('Instance deleted successfully'); // Add this
 			}
 		} catch (error) {
 			console.error("Error deleting instance:", error);
 			alert("Failed to delete instance");
+		} finally {
+			setActionLoading(null); // Add this
 		}
+	};
+
+	const handleVMAction = async (instanceId: number, action: 'start' | 'stop' | 'reboot' | 'suspend' | 'resume') => {
+		setActionLoading(instanceId);
+		setAnchorEl(null);
+		try {
+			const result = await momoi_client.api.v1.student.instances({ id: instanceId }).status.post({
+				action
+			});
+
+			if (result.error) {
+				alert(`Failed to ${action} instance: ${result.error.value.message}`);
+			} else {
+				// Update the instance status in the list
+				setInstances(prev => prev.map(instance =>
+					instance.id === instanceId
+						? { ...instance, status: (result.data as any)?.data?.status || instance.status }
+						: instance
+				));
+				alert(`VM ${action} request sent successfully`);
+			}
+		} catch (error) {
+			console.error(`Error ${action} instance:`, error);
+			alert(`Failed to ${action} instance`);
+		} finally {
+			setActionLoading(null);
+		}
+	};
+
+	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, instanceId: number) => {
+		setAnchorEl(event.currentTarget);
+		setSelectedInstance(instanceId);
+	};
+
+	const handleMenuClose = () => {
+		setAnchorEl(null);
+		setSelectedInstance(null);
 	};
 
 	const getStatusColor = (status: string) => {
@@ -223,6 +272,32 @@ export default function StudentInstancesPage() {
 									</div>
 
 									<div className="flex gap-2">
+										{/* Start/Stop Button */}
+										{instance.status === 'stopped' ? (
+											<Button
+												variant="contained"
+												color="success"
+												size="small"
+												startIcon={<Play className="w-4 h-4" />}
+												onClick={() => handleVMAction(instance.id, 'start')}
+												disabled={actionLoading === instance.id}
+											>
+												{actionLoading === instance.id ? 'Starting...' : 'Start'}
+											</Button>
+										) : instance.status === 'running' ? (
+											<Button
+												variant="contained"
+												color="warning"
+												size="small"
+												startIcon={<Square className="w-4 h-4" />}
+												onClick={() => handleVMAction(instance.id, 'stop')}
+												disabled={actionLoading === instance.id}
+											>
+												{actionLoading === instance.id ? 'Stopping...' : 'Stop'}
+											</Button>
+										) : null}
+
+										{/* Connect Button */}
 										<Button
 											variant="outlined"
 											size="small"
@@ -231,15 +306,53 @@ export default function StudentInstancesPage() {
 										>
 											Connect
 										</Button>
-										<Button
-											variant="outlined"
-											color="error"
+
+										{/* More Actions Menu */}
+										<IconButton
 											size="small"
-											startIcon={<Trash2 className="w-4 h-4" />}
-											onClick={() => handleDeleteInstance(instance.id)}
+											onClick={(e) => handleMenuOpen(e, instance.id)}
+											disabled={actionLoading === instance.id}
 										>
-											Delete
-										</Button>
+											<MoreVertical className="w-4 h-4" />
+										</IconButton>
+
+										<Menu
+											anchorEl={anchorEl}
+											open={Boolean(anchorEl) && selectedInstance === instance.id}
+											onClose={handleMenuClose}
+										>
+											<MenuItem
+												onClick={() => handleVMAction(instance.id, 'reboot')}
+												disabled={instance.status !== 'running'}
+											>
+												<RotateCw className="w-4 h-4 mr-2" />
+												Reboot
+											</MenuItem>
+											<MenuItem
+												onClick={() => handleVMAction(instance.id, 'suspend')}
+												disabled={instance.status !== 'running'}
+											>
+												<Pause className="w-4 h-4 mr-2" />
+												Suspend
+											</MenuItem>
+											<MenuItem
+												onClick={() => handleVMAction(instance.id, 'resume')}
+												disabled={instance.status !== 'stopped'}
+											>
+												<Play className="w-4 h-4 mr-2" />
+												Resume
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													handleDeleteInstance(instance.id);
+												}}
+												style={{ color: 'red' }}
+											>
+												<Trash2 className="w-4 h-4 mr-2" />
+												Delete
+											</MenuItem>
+										</Menu>
 									</div>
 								</div>
 							))}

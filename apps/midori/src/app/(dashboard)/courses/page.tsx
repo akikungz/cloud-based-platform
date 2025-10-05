@@ -106,7 +106,13 @@ export default function CoursesPage() {
       if (result.error) {
         throw new Error(result.error.value.message || 'Failed to fetch staff members');
       }
-      setStaffMembers(result.data?.data || []);
+
+      // check if result.data has data field
+      if (result.data && ('data' in result.data)) {
+        setStaffMembers(result.data.data as StaffMember[]);
+      } else {
+        setStaffMembers([]);
+      }
     } catch (err) {
       console.error('Failed to fetch staff members:', err);
       setStaffMembers([]);

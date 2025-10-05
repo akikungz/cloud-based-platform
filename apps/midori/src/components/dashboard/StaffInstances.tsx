@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { SectionCard, LoadingSpinner, AlertMessage, EmptyState } from "@midori/components/ui";
 import { momoi_client } from "@midori/libs/momoi";
-import { Database, User, Calendar, Cpu, MemoryStick, HardDrive, ExternalLink } from "lucide-react";
+import { Database, User, Calendar, Cpu, MemoryStick, HardDrive, ExternalLink, Archive, ArchiveX, Trash2, Play, Square, RotateCw, Pause, MoreVertical } from "lucide-react";
 import { formatDate } from "@midori/utils/format";
 import Link from "next/link";
-import { Button } from "@mui/material";
+import { Button, Menu, MenuItem, IconButton } from "@mui/material";
 
 interface Instance {
   id: number;
@@ -22,6 +22,7 @@ interface Instance {
   ip_address: string | { ip: string } | null;
   created_at: Date;
   updated_at: Date;
+  state?: string; // Add this
   user: {
     id: string;
     email: string;
@@ -39,6 +40,11 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // NEW: Add these states
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedInstance, setSelectedInstance] = useState<number | null>(null);
+
   useEffect(() => {
     const fetchInstances = async () => {
       try {
@@ -51,7 +57,7 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
         if (result.error) {
           setError(result.error.value.message || 'Failed to fetch instances');
         } else if (result.data) {
-          const instancesData = result.data?.data?.instances || result.data?.data || [];
+          const instancesData = (result.data as any)?.data?.instances || (result.data as any)?.data || [];
           setInstances(Array.isArray(instancesData) ? instancesData : []);
         } else {
           setError('No data received');
@@ -91,6 +97,115 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
       default:
         return '⚪';
     }
+  };
+
+  const handleArchive = async (instanceId: number) => {
+    if (!confirm("Archive this instance? It will be marked as permanent storage.")) {
+      return;
+    }
+
+    setActionLoading(instanceId);
+    try {
+      const result = await momoi_client.api.v1.staff.instances({ id: instanceId }).archive.post();
+
+      if (result.error) {
+        alert(`Failed to archive: ${result.error.value.message}`);
+      } else {
+        setInstances(prev => prev.map(instance =>
+          instance.id === instanceId
+            ? { ...instance, state: 'archived' }
+            : instance
+        ));
+        alert('Instance archived successfully');
+      }
+    } catch (error) {
+      console.error("Error archiving instance:", error);
+      alert("Failed to archive instance");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleUnarchive = async (instanceId: number) => {
+    setActionLoading(instanceId);
+    try {
+      const result = await momoi_client.api.v1.staff.instances({ id: instanceId }).unarchive.post();
+
+      if (result.error) {
+        alert(`Failed to unarchive: ${result.error.value.message}`);
+      } else {
+        setInstances(prev => prev.map(instance =>
+          instance.id === instanceId
+            ? { ...instance, state: 'active' }
+            : instance
+        ));
+        alert('Instance unarchived successfully');
+      }
+    } catch (error) {
+      console.error("Error unarchiving instance:", error);
+      alert("Failed to unarchive instance");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async (instanceId: number) => {
+    if (!confirm("Delete this instance? This will remove the VM from Proxmox.")) {
+      return;
+    }
+
+    setActionLoading(instanceId);
+    try {
+      const result = await momoi_client.api.v1.staff.instances({ id: instanceId }).delete();
+
+      if (result.error) {
+        alert(`Failed to delete: ${result.error.value.message}`);
+      } else {
+        setInstances(prev => prev.filter(instance => instance.id !== instanceId));
+        alert('Instance deleted successfully');
+      }
+    } catch (error) {
+      console.error("Error deleting instance:", error);
+      alert("Failed to delete instance");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleVMAction = async (instanceId: number, action: 'start' | 'stop' | 'reboot' | 'suspend' | 'resume') => {
+    setActionLoading(instanceId);
+    setAnchorEl(null);
+    try {
+      const result = await momoi_client.api.v1.staff.instances({ id: instanceId }).status.post({
+        action
+      });
+
+      if (result.error) {
+        alert(`Failed to ${action}: ${result.error.value.message}`);
+      } else {
+        setInstances(prev => prev.map(instance =>
+          instance.id === instanceId
+            ? { ...instance, status: (result.data as any)?.data?.status || instance.status }
+            : instance
+        ));
+        alert(`VM ${action} request sent successfully`);
+      }
+    } catch (error) {
+      console.error(`Error ${action} instance:`, error);
+      alert(`Failed to ${action} instance`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, instanceId: number) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedInstance(instanceId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedInstance(null);
   };
 
   if (loading) {
@@ -136,8 +251,8 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
             </Link>
           </div>
         )}
-        <AlertMessage 
-          type="error" 
+        <AlertMessage
+          type="error"
           message={`Error loading instances: ${error}`}
           className="mb-4"
         />
@@ -191,14 +306,14 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
           </Link>
         </div>
       )}
-      
+
       {!dashboard && (
         <div className="mb-4">
           <h3 className="text-xl font-semibold text-vm-blue-900 mb-2">All Instances</h3>
           <p className="text-vm-blue-600">Manage all virtual machine instances</p>
         </div>
       )}
-      
+
       <div className="space-y-4">
         {instances.map((instance) => (
           <div
@@ -216,7 +331,7 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
                     {instance.status}
                   </span>
                 </div>
-                
+
                 {instance.description && (
                   <p className="text-gray-600 mb-3">{instance.description}</p>
                 )}
@@ -226,17 +341,17 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
                     <User className="h-4 w-4" />
                     <span>{instance.user.name}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
                     <span>{instance.semester}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     <Cpu className="h-4 w-4" />
                     <span>{instance.cpus} CPU{instance.cpus !== 1 ? 's' : ''}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     <MemoryStick className="h-4 w-4" />
                     <span>{instance.memory}MB RAM</span>
@@ -250,13 +365,111 @@ export function StaffInstances({ limit = 10, dashboard = false }: StaffInstances
                       <span>IP: {typeof instance.ip_address === 'string' ? instance.ip_address : instance.ip_address.ip}</span>
                     )}
                   </div>
-                  
+
                   {!dashboard && (
                     <button className="flex items-center space-x-1 text-vm-blue-600 hover:text-vm-blue-700">
                       <ExternalLink className="h-4 w-4" />
                       <span>View Details</span>
                     </button>
                   )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t">
+                  {/* Archive/Unarchive Button */}
+                  {instance.state === 'archived' ? (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<ArchiveX className="w-4 h-4" />}
+                      onClick={() => handleUnarchive(instance.id)}
+                      disabled={actionLoading === instance.id}
+                    >
+                      Unarchive
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Archive className="w-4 h-4" />}
+                      onClick={() => handleArchive(instance.id)}
+                      disabled={actionLoading === instance.id}
+                    >
+                      Archive
+                    </Button>
+                  )}
+
+                  {/* Start/Stop Button */}
+                  {instance.status === 'stopped' ? (
+                    <Button
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      startIcon={<Play className="w-4 h-4" />}
+                      onClick={() => handleVMAction(instance.id, 'start')}
+                      disabled={actionLoading === instance.id}
+                    >
+                      Start
+                    </Button>
+                  ) : instance.status === 'running' ? (
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      size="small"
+                      startIcon={<Square className="w-4 h-4" />}
+                      onClick={() => handleVMAction(instance.id, 'stop')}
+                      disabled={actionLoading === instance.id}
+                    >
+                      Stop
+                    </Button>
+                  ) : null}
+
+                  {/* More Actions Menu */}
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleMenuOpen(e, instance.id)}
+                    disabled={actionLoading === instance.id}
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </IconButton>
+
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl) && selectedInstance === instance.id}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem
+                      onClick={() => handleVMAction(instance.id, 'reboot')}
+                      disabled={instance.status !== 'running'}
+                    >
+                      <RotateCw className="w-4 h-4 mr-2" />
+                      Reboot
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleVMAction(instance.id, 'suspend')}
+                      disabled={instance.status !== 'running'}
+                    >
+                      <Pause className="w-4 h-4 mr-2" />
+                      Suspend
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleVMAction(instance.id, 'resume')}
+                      disabled={instance.status !== 'stopped'}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Resume
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleMenuClose();
+                        handleDelete(instance.id);
+                      }}
+                      style={{ color: 'red' }}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </MenuItem>
+                  </Menu>
                 </div>
               </div>
             </div>

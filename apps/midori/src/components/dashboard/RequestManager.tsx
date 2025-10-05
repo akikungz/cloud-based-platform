@@ -75,12 +75,12 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
 
       const requestsData = requestsResult.data?.data || requestsResult.data;
       const instancesData = instancesResult.data?.data || instancesResult.data;
-      
+
       if (requestsData) {
         setRequests(requestsData.requests || []);
         setExtendRequests(requestsData.extend_requests || []);
       }
-      
+
       if (instancesData) {
         setInstances(Array.isArray(instancesData) ? instancesData : []);
       }
@@ -102,7 +102,7 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
       const result = await momoi_client.api.v1.student.requests["create-instance"].post({
         request_id: requestId
       });
-      
+
       if (result.error) {
         setSnackbar({
           open: true,
@@ -167,8 +167,8 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
 
   // Helper function to check if an instance exists for a request
   const hasInstanceForRequest = (request: InstanceRequest): boolean => {
-    return instances.some(instance => 
-      instance.hostname === request.hostname && 
+    return instances.some(instance =>
+      instance.hostname === request.hostname &&
       instance.state !== 'deleted'
     );
   };
@@ -271,7 +271,7 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
 
                   <div className="flex items-center space-x-3">
                     {/* Show Create Instance button for approved instance requests that don't have an instance yet */}
-                    {request.requestType === 'instance' && 
+                    {/* {request.requestType === 'instance' && 
                      request.state === 'approved' && 
                      !hasInstanceForRequest(request as InstanceRequest) && (
                       <Button
@@ -285,7 +285,7 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
                       >
                         {creatingInstance === request.id ? "Creating..." : "Create Instance"}
                       </Button>
-                    )}
+                    )} */}
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStateColor(request.state)}`}>
                       {request.state}
                     </span>
@@ -382,8 +382,8 @@ export function RequestManager({ refreshTrigger, onRefresh }: RequestManagerProp
         autoHideDuration={6000}
         onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
       >
-        <Alert 
-          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
           severity={snackbar.severity}
         >
           {snackbar.message}
