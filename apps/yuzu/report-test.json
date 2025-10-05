@@ -1,0 +1,815 @@
+{
+  "timestamp": "2025-10-03T07:31:03.534Z",
+  "report": {
+    "totalTests": 20,
+    "linkedCloneTests": 10,
+    "fullCloneTests": 10,
+    "linkedCloneMetrics": {
+      "average": 1575.1961800000001,
+      "min": 1440.542,
+      "max": 2463.2088000000003,
+      "total": 10,
+      "successful": 10,
+      "failed": 0
+    },
+    "fullCloneMetrics": {
+      "average": 51240.985230000006,
+      "min": 46722.8658,
+      "max": 57906.21770000001,
+      "total": 10,
+      "successful": 10,
+      "failed": 0
+    },
+    "comparison": {
+      "averageDifference": 49665.78905000001,
+      "percentageDifference": -96.92590575116856,
+      "fasterMethod": "linked"
+    },
+    "metrics": [
+      {
+        "operation": "clone",
+        "startTime": 424.3449,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10000,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 1985.021,
+        "duration": 1560.6761
+      },
+      {
+        "operation": "clone",
+        "startTime": 2993.6661,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10001,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 4434.2081,
+        "duration": 1440.542
+      },
+      {
+        "operation": "clone",
+        "startTime": 5444.977,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10002,
+          "node": "pve-1",
+          "target": "pve-7",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 7908.1858,
+        "duration": 2463.2088000000003
+      },
+      {
+        "operation": "clone",
+        "startTime": 8918.2952,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10003,
+          "node": "pve-1",
+          "target": "pve-8",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 10382.0435,
+        "duration": 1463.7482999999993
+      },
+      {
+        "operation": "clone",
+        "startTime": 11393.3234,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10004,
+          "node": "pve-1",
+          "target": "pve-10",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 12845.8803,
+        "duration": 1452.5569000000014
+      },
+      {
+        "operation": "clone",
+        "startTime": 13877.2005,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10005,
+          "node": "pve-1",
+          "target": "pve-8",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 15349.9655,
+        "duration": 1472.7649999999994
+      },
+      {
+        "operation": "clone",
+        "startTime": 16371.4392,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10006,
+          "node": "pve-1",
+          "target": "pve-7",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 17826.0443,
+        "duration": 1454.6051000000007
+      },
+      {
+        "operation": "clone",
+        "startTime": 18839.7237,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10007,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 20333.7343,
+        "duration": 1494.0106000000014
+      },
+      {
+        "operation": "clone",
+        "startTime": 21353.3643,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10008,
+          "node": "pve-1",
+          "target": "pve-7",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 22797.6556,
+        "duration": 1444.2912999999971
+      },
+      {
+        "operation": "clone",
+        "startTime": 23811.4577,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10009,
+          "node": "pve-1",
+          "target": "pve-8",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 25317.0154,
+        "duration": 1505.5577000000012
+      },
+      {
+        "operation": "clone",
+        "startTime": 25317.9084,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10010,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 72172.0858,
+        "duration": 46854.1774
+      },
+      {
+        "operation": "clone",
+        "startTime": 73182.9503,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10011,
+          "node": "pve-1",
+          "target": "pve-9",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 119905.8161,
+        "duration": 46722.8658
+      },
+      {
+        "operation": "clone",
+        "startTime": 120936.9857,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10012,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 169757.917,
+        "duration": 48820.93129999998
+      },
+      {
+        "operation": "clone",
+        "startTime": 170767.9693,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10013,
+          "node": "pve-1",
+          "target": "pve-7",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 221659.7308,
+        "duration": 50891.76149999999
+      },
+      {
+        "operation": "clone",
+        "startTime": 222667.9443,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10014,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 280574.162,
+        "duration": 57906.21770000001
+      },
+      {
+        "operation": "clone",
+        "startTime": 281581.1097,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10015,
+          "node": "pve-1",
+          "target": "pve-8",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 331375.7065,
+        "duration": 49794.5968
+      },
+      {
+        "operation": "clone",
+        "startTime": 332388.1604,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10016,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 387303.5212,
+        "duration": 54915.360800000024
+      },
+      {
+        "operation": "clone",
+        "startTime": 388311.8663,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10017,
+          "node": "pve-1",
+          "target": "pve-7",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 441182.9966,
+        "duration": 52871.13030000002
+      },
+      {
+        "operation": "clone",
+        "startTime": 442206.1476,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10018,
+          "node": "pve-1",
+          "target": "pve-7",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 493046.3306,
+        "duration": 50840.18299999996
+      },
+      {
+        "operation": "clone",
+        "startTime": 494063.6118,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10019,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 546856.2395,
+        "duration": 52792.62770000001
+      }
+    ]
+  },
+  "rawMetrics": [
+    {
+      "operation": "clone",
+      "startTime": 424.3449,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10000,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 1985.021,
+      "duration": 1560.6761
+    },
+    {
+      "operation": "clone",
+      "startTime": 2993.6661,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10001,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 4434.2081,
+      "duration": 1440.542
+    },
+    {
+      "operation": "clone",
+      "startTime": 5444.977,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10002,
+        "node": "pve-1",
+        "target": "pve-7",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 7908.1858,
+      "duration": 2463.2088000000003
+    },
+    {
+      "operation": "clone",
+      "startTime": 8918.2952,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10003,
+        "node": "pve-1",
+        "target": "pve-8",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 10382.0435,
+      "duration": 1463.7482999999993
+    },
+    {
+      "operation": "clone",
+      "startTime": 11393.3234,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10004,
+        "node": "pve-1",
+        "target": "pve-10",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 12845.8803,
+      "duration": 1452.5569000000014
+    },
+    {
+      "operation": "clone",
+      "startTime": 13877.2005,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10005,
+        "node": "pve-1",
+        "target": "pve-8",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 15349.9655,
+      "duration": 1472.7649999999994
+    },
+    {
+      "operation": "clone",
+      "startTime": 16371.4392,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10006,
+        "node": "pve-1",
+        "target": "pve-7",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 17826.0443,
+      "duration": 1454.6051000000007
+    },
+    {
+      "operation": "clone",
+      "startTime": 18839.7237,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10007,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 20333.7343,
+      "duration": 1494.0106000000014
+    },
+    {
+      "operation": "clone",
+      "startTime": 21353.3643,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10008,
+        "node": "pve-1",
+        "target": "pve-7",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 22797.6556,
+      "duration": 1444.2912999999971
+    },
+    {
+      "operation": "clone",
+      "startTime": 23811.4577,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10009,
+        "node": "pve-1",
+        "target": "pve-8",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 25317.0154,
+      "duration": 1505.5577000000012
+    },
+    {
+      "operation": "clone",
+      "startTime": 25317.9084,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10010,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 72172.0858,
+      "duration": 46854.1774
+    },
+    {
+      "operation": "clone",
+      "startTime": 73182.9503,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10011,
+        "node": "pve-1",
+        "target": "pve-9",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 119905.8161,
+      "duration": 46722.8658
+    },
+    {
+      "operation": "clone",
+      "startTime": 120936.9857,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10012,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 169757.917,
+      "duration": 48820.93129999998
+    },
+    {
+      "operation": "clone",
+      "startTime": 170767.9693,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10013,
+        "node": "pve-1",
+        "target": "pve-7",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 221659.7308,
+      "duration": 50891.76149999999
+    },
+    {
+      "operation": "clone",
+      "startTime": 222667.9443,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10014,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 280574.162,
+      "duration": 57906.21770000001
+    },
+    {
+      "operation": "clone",
+      "startTime": 281581.1097,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10015,
+        "node": "pve-1",
+        "target": "pve-8",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 331375.7065,
+      "duration": 49794.5968
+    },
+    {
+      "operation": "clone",
+      "startTime": 332388.1604,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10016,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 387303.5212,
+      "duration": 54915.360800000024
+    },
+    {
+      "operation": "clone",
+      "startTime": 388311.8663,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10017,
+        "node": "pve-1",
+        "target": "pve-7",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 441182.9966,
+      "duration": 52871.13030000002
+    },
+    {
+      "operation": "clone",
+      "startTime": 442206.1476,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10018,
+        "node": "pve-1",
+        "target": "pve-7",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 493046.3306,
+      "duration": 50840.18299999996
+    },
+    {
+      "operation": "clone",
+      "startTime": 494063.6118,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10019,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 546856.2395,
+      "duration": 52792.62770000001
+    }
+  ],
+  "results": [
+    {
+      "testId": "clone-linked-10000",
+      "vmid": 101,
+      "newid": 10000,
+      "cloneType": "linked",
+      "targetNode": "pve-6",
+      "duration": 1560.6761,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10001",
+      "vmid": 101,
+      "newid": 10001,
+      "cloneType": "linked",
+      "targetNode": "pve-6",
+      "duration": 1440.542,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10002",
+      "vmid": 101,
+      "newid": 10002,
+      "cloneType": "linked",
+      "targetNode": "pve-7",
+      "duration": 2463.2088000000003,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10003",
+      "vmid": 101,
+      "newid": 10003,
+      "cloneType": "linked",
+      "targetNode": "pve-8",
+      "duration": 1463.7482999999993,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10004",
+      "vmid": 101,
+      "newid": 10004,
+      "cloneType": "linked",
+      "targetNode": "pve-10",
+      "duration": 1452.5569000000014,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10005",
+      "vmid": 101,
+      "newid": 10005,
+      "cloneType": "linked",
+      "targetNode": "pve-8",
+      "duration": 1472.7649999999994,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10006",
+      "vmid": 101,
+      "newid": 10006,
+      "cloneType": "linked",
+      "targetNode": "pve-7",
+      "duration": 1454.6051000000007,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10007",
+      "vmid": 101,
+      "newid": 10007,
+      "cloneType": "linked",
+      "targetNode": "pve-6",
+      "duration": 1494.0106000000014,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10008",
+      "vmid": 101,
+      "newid": 10008,
+      "cloneType": "linked",
+      "targetNode": "pve-7",
+      "duration": 1444.2912999999971,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10009",
+      "vmid": 101,
+      "newid": 10009,
+      "cloneType": "linked",
+      "targetNode": "pve-8",
+      "duration": 1505.5577000000012,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10010",
+      "vmid": 101,
+      "newid": 10010,
+      "cloneType": "full",
+      "targetNode": "pve-6",
+      "duration": 46854.1774,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10011",
+      "vmid": 101,
+      "newid": 10011,
+      "cloneType": "full",
+      "targetNode": "pve-9",
+      "duration": 46722.8658,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10012",
+      "vmid": 101,
+      "newid": 10012,
+      "cloneType": "full",
+      "targetNode": "pve-6",
+      "duration": 48820.93129999998,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10013",
+      "vmid": 101,
+      "newid": 10013,
+      "cloneType": "full",
+      "targetNode": "pve-7",
+      "duration": 50891.76149999999,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10014",
+      "vmid": 101,
+      "newid": 10014,
+      "cloneType": "full",
+      "targetNode": "pve-6",
+      "duration": 57906.21770000001,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10015",
+      "vmid": 101,
+      "newid": 10015,
+      "cloneType": "full",
+      "targetNode": "pve-8",
+      "duration": 49794.5968,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10016",
+      "vmid": 101,
+      "newid": 10016,
+      "cloneType": "full",
+      "targetNode": "pve-6",
+      "duration": 54915.360800000024,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10017",
+      "vmid": 101,
+      "newid": 10017,
+      "cloneType": "full",
+      "targetNode": "pve-7",
+      "duration": 52871.13030000002,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10018",
+      "vmid": 101,
+      "newid": 10018,
+      "cloneType": "full",
+      "targetNode": "pve-7",
+      "duration": 50840.18299999996,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10019",
+      "vmid": 101,
+      "newid": 10019,
+      "cloneType": "full",
+      "targetNode": "pve-6",
+      "duration": 52792.62770000001,
+      "success": true
+    }
+  ]
+}

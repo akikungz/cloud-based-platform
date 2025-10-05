@@ -80,7 +80,10 @@ export type PVE_PATH =
 	| "/nodes/:node/lxc/:vmid/config"
 	| "/nodes/:node/lxc/:vmid/resize"
 	// Get node tasks
-	| "/nodes/:node/tasks/:upid/status";
+	| "/nodes/:node/tasks/:upid/status"
+	// Get qemu agent installed
+	| "/nodes/:node/qemu/:vmid/agent/info"
+
 
 export type PVE_Network_Config = `ip=${string}/${number},gw=${string}`;
 export type PVE_Interface_Config = `model=virtio,bridge=${string}`;
@@ -221,6 +224,17 @@ export interface PVE_API_Template extends PVE_API_Structure {
 				size: PVE_Disk_Resize;
 				disk: "scsi0";
 			},
+			PVE_Empty_Response
+		>;
+	};
+	"/nodes/:node/qemu/:vmid/agent/info": {
+		GET: RequestOptions<
+			"/nodes/:node/qemu/:vmid/agent/info",
+			{
+				node: string;
+				vmid: number;
+			},
+			Record<string, never>,
 			PVE_Empty_Response
 		>;
 	};

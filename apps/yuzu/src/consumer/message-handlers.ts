@@ -470,6 +470,25 @@ export class VMMessageHandler implements MessageHandler {
       await task_status(instanceUser.pve_node, startTask.data);
       console.log('VM started successfully');
 
+      // Step 5.5: Check if QEMU agent is installed before updating status
+      console.log('Checking if QEMU agent is installed...');
+      try {
+        await qemu.checkAgentInstalled({
+          node: instanceUser.pve_node,
+          vmid: instanceUser.vm_id
+        });
+        console.log('QEMU agent is installed and available');
+      } catch (agentError) {
+        console.warn('QEMU agent check failed:', agentError);
+        logger.warn({
+          vmid: instanceUser.vm_id,
+          node: instanceUser.pve_node,
+          error: agentError
+        }, 'QEMU agent is not available - VM will still be marked as running');
+        // Continue with VM creation even if agent is not available
+        // This is not a critical failure for basic VM functionality
+      }
+
       // Step 6: Update database with success status
       await db.instance.update({
         where: { id: instance.id },

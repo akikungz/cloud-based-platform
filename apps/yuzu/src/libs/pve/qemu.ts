@@ -344,3 +344,43 @@ export const setStatusQEMU = async (params: SetStatusQEMUProps) => {
 		return task.data;
 	}, context);
 };
+
+export type CheckAgentInstalledProps = NonNullable<PVE_API_Template["/nodes/:node/qemu/:vmid/agent/info"]["GET"]["params"]>;
+
+export const checkAgentInstalled = async (params: CheckAgentInstalledProps) => {
+	const { vmid, node } = params;
+
+	if (!node?.trim()) {
+		throw new ValidationError('Node name is required', 'node', node);
+	}
+	if (!vmid || vmid <= 0) {
+		throw new ValidationError('Valid VM ID is required', 'vmid', vmid);
+	}
+
+	const context = {
+		operation: 'qemu_check_agent_installed',
+		node,
+		vmid,
+		requestId: `check-agent-${vmid}`,
+	};
+
+	return RetryHandler.withCustomDelay(async () => {
+		const task = await instance({
+			path: "/nodes/:node/qemu/:vmid/agent/info",
+			method: "GET",
+			params,
+		});
+
+		if (task.status !== 200) {
+			throw new PVEAPIError(
+				`Failed to check agent for QEMU ${vmid}`,
+				task.status,
+				`/nodes/${node}/qemu/${vmid}/agent`,
+				'GET'
+			);
+		}
+
+		return task.data;
+		// Use a custom delay sequence: 30s, 45s, 60s, 75s, ... up to 10 attempts
+	}, context, 10, (attempt, baseDelay = 30000) => baseDelay + (attempt - 1) * 15000);
+}
