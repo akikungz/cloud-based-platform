@@ -1,3 +1,21 @@
+% -------------------------------------------------------------------
+% Build notes:
+% Recommended engine: XeLaTeX (or LuaLaTeX) because this document uses fontspec
+% Bibliography backend: biber (biblatex is configured in the class)
+%
+% Quick build (recommended, from this folder):
+%   latexmk -pdf -xelatex -use-biber Main.tex
+%
+% Manual build sequence (if you don't use latexmk):
+%   xelatex Main.tex
+%   biber Main
+%   xelatex Main.tex
+%   xelatex Main.tex
+%
+% Fonts: project class expects THSarabun files in Class/Font/ or the system fonts.
+% If compilation fails due to fonts, either install the THSarabun fonts system-wide
+% or copy the font files into docs/special_project/Class/Font/ (see project_report.cls).
+% -------------------------------------------------------------------
 \documentclass{Class/project_report}
 \setTHSarabunFont
 \geometry{a4paper,top=1.5in,bottom=1in,left=1.5in,right=1in}
