@@ -1,0 +1,30 @@
+architecture-beta
+    
+    # Edge / Ingress
+    group edge(cloud)[Edge]
+    service users(cloud)[Users Traffic] in edge
+    service nginx(server)[Nginx Load Balancer & Reverse Proxy] in edge
+
+    # Compute Cluster
+    group cluster(cloud)[Proxmox VE Cluster]
+    service vm(server)[VM / LXC Linux] in cluster
+
+    # Application
+    group app(server)[Main Application]
+    service app1(server)[Application Service] in app
+
+    # Messaging
+    group mq(database)[Message Queue (RabbitMQ)]
+    service mq1(database)[Message Broker] in mq
+
+    # Management
+    group mgmt(cloud)[Management]
+    service mgmt1(server)[VM / LXC Management] in mgmt
+
+    # Connections
+    users:R -- L:nginx
+    nginx:R -- L:app1
+    app1:R -- L:mq1
+    mq1:R -- L:mgmt1
+    vm:R -- L:mgmt1
+    nginx:T -- B:vm
