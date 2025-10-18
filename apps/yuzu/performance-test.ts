@@ -2,8 +2,13 @@
 /**
  * Clone Performance Test CLI Runner
  * 
- * Usage:
- *   bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-node pve-node-1 --start-vmid 10000 --linked 5 --full 5
+ * Default behavior: Runs 3 concurrent linked clones + 3 concurrent full clones
+ * 
+ * Basic Usage:
+ *   bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-node pve-node-1 --start-vmid 10000
+ * 
+ * Custom Usage:
+ *   bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-node pve-node-1 --start-vmid 10000 --concurrent-linked 5 --concurrent-full 5
  * 
  * Options:
  *   --template-vmid       Template VM ID to clone from (required)
@@ -13,8 +18,10 @@
  *   --random-target       Randomly select target node from database for each test
  *   --nodes-available     Show available nodes from database and exit
  *   --start-vmid          Starting VM ID for test VMs (required)
- *   --linked              Number of linked clone tests (default: 3)
- *   --full                Number of full clone tests (default: 3)
+ *   --linked              Number of sequential linked clone tests (default: 0)
+ *   --full                Number of sequential full clone tests (default: 0)
+ *   --concurrent-linked   Number of concurrent linked clone tests (default: 3)
+ *   --concurrent-full     Number of concurrent full clone tests (default: 3)
  *   --no-cleanup          Don't cleanup test VMs after completion
  *   --delay               Delay between tests in milliseconds (default: 1000)
  *   --output-json         Output JSON report file path
@@ -29,8 +36,10 @@ import { db } from './src/libs/db';
 function parseArgs(): CloneTestConfig & { outputJson?: string; outputCsv?: string; showAvailableNodes?: boolean } {
   const args = process.argv.slice(2);
   const config: any = {
-    linkedCloneCount: 3,
-    fullCloneCount: 3,
+    linkedCloneCount: 0, // Default to 0 for sequential
+    fullCloneCount: 0, // Default to 0 for sequential
+    concurrentLinkedCount: 3, // Default concurrent linked tests
+    concurrentFullCount: 3, // Default concurrent full tests
     cleanupAfterTest: true,
     delayBetweenTests: 1000,
   };
@@ -72,6 +81,14 @@ function parseArgs(): CloneTestConfig & { outputJson?: string; outputCsv?: strin
         break;
       case '--full':
         config.fullCloneCount = parseInt(nextArg);
+        i++;
+        break;
+      case '--concurrent-linked':
+        config.concurrentLinkedCount = parseInt(nextArg);
+        i++;
+        break;
+      case '--concurrent-full':
+        config.concurrentFullCount = parseInt(nextArg);
         i++;
         break;
       case '--no-cleanup':
@@ -140,8 +157,10 @@ Utility Options:
   --nodes-available         Show all available nodes from database and exit
 
 Optional:
-  --linked <count>          Number of linked clone tests (default: 3)
-  --full <count>            Number of full clone tests (default: 3)
+  --linked <count>          Number of sequential linked clone tests (default: 0)
+  --full <count>            Number of sequential full clone tests (default: 0)
+  --concurrent-linked <n>   Number of concurrent linked clone tests (default: 3)
+  --concurrent-full <n>     Number of concurrent full clone tests (default: 3)
   --no-cleanup              Don't cleanup test VMs after completion
   --delay <ms>              Delay between tests in milliseconds (default: 1000)
   --output-json <path>      Output JSON report file path
@@ -152,14 +171,20 @@ Examples:
   # Show available nodes
   bun run performance-test.ts --nodes-available
 
-  # Run tests with specific target node
-  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-node pve-node-1 --start-vmid 10000 --linked 5 --full 5
+  # Run basic concurrent tests (default behavior)
+  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-node pve-node-1 --start-vmid 10000
+
+  # Run with custom concurrent counts
+  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-node pve-node-1 --start-vmid 10000 --concurrent-linked 5 --concurrent-full 5
 
   # Run tests with random target nodes from list
-  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-nodes pve-node-1,pve-node-2,pve-node-3 --start-vmid 10000 --linked 10 --full 10
+  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-nodes pve-node-1,pve-node-2,pve-node-3 --start-vmid 10000 --concurrent-linked 10 --concurrent-full 10
 
   # Run tests with random target from database
-  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --random-target --start-vmid 10000 --linked 10 --full 10
+  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --random-target --start-vmid 10000 --concurrent-linked 10 --concurrent-full 10
+
+  # Run sequential tests (legacy mode)
+  bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --target-node pve-node-1 --start-vmid 10000 --linked 5 --full 5 --concurrent-linked 0 --concurrent-full 0
 
   # Run tests and export results
   bun run performance-test.ts --template-vmid 9000 --template-node pve-node-1 --random-target --start-vmid 10000 --output-json report.json --output-csv report.csv
@@ -169,7 +194,7 @@ Examples:
 async function showAvailableNodes() {
   try {
     console.log('\n📋 Fetching available nodes from database...\n');
-    
+
     const nodes = await db.pve_node.findMany({
       where: {
         deleted_at: null,
@@ -193,12 +218,12 @@ async function showAvailableNodes() {
     console.log('💡 Usage examples:');
     console.log(`\n  # Use specific node:`);
     console.log(`  --target-node ${nodes[0].name}`);
-    
+
     if (nodes.length > 1) {
       console.log(`\n  # Random from list:`);
       console.log(`  --target-nodes ${nodes.map(n => n.name).join(',')}`);
     }
-    
+
     console.log(`\n  # Random from database:`);
     console.log(`  --random-target\n`);
 
@@ -222,7 +247,7 @@ async function main() {
   console.log('Configuration:');
   console.log(`  Template VMID: ${config.templateVmid}`);
   console.log(`  Template Node: ${config.templateNode}`);
-  
+
   if (config.targetNode) {
     console.log(`  Target Node: ${config.targetNode}`);
   } else if (config.targetNodes) {
@@ -230,14 +255,32 @@ async function main() {
   } else if (config.randomTargetNode) {
     console.log(`  Target Node: Random from database`);
   }
-  
-  console.log(`  Start VMID: ${config.startVmid}`);
-  console.log(`  Linked Clone Tests: ${config.linkedCloneCount}`);
-  console.log(`  Full Clone Tests: ${config.fullCloneCount}`);
-  console.log(`  Cleanup After Test: ${config.cleanupAfterTest}`);
-  console.log(`  Delay Between Tests: ${config.delayBetweenTests}ms\n`);
 
-  const test = new ClonePerformanceTest();
+  console.log(`  Start VMID: ${config.startVmid}`);
+
+  // Display concurrent tests (now default)
+  console.log(`  Concurrent Linked Tests: ${config.concurrentLinkedCount || 0}`);
+  console.log(`  Concurrent Full Tests: ${config.concurrentFullCount || 0}`);
+
+  // Display sequential tests if specified
+  if (config.linkedCloneCount > 0 || config.fullCloneCount > 0) {
+    console.log(`  Sequential Linked Tests: ${config.linkedCloneCount}`);
+    console.log(`  Sequential Full Tests: ${config.fullCloneCount}`);
+  }
+
+  const hasConcurrent = (config.concurrentLinkedCount || 0) > 0 || (config.concurrentFullCount || 0) > 0;
+  const hasSequential = config.linkedCloneCount > 0 || config.fullCloneCount > 0;
+
+  let testMode = 'Concurrent (Default)';
+  if (hasConcurrent && hasSequential) {
+    testMode = 'Mixed (Concurrent + Sequential)';
+  } else if (hasSequential && !hasConcurrent) {
+    testMode = 'Sequential (Legacy)';
+  }
+
+  console.log(`  Test Mode: ${testMode}`);
+  console.log(`  Cleanup After Test: ${config.cleanupAfterTest}`);
+  console.log(`  Delay Between Tests: ${config.delayBetweenTests}ms\n`); const test = new ClonePerformanceTest();
 
   try {
     await test.runTestSuite(config);

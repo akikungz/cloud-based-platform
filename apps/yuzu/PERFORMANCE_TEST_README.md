@@ -1,12 +1,13 @@
 # Clone Performance Testing
 
-This module provides comprehensive performance testing tools for comparing **linked-clone** vs **full clone** operations in Proxmox VE.
+This module provides comprehensive performance testing tools for comparing **linked-clone** vs **full clone** operations in Proxmox VE. **Concurrent testing is enabled by default** for realistic load testing scenarios.
 
 ## Features
 
 - ⏱️ **Time Collection**: Accurate performance metrics collection using high-resolution timers
 - 📊 **Detailed Reports**: Generate comprehensive reports with statistics and comparisons
 - 🔄 **Automated Testing**: Run multiple tests with configurable parameters
+- ⚡ **Concurrent Testing**: Run multiple clone operations simultaneously for load testing
 - 🧹 **Auto Cleanup**: Automatically clean up test VMs after completion
 - 📁 **Multiple Export Formats**: Export results to JSON, CSV, and formatted text
 
@@ -111,7 +112,26 @@ bun run show-report.ts report-test.json --table
 bun run perf:show report-test.json -t
 ```
 
-#### Basic Test (Single Target Node)
+#### Basic Test (Concurrent - Default Behavior)
+```bash
+# Uses default: 3 concurrent linked + 3 concurrent full clones
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-node pve-node-1 \
+  --start-vmid 10000
+
+# Custom concurrent counts
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-node pve-node-1 \
+  --start-vmid 10000 \
+  --concurrent-linked 5 \
+  --concurrent-full 5
+```
+
+#### Sequential Test (Legacy Mode)
 ```bash
 bun run performance-test.ts \
   --template-vmid 9000 \
@@ -119,7 +139,9 @@ bun run performance-test.ts \
   --target-node pve-node-1 \
   --start-vmid 10000 \
   --linked 5 \
-  --full 5
+  --full 5 \
+  --concurrent-linked 0 \
+  --concurrent-full 0
 ```
 
 #### Random Target Nodes from List
@@ -129,8 +151,8 @@ bun run performance-test.ts \
   --template-node pve-node-1 \
   --target-nodes pve-node-1,pve-node-2,pve-node-3 \
   --start-vmid 10000 \
-  --linked 10 \
-  --full 10
+  --concurrent-linked 10 \
+  --concurrent-full 10
 ```
 
 #### Random Target from Database
@@ -140,8 +162,40 @@ bun run performance-test.ts \
   --template-node pve-node-1 \
   --random-target \
   --start-vmid 10000 \
-  --linked 10 \
-  --full 10
+  --concurrent-linked 10 \
+  --concurrent-full 10
+```
+
+#### Concurrent Testing
+```bash
+# Run 5 linked clones and 3 full clones concurrently
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-node pve-node-1 \
+  --start-vmid 10000 \
+  --concurrent-linked 5 \
+  --concurrent-full 3
+
+# Concurrent testing with random nodes
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --random-target \
+  --start-vmid 10000 \
+  --concurrent-linked 10 \
+  --concurrent-full 5
+
+# Mixed mode: sequential + concurrent testing
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-node pve-node-1 \
+  --start-vmid 10000 \
+  --linked 3 \
+  --concurrent-linked 5 \
+  --full 2 \
+  --concurrent-full 3
 ```
 
 #### With Export
@@ -345,6 +399,138 @@ Typically, linked clones are **60-80% faster** than full clones, depending on:
 ### Cleanup Fails
 - Manually delete test VMs using PVE web UI
 - Check VM IDs used in the test
+
+## Concurrent Testing
+
+The concurrent testing feature allows you to run multiple clone operations simultaneously, enabling performance testing under concurrent load conditions.
+
+### Key Benefits
+
+- **Load Testing**: Test system performance under concurrent VM provisioning load
+- **Resource Utilization**: Measure how concurrent operations affect overall system performance
+- **Scalability Assessment**: Determine optimal concurrent operation limits
+- **Real-world Simulation**: Simulate actual production scenarios with multiple simultaneous requests
+
+### Concurrent vs Sequential Testing
+
+#### Concurrent Testing (Default Behavior)
+```bash
+# Uses defaults: 3 concurrent linked + 3 concurrent full clones
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-node pve-node-1 \
+  --start-vmid 10000
+
+# Custom concurrent counts
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-node pve-node-1 \
+  --start-vmid 10000 \
+  --concurrent-linked 5 \
+  --concurrent-full 3
+```
+
+#### Sequential Testing (Legacy Mode)
+```bash
+# Disable concurrent testing to run sequentially
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-node pve-node-1 \
+  --start-vmid 10000 \
+  --linked 5 \
+  --full 3 \
+  --concurrent-linked 0 \
+  --concurrent-full 0 \
+  --delay 2000
+```
+
+### Performance Implications
+
+**Concurrent Linked Clones:**
+- Higher resource utilization during creation
+- Potential network and storage I/O contention
+- May show diminishing returns at higher concurrency levels
+
+**Concurrent Full Clones:**
+- Significant storage I/O impact
+- Higher memory and CPU utilization
+- Network bandwidth considerations for cross-node clones
+
+### Best Practices
+
+1. **Start Small**: Begin with low concurrency (2-3) and gradually increase
+2. **Monitor Resources**: Watch CPU, memory, storage I/O, and network usage
+3. **Node Distribution**: Use `--random-target` or `--target-nodes` to distribute load
+4. **Cleanup**: Always use cleanup to prevent resource accumulation
+5. **Export Results**: Save detailed metrics for analysis
+
+### Example Concurrent Testing Scenarios
+
+#### Scenario 1: Load Testing
+```bash
+# Test system under heavy concurrent load
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --target-nodes pve-node-1,pve-node-2,pve-node-3 \
+  --start-vmid 10000 \
+  --concurrent-linked 20 \
+  --concurrent-full 10 \
+  --output-json load-test-results.json
+```
+
+#### Scenario 2: Scalability Assessment  
+```bash
+# Test different concurrency levels
+# Run with --concurrent-linked 1, then 3, 5, 10, 20
+for level in 1 3 5 10 20; do
+  bun run performance-test.ts \
+    --template-vmid 9000 \
+    --template-node pve-node-1 \
+    --target-node pve-node-1 \
+    --start-vmid $((10000 + level * 100)) \
+    --concurrent-linked $level \
+    --output-json "scalability-test-${level}.json"
+done
+```
+
+#### Scenario 3: Mixed Workload Testing
+```bash
+# Combine sequential and concurrent testing
+bun run performance-test.ts \
+  --template-vmid 9000 \
+  --template-node pve-node-1 \
+  --random-target \
+  --start-vmid 10000 \
+  --linked 5 \              # Sequential baseline
+  --concurrent-linked 10 \  # Concurrent burst
+  --full 3 \               # Sequential full clones
+  --concurrent-full 5 \    # Concurrent full clones
+  --delay 3000 \           # Delay between batches
+  --output-json mixed-workload-results.json
+```
+
+### Monitoring and Analysis
+
+The concurrent testing generates detailed metrics including:
+
+- **Individual Operation Timing**: Each concurrent operation is timed separately
+- **Concurrency Statistics**: Number of simultaneous operations
+- **Success/Failure Rates**: Track which operations succeed under load
+- **Resource Contention Indicators**: Performance degradation patterns
+
+Use the `show-report.ts` script to analyze concurrent test results:
+
+```bash
+# Display concurrent test results
+bun run show-report.ts concurrent-test-results.json --table
+
+# Export for further analysis
+bun run show-report.ts concurrent-test-results.json --csv > analysis.csv
+```
 
 ## Integration with Existing Code
 

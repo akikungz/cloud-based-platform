@@ -1,0 +1,836 @@
+{
+  "timestamp": "2025-10-18T18:23:09.312Z",
+  "report": {
+    "totalTests": 20,
+    "linkedCloneTests": 10,
+    "fullCloneTests": 10,
+    "linkedCloneMetrics": {
+      "average": 5931.486480000001,
+      "min": 1492.1195,
+      "max": 10423.624800000001,
+      "total": 10,
+      "successful": 10,
+      "failed": 0
+    },
+    "fullCloneMetrics": {
+      "average": 172493.79786666666,
+      "min": 167395.6774,
+      "max": 175525.8132,
+      "total": 3,
+      "successful": 3,
+      "failed": 7
+    },
+    "comparison": {
+      "averageDifference": 166562.31138666667,
+      "percentageDifference": -96.56133347786516,
+      "fasterMethod": "linked"
+    },
+    "metrics": [
+      {
+        "operation": "clone",
+        "startTime": 221.9741,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10008,
+          "node": "pve-1",
+          "target": "pve-3",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 1714.0936,
+        "duration": 1492.1195
+      },
+      {
+        "operation": "clone",
+        "startTime": 222.457,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10009,
+          "node": "pve-1",
+          "target": "pve-3",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 2694.282,
+        "duration": 2471.8250000000003
+      },
+      {
+        "operation": "clone",
+        "startTime": 218.1315,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10003,
+          "node": "pve-1",
+          "target": "pve-4",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 3698.2897,
+        "duration": 3480.1582
+      },
+      {
+        "operation": "clone",
+        "startTime": 220.1987,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10005,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 4743.3031,
+        "duration": 4523.1044
+      },
+      {
+        "operation": "clone",
+        "startTime": 219.4523,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10004,
+          "node": "pve-1",
+          "target": "pve-2",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 5594.8353,
+        "duration": 5375.383
+      },
+      {
+        "operation": "clone",
+        "startTime": 221.3893,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10007,
+          "node": "pve-1",
+          "target": "pve-3",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 6584.5523,
+        "duration": 6363.1630000000005
+      },
+      {
+        "operation": "clone",
+        "startTime": 215.9689,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10002,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 7601.1169,
+        "duration": 7385.148
+      },
+      {
+        "operation": "clone",
+        "startTime": 220.7794,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10006,
+          "node": "pve-1",
+          "target": "pve-3",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 8611.984,
+        "duration": 8391.204600000001
+      },
+      {
+        "operation": "clone",
+        "startTime": 214.4929,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10001,
+          "node": "pve-1",
+          "target": "pve-4",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 9623.6272,
+        "duration": 9409.134300000002
+      },
+      {
+        "operation": "clone",
+        "startTime": 202.1858,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10000,
+          "node": "pve-1",
+          "target": "pve-5",
+          "cloneType": "linked",
+          "templateId": 101
+        },
+        "endTime": 10625.8106,
+        "duration": 10423.624800000001
+      },
+      {
+        "operation": "clone",
+        "startTime": 11639.8651,
+        "status": "failed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10011,
+          "node": "pve-1",
+          "target": "pve-6",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 23874.6497,
+        "duration": 12234.7846,
+        "error": "Task UPID:pve-1:001F692B:1EE7992A:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: clone failed: cfs-lock 'storage-rbd' error: got lock request timeout"
+      },
+      {
+        "operation": "clone",
+        "startTime": 11640.4608,
+        "status": "failed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10013,
+          "node": "pve-1",
+          "target": "pve-9",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 23878.0475,
+        "duration": 12237.5867,
+        "error": "Task UPID:pve-1:001F692D:1EE7992B:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: clone failed: cfs-lock 'storage-rbd' error: got lock request timeout"
+      },
+      {
+        "operation": "clone",
+        "startTime": 11639.1778,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10010,
+          "node": "pve-1",
+          "target": "pve-1",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 179034.8552,
+        "duration": 167395.6774
+      },
+      {
+        "operation": "clone",
+        "startTime": 11640.7633,
+        "status": "failed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10014,
+          "node": "pve-1",
+          "target": "pve-10",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 186085.3507,
+        "duration": 174444.58740000002,
+        "error": "Task UPID:pve-1:001F692E:1EE7992D:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+      },
+      {
+        "operation": "clone",
+        "startTime": 11640.9886,
+        "status": "failed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10015,
+          "node": "pve-1",
+          "target": "pve-10",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 186176.741,
+        "duration": 174535.7524,
+        "error": "Task UPID:pve-1:001F6932:1EE7992F:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+      },
+      {
+        "operation": "clone",
+        "startTime": 11641.189,
+        "status": "failed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10016,
+          "node": "pve-1",
+          "target": "pve-3",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 186177.7963,
+        "duration": 174536.60729999997,
+        "error": "Task UPID:pve-1:001F6935:1EE79930:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+      },
+      {
+        "operation": "clone",
+        "startTime": 11641.79,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10019,
+          "node": "pve-1",
+          "target": "pve-10",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 186201.693,
+        "duration": 174559.903
+      },
+      {
+        "operation": "clone",
+        "startTime": 11641.383,
+        "status": "failed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10017,
+          "node": "pve-1",
+          "target": "pve-2",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 186201.869,
+        "duration": 174560.486,
+        "error": "Task UPID:pve-1:001F697F:1EE79934:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+      },
+      {
+        "operation": "clone",
+        "startTime": 11640.2201,
+        "status": "failed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10012,
+          "node": "pve-1",
+          "target": "pve-2",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 186970.2909,
+        "duration": 175330.0708,
+        "error": "Task UPID:pve-1:001F6929:1EE79929:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+      },
+      {
+        "operation": "clone",
+        "startTime": 11641.5766,
+        "status": "completed",
+        "metadata": {
+          "vmid": 101,
+          "newid": 10018,
+          "node": "pve-1",
+          "target": "pve-8",
+          "cloneType": "full",
+          "templateId": 101
+        },
+        "endTime": 187167.3898,
+        "duration": 175525.8132
+      }
+    ]
+  },
+  "rawMetrics": [
+    {
+      "operation": "clone",
+      "startTime": 221.9741,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10008,
+        "node": "pve-1",
+        "target": "pve-3",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 1714.0936,
+      "duration": 1492.1195
+    },
+    {
+      "operation": "clone",
+      "startTime": 222.457,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10009,
+        "node": "pve-1",
+        "target": "pve-3",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 2694.282,
+      "duration": 2471.8250000000003
+    },
+    {
+      "operation": "clone",
+      "startTime": 218.1315,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10003,
+        "node": "pve-1",
+        "target": "pve-4",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 3698.2897,
+      "duration": 3480.1582
+    },
+    {
+      "operation": "clone",
+      "startTime": 220.1987,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10005,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 4743.3031,
+      "duration": 4523.1044
+    },
+    {
+      "operation": "clone",
+      "startTime": 219.4523,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10004,
+        "node": "pve-1",
+        "target": "pve-2",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 5594.8353,
+      "duration": 5375.383
+    },
+    {
+      "operation": "clone",
+      "startTime": 221.3893,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10007,
+        "node": "pve-1",
+        "target": "pve-3",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 6584.5523,
+      "duration": 6363.1630000000005
+    },
+    {
+      "operation": "clone",
+      "startTime": 215.9689,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10002,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 7601.1169,
+      "duration": 7385.148
+    },
+    {
+      "operation": "clone",
+      "startTime": 220.7794,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10006,
+        "node": "pve-1",
+        "target": "pve-3",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 8611.984,
+      "duration": 8391.204600000001
+    },
+    {
+      "operation": "clone",
+      "startTime": 214.4929,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10001,
+        "node": "pve-1",
+        "target": "pve-4",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 9623.6272,
+      "duration": 9409.134300000002
+    },
+    {
+      "operation": "clone",
+      "startTime": 202.1858,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10000,
+        "node": "pve-1",
+        "target": "pve-5",
+        "cloneType": "linked",
+        "templateId": 101
+      },
+      "endTime": 10625.8106,
+      "duration": 10423.624800000001
+    },
+    {
+      "operation": "clone",
+      "startTime": 11639.8651,
+      "status": "failed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10011,
+        "node": "pve-1",
+        "target": "pve-6",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 23874.6497,
+      "duration": 12234.7846,
+      "error": "Task UPID:pve-1:001F692B:1EE7992A:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: clone failed: cfs-lock 'storage-rbd' error: got lock request timeout"
+    },
+    {
+      "operation": "clone",
+      "startTime": 11640.4608,
+      "status": "failed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10013,
+        "node": "pve-1",
+        "target": "pve-9",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 23878.0475,
+      "duration": 12237.5867,
+      "error": "Task UPID:pve-1:001F692D:1EE7992B:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: clone failed: cfs-lock 'storage-rbd' error: got lock request timeout"
+    },
+    {
+      "operation": "clone",
+      "startTime": 11639.1778,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10010,
+        "node": "pve-1",
+        "target": "pve-1",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 179034.8552,
+      "duration": 167395.6774
+    },
+    {
+      "operation": "clone",
+      "startTime": 11640.7633,
+      "status": "failed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10014,
+        "node": "pve-1",
+        "target": "pve-10",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 186085.3507,
+      "duration": 174444.58740000002,
+      "error": "Task UPID:pve-1:001F692E:1EE7992D:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "operation": "clone",
+      "startTime": 11640.9886,
+      "status": "failed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10015,
+        "node": "pve-1",
+        "target": "pve-10",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 186176.741,
+      "duration": 174535.7524,
+      "error": "Task UPID:pve-1:001F6932:1EE7992F:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "operation": "clone",
+      "startTime": 11641.189,
+      "status": "failed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10016,
+        "node": "pve-1",
+        "target": "pve-3",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 186177.7963,
+      "duration": 174536.60729999997,
+      "error": "Task UPID:pve-1:001F6935:1EE79930:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "operation": "clone",
+      "startTime": 11641.79,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10019,
+        "node": "pve-1",
+        "target": "pve-10",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 186201.693,
+      "duration": 174559.903
+    },
+    {
+      "operation": "clone",
+      "startTime": 11641.383,
+      "status": "failed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10017,
+        "node": "pve-1",
+        "target": "pve-2",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 186201.869,
+      "duration": 174560.486,
+      "error": "Task UPID:pve-1:001F697F:1EE79934:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "operation": "clone",
+      "startTime": 11640.2201,
+      "status": "failed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10012,
+        "node": "pve-1",
+        "target": "pve-2",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 186970.2909,
+      "duration": 175330.0708,
+      "error": "Task UPID:pve-1:001F6929:1EE79929:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "operation": "clone",
+      "startTime": 11641.5766,
+      "status": "completed",
+      "metadata": {
+        "vmid": 101,
+        "newid": 10018,
+        "node": "pve-1",
+        "target": "pve-8",
+        "cloneType": "full",
+        "templateId": 101
+      },
+      "endTime": 187167.3898,
+      "duration": 175525.8132
+    }
+  ],
+  "results": [
+    {
+      "testId": "clone-linked-10000",
+      "vmid": 101,
+      "newid": 10000,
+      "cloneType": "linked",
+      "targetNode": "pve-5",
+      "duration": 10423.624800000001,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10001",
+      "vmid": 101,
+      "newid": 10001,
+      "cloneType": "linked",
+      "targetNode": "pve-4",
+      "duration": 9409.134300000002,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10002",
+      "vmid": 101,
+      "newid": 10002,
+      "cloneType": "linked",
+      "targetNode": "pve-6",
+      "duration": 7385.148,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10003",
+      "vmid": 101,
+      "newid": 10003,
+      "cloneType": "linked",
+      "targetNode": "pve-4",
+      "duration": 3480.1582,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10004",
+      "vmid": 101,
+      "newid": 10004,
+      "cloneType": "linked",
+      "targetNode": "pve-2",
+      "duration": 5375.383,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10005",
+      "vmid": 101,
+      "newid": 10005,
+      "cloneType": "linked",
+      "targetNode": "pve-6",
+      "duration": 4523.1044,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10006",
+      "vmid": 101,
+      "newid": 10006,
+      "cloneType": "linked",
+      "targetNode": "pve-3",
+      "duration": 8391.204600000001,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10007",
+      "vmid": 101,
+      "newid": 10007,
+      "cloneType": "linked",
+      "targetNode": "pve-3",
+      "duration": 6363.1630000000005,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10008",
+      "vmid": 101,
+      "newid": 10008,
+      "cloneType": "linked",
+      "targetNode": "pve-3",
+      "duration": 1492.1195,
+      "success": true
+    },
+    {
+      "testId": "clone-linked-10009",
+      "vmid": 101,
+      "newid": 10009,
+      "cloneType": "linked",
+      "targetNode": "pve-3",
+      "duration": 2471.8250000000003,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10010",
+      "vmid": 101,
+      "newid": 10010,
+      "cloneType": "full",
+      "targetNode": "pve-1",
+      "duration": 167395.6774,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10011",
+      "vmid": 101,
+      "newid": 10011,
+      "cloneType": "full",
+      "targetNode": "pve-6",
+      "duration": 0,
+      "success": false,
+      "error": "Task UPID:pve-1:001F692B:1EE7992A:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: clone failed: cfs-lock 'storage-rbd' error: got lock request timeout"
+    },
+    {
+      "testId": "clone-full-10012",
+      "vmid": 101,
+      "newid": 10012,
+      "cloneType": "full",
+      "targetNode": "pve-2",
+      "duration": 0,
+      "success": false,
+      "error": "Task UPID:pve-1:001F6929:1EE79929:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "testId": "clone-full-10013",
+      "vmid": 101,
+      "newid": 10013,
+      "cloneType": "full",
+      "targetNode": "pve-9",
+      "duration": 0,
+      "success": false,
+      "error": "Task UPID:pve-1:001F692D:1EE7992B:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: clone failed: cfs-lock 'storage-rbd' error: got lock request timeout"
+    },
+    {
+      "testId": "clone-full-10014",
+      "vmid": 101,
+      "newid": 10014,
+      "cloneType": "full",
+      "targetNode": "pve-10",
+      "duration": 0,
+      "success": false,
+      "error": "Task UPID:pve-1:001F692E:1EE7992D:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "testId": "clone-full-10015",
+      "vmid": 101,
+      "newid": 10015,
+      "cloneType": "full",
+      "targetNode": "pve-10",
+      "duration": 0,
+      "success": false,
+      "error": "Task UPID:pve-1:001F6932:1EE7992F:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "testId": "clone-full-10016",
+      "vmid": 101,
+      "newid": 10016,
+      "cloneType": "full",
+      "targetNode": "pve-3",
+      "duration": 0,
+      "success": false,
+      "error": "Task UPID:pve-1:001F6935:1EE79930:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "testId": "clone-full-10017",
+      "vmid": 101,
+      "newid": 10017,
+      "cloneType": "full",
+      "targetNode": "pve-2",
+      "duration": 0,
+      "success": false,
+      "error": "Task UPID:pve-1:001F697F:1EE79934:68F3DA3D:qmclone:101:root@pam!thitipong.t-special-project: failed with exit status: WARNINGS: 1"
+    },
+    {
+      "testId": "clone-full-10018",
+      "vmid": 101,
+      "newid": 10018,
+      "cloneType": "full",
+      "targetNode": "pve-8",
+      "duration": 175525.8132,
+      "success": true
+    },
+    {
+      "testId": "clone-full-10019",
+      "vmid": 101,
+      "newid": 10019,
+      "cloneType": "full",
+      "targetNode": "pve-10",
+      "duration": 174559.903,
+      "success": true
+    }
+  ]
+}

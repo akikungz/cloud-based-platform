@@ -21,8 +21,10 @@ async function basicPerformanceTest() {
     templateNode: 'pve-node-1',
     targetNode: 'pve-node-1',
     startVmid: 10000,
-    linkedCloneCount: 3,
-    fullCloneCount: 3,
+    linkedCloneCount: 0, // Using concurrent mode
+    fullCloneCount: 0, // Using concurrent mode
+    concurrentLinkedCount: 3, // Now using concurrent by default
+    concurrentFullCount: 3,
     cleanupAfterTest: true,
     delayBetweenTests: 1000,
   });
@@ -44,8 +46,10 @@ async function advancedPerformanceTest() {
     templateNode: 'pve-node-1',
     targetNode: 'pve-node-1',
     startVmid: 11000,
-    linkedCloneCount: 10,
-    fullCloneCount: 10,
+    linkedCloneCount: 0, // Using concurrent mode
+    fullCloneCount: 0, // Using concurrent mode
+    concurrentLinkedCount: 10, // Concurrent testing
+    concurrentFullCount: 10,
     cleanupAfterTest: true,
     delayBetweenTests: 2000,
   });
@@ -70,7 +74,7 @@ async function directTimeCollectorExample() {
   // Simulate some operations
   for (let i = 0; i < 5; i++) {
     const id = `test-${i}`;
-    
+
     collector.start(id, 'clone', {
       vmid: 9000,
       newid: 12000 + i,
@@ -170,16 +174,16 @@ async function customAnalysis() {
   const metrics = collector.getCompletedMetrics();
 
   // Custom analysis: Find outliers
-  const linkedMetrics = metrics.filter(m => 
+  const linkedMetrics = metrics.filter(m =>
     m.metadata?.cloneType === 'linked' && m.duration
   );
-  const fullMetrics = metrics.filter(m => 
+  const fullMetrics = metrics.filter(m =>
     m.metadata?.cloneType === 'full' && m.duration
   );
 
   if (linkedMetrics.length > 0) {
     const linkedAvg = linkedMetrics.reduce((sum, m) => sum + m.duration!, 0) / linkedMetrics.length;
-    const linkedOutliers = linkedMetrics.filter(m => 
+    const linkedOutliers = linkedMetrics.filter(m =>
       Math.abs(m.duration! - linkedAvg) > linkedAvg * 0.5
     );
 
@@ -191,7 +195,7 @@ async function customAnalysis() {
 
   if (fullMetrics.length > 0) {
     const fullAvg = fullMetrics.reduce((sum, m) => sum + m.duration!, 0) / fullMetrics.length;
-    const fullOutliers = fullMetrics.filter(m => 
+    const fullOutliers = fullMetrics.filter(m =>
       Math.abs(m.duration! - fullAvg) > fullAvg * 0.5
     );
 

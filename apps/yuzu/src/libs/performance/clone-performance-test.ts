@@ -20,6 +20,9 @@ export interface CloneTestConfig {
   cleanupAfterTest?: boolean;
   delayBetweenTests?: number; // milliseconds
   randomTargetNode?: boolean; // If true, randomly select target node for each test
+  concurrentTests?: number; // Optional: number of concurrent tests to run (default: 1 for sequential)
+  concurrentLinkedCount?: number; // Optional: number of concurrent linked clone tests
+  concurrentFullCount?: number; // Optional: number of concurrent full clone tests
 }
 
 export interface CloneTestResult {
@@ -139,7 +142,7 @@ export class ClonePerformanceTest {
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       // Stop tracking and mark as failed
       this.collector.stop(testId, errorMessage);
 
@@ -168,7 +171,7 @@ export class ClonePerformanceTest {
   private async cleanupTestVM(node: string, vmid: number): Promise<void> {
     try {
       const { qemu } = await import('../pve');
-      
+
       logger.info({ vmid, node }, 'Cleaning up test VM');
 
       // Try to stop VM first
@@ -202,6 +205,85 @@ export class ClonePerformanceTest {
   }
 
   /**
+   * Run concurrent clone tests
+   */
+  private async runConcurrentCloneTests(
+    templateVmid: number,
+    templateNode: string,
+    startVmid: number,
+    count: number,
+    cloneType: 'linked' | 'full',
+    config: CloneTestConfig
+  ): Promise<CloneTestResult[]> {
+    logger.info({
+      cloneType,
+      count,
+      concurrent: true
+    }, `Starting ${count} concurrent ${cloneType} clone tests`);
+
+    const promises: Promise<CloneTestResult>[] = [];
+    const results: CloneTestResult[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const selectedTargetNode = config.randomTargetNode || config.targetNodes
+        ? this.getRandomTargetNode()
+        : config.targetNode!;
+
+      const testVmid = startVmid + i;
+
+      const testPromise = this.runCloneTest(
+        templateVmid,
+        templateNode,
+        selectedTargetNode,
+        testVmid,
+        cloneType
+      );
+
+      promises.push(testPromise);
+    }
+
+    // Wait for all concurrent tests to complete
+    try {
+      const concurrentResults = await Promise.allSettled(promises);
+
+      concurrentResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          results.push(result.value);
+        } else {
+          // Create failed result for rejected promises
+          const failedResult: CloneTestResult = {
+            testId: `clone-${cloneType}-${startVmid + index}`,
+            vmid: templateVmid,
+            newid: startVmid + index,
+            cloneType,
+            targetNode: config.targetNode || 'unknown',
+            duration: 0,
+            success: false,
+            error: result.reason?.message || 'Unknown error'
+          };
+          results.push(failedResult);
+          logger.error({
+            error: result.reason,
+            vmid: startVmid + index
+          }, `Concurrent ${cloneType} clone test failed`);
+        }
+      });
+
+      logger.info({
+        cloneType,
+        total: count,
+        successful: results.filter(r => r.success).length,
+        failed: results.filter(r => !r.success).length
+      }, `Completed concurrent ${cloneType} clone tests`);
+
+      return results;
+    } catch (error) {
+      logger.error({ error, cloneType }, `Failed to run concurrent ${cloneType} clone tests`);
+      throw error;
+    }
+  }
+
+  /**
    * Run performance test suite
    */
   async runTestSuite(config: CloneTestConfig): Promise<void> {
@@ -218,6 +300,9 @@ export class ClonePerformanceTest {
       cleanupAfterTest = true,
       delayBetweenTests = 1000,
       randomTargetNode = false,
+      concurrentTests,
+      concurrentLinkedCount,
+      concurrentFullCount,
     } = config;
 
     // Setup available nodes for random selection
@@ -241,59 +326,155 @@ export class ClonePerformanceTest {
     const createdVmids: { vmid: number; node: string }[] = [];
 
     try {
-      // Run linked clone tests
-      logger.info({ count: linkedCloneCount }, 'Running linked clone tests');
-      for (let i = 0; i < linkedCloneCount; i++) {
-        const selectedTargetNode = randomTargetNode || targetNodes 
-          ? this.getRandomTargetNode() 
-          : targetNode!;
-        
-        logger.info({ targetNode: selectedTargetNode }, `Test ${i + 1}: Selected target node`);
-        
-        const result = await this.runCloneTest(
-          templateVmid,
-          templateNode,
-          selectedTargetNode,
-          currentVmid,
-          'linked'
-        );
-        this.results.push(result);
-        if (result.success) {
-          createdVmids.push({ vmid: currentVmid, node: selectedTargetNode });
-        }
-        currentVmid++;
+      // Determine if we're running concurrent tests (now default)
+      const actualConcurrentLinked = concurrentLinkedCount ?? 0;
+      const actualConcurrentFull = concurrentFullCount ?? 0;
+      const usesConcurrentTesting = concurrentTests || actualConcurrentLinked > 0 || actualConcurrentFull > 0;
 
-        // Delay between tests
-        if (i < linkedCloneCount - 1 && delayBetweenTests > 0) {
-          await new Promise(resolve => setTimeout(resolve, delayBetweenTests));
-        }
-      }
+      if (usesConcurrentTesting) {
+        logger.info('Running tests in concurrent mode');
 
-      // Run full clone tests
-      logger.info({ count: fullCloneCount }, 'Running full clone tests');
-      for (let i = 0; i < fullCloneCount; i++) {
-        const selectedTargetNode = randomTargetNode || targetNodes 
-          ? this.getRandomTargetNode() 
-          : targetNode!;
-        
-        logger.info({ targetNode: selectedTargetNode }, `Test ${i + 1}: Selected target node`);
-        
-        const result = await this.runCloneTest(
-          templateVmid,
-          templateNode,
-          selectedTargetNode,
-          currentVmid,
-          'full'
-        );
-        this.results.push(result);
-        if (result.success) {
-          createdVmids.push({ vmid: currentVmid, node: selectedTargetNode });
-        }
-        currentVmid++;
+        // Run concurrent linked clone tests
+        if (actualConcurrentLinked > 0) {
+          const linkedResults = await this.runConcurrentCloneTests(
+            templateVmid,
+            templateNode,
+            currentVmid,
+            actualConcurrentLinked,
+            'linked',
+            config
+          );
+          this.results.push(...linkedResults);
 
-        // Delay between tests
-        if (i < fullCloneCount - 1 && delayBetweenTests > 0) {
-          await new Promise(resolve => setTimeout(resolve, delayBetweenTests));
+          // Track created VMs for cleanup
+          linkedResults.forEach(result => {
+            if (result.success) {
+              createdVmids.push({ vmid: result.newid, node: result.targetNode });
+            }
+          });
+          currentVmid += actualConcurrentLinked;
+
+          // Delay before next batch if specified
+          if (delayBetweenTests > 0) {
+            await new Promise(resolve => setTimeout(resolve, delayBetweenTests));
+          }
+        } else if (concurrentTests && linkedCloneCount > 0) {
+          // Use general concurrent setting for linked clones
+          const linkedResults = await this.runConcurrentCloneTests(
+            templateVmid,
+            templateNode,
+            currentVmid,
+            linkedCloneCount,
+            'linked',
+            config
+          );
+          this.results.push(...linkedResults);
+
+          linkedResults.forEach(result => {
+            if (result.success) {
+              createdVmids.push({ vmid: result.newid, node: result.targetNode });
+            }
+          });
+          currentVmid += linkedCloneCount;
+
+          if (delayBetweenTests > 0) {
+            await new Promise(resolve => setTimeout(resolve, delayBetweenTests));
+          }
+        }
+
+        // Run concurrent full clone tests
+        if (actualConcurrentFull > 0) {
+          const fullResults = await this.runConcurrentCloneTests(
+            templateVmid,
+            templateNode,
+            currentVmid,
+            actualConcurrentFull,
+            'full',
+            config
+          );
+          this.results.push(...fullResults);
+
+          fullResults.forEach(result => {
+            if (result.success) {
+              createdVmids.push({ vmid: result.newid, node: result.targetNode });
+            }
+          });
+        } else if (concurrentTests && fullCloneCount > 0) {
+          // Use general concurrent setting for full clones
+          const fullResults = await this.runConcurrentCloneTests(
+            templateVmid,
+            templateNode,
+            currentVmid,
+            fullCloneCount,
+            'full',
+            config
+          );
+          this.results.push(...fullResults);
+
+          fullResults.forEach(result => {
+            if (result.success) {
+              createdVmids.push({ vmid: result.newid, node: result.targetNode });
+            }
+          });
+        }
+      } else {
+        // Sequential testing (original behavior)
+        logger.info('Running tests in sequential mode');
+
+        // Run linked clone tests sequentially
+        logger.info({ count: linkedCloneCount }, 'Running linked clone tests');
+        for (let i = 0; i < linkedCloneCount; i++) {
+          const selectedTargetNode = randomTargetNode || targetNodes
+            ? this.getRandomTargetNode()
+            : targetNode!;
+
+          logger.info({ targetNode: selectedTargetNode }, `Test ${i + 1}: Selected target node`);
+
+          const result = await this.runCloneTest(
+            templateVmid,
+            templateNode,
+            selectedTargetNode,
+            currentVmid,
+            'linked'
+          );
+          this.results.push(result);
+          if (result.success) {
+            createdVmids.push({ vmid: currentVmid, node: selectedTargetNode });
+          }
+          currentVmid++;
+
+          // Delay between tests
+          if (i < linkedCloneCount - 1 && delayBetweenTests > 0) {
+            await new Promise(resolve => setTimeout(resolve, delayBetweenTests));
+          }
+        }
+
+        // Run full clone tests sequentially
+        logger.info({ count: fullCloneCount }, 'Running full clone tests');
+        for (let i = 0; i < fullCloneCount; i++) {
+          const selectedTargetNode = randomTargetNode || targetNodes
+            ? this.getRandomTargetNode()
+            : targetNode!;
+
+          logger.info({ targetNode: selectedTargetNode }, `Test ${i + 1}: Selected target node`);
+
+          const result = await this.runCloneTest(
+            templateVmid,
+            templateNode,
+            selectedTargetNode,
+            currentVmid,
+            'full'
+          );
+          this.results.push(result);
+          if (result.success) {
+            createdVmids.push({ vmid: currentVmid, node: selectedTargetNode });
+          }
+          currentVmid++;
+
+          // Delay between tests
+          if (i < fullCloneCount - 1 && delayBetweenTests > 0) {
+            await new Promise(resolve => setTimeout(resolve, delayBetweenTests));
+          }
         }
       }
 
@@ -308,7 +489,7 @@ export class ClonePerformanceTest {
         logger.info({ count: createdVmids.length }, 'Cleaning up test VMs');
         for (const vm of createdVmids) {
           await this.cleanupTestVM(vm.node, vm.vmid);
-          
+
           // Small delay between cleanups
           if (delayBetweenTests > 0) {
             await new Promise(resolve => setTimeout(resolve, delayBetweenTests / 2));
@@ -357,7 +538,7 @@ export class ClonePerformanceTest {
   exportToJSON(filepath: string): void {
     const fs = require('fs');
     const report = this.collector.generateCloneReport();
-    
+
     fs.writeFileSync(filepath, JSON.stringify({
       timestamp: new Date().toISOString(),
       report,
@@ -374,7 +555,7 @@ export class ClonePerformanceTest {
   exportToCSV(filepath: string): void {
     const fs = require('fs');
     const csv = this.collector.exportToCSV();
-    
+
     fs.writeFileSync(filepath, csv);
 
     logger.info({ filepath }, 'Performance report exported to CSV');
@@ -393,6 +574,13 @@ export class ClonePerformanceTest {
   getCollector(): TimeCollector {
     return this.collector;
   }
+
+  /**
+   * Get the generated performance report
+   */
+  getReport() {
+    return this.collector.generateCloneReport();
+  }
 }
 
 /**
@@ -401,14 +589,16 @@ export class ClonePerformanceTest {
 export async function runExamplePerformanceTest() {
   const test = new ClonePerformanceTest();
 
-  // Example configuration
+  // Example configuration - now uses concurrent testing by default
   const config: CloneTestConfig = {
     templateVmid: 9000, // Your template VM ID
     templateNode: 'pve-node-1', // Node where template is located
     targetNode: 'pve-node-1', // Target node for clones
     startVmid: 10000, // Starting VM ID for test VMs
-    linkedCloneCount: 5, // Number of linked clone tests
-    fullCloneCount: 5, // Number of full clone tests
+    linkedCloneCount: 0, // Sequential tests (0 = none)
+    fullCloneCount: 0, // Sequential tests (0 = none)
+    concurrentLinkedCount: 5, // Concurrent linked clone tests (default mode)
+    concurrentFullCount: 5, // Concurrent full clone tests (default mode)
     cleanupAfterTest: true, // Clean up test VMs after completion
     delayBetweenTests: 2000, // 2 second delay between tests
   };

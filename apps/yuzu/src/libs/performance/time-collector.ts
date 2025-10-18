@@ -95,10 +95,29 @@ export class TimeCollector {
   }
 
   /**
+   * Get concurrent operation statistics
+   */
+  getConcurrentStats(operation: string): {
+    concurrent: number;
+    totalRunning: number;
+    concurrentOperations: PerformanceMetric[];
+  } {
+    const concurrentOps = Array.from(this.metrics.values()).filter(
+      m => m.operation === operation && m.status === 'running'
+    );
+
+    return {
+      concurrent: concurrentOps.length,
+      totalRunning: this.metrics.size,
+      concurrentOperations: concurrentOps,
+    };
+  }
+
+  /**
    * Get a specific metric by id
    */
   getMetric(id: string): PerformanceMetric | undefined {
-    return this.metrics.get(id) || this.completedMetrics.find(m => 
+    return this.metrics.get(id) || this.completedMetrics.find(m =>
       m.metadata?.id === id
     );
   }
@@ -150,8 +169,8 @@ export class TimeCollector {
     // Calculate linked clone statistics
     const linkedDurations = linkedCloneMetrics.map(m => m.duration!);
     const linkedStats = {
-      average: linkedDurations.length > 0 
-        ? linkedDurations.reduce((a, b) => a + b, 0) / linkedDurations.length 
+      average: linkedDurations.length > 0
+        ? linkedDurations.reduce((a, b) => a + b, 0) / linkedDurations.length
         : 0,
       min: linkedDurations.length > 0 ? Math.min(...linkedDurations) : 0,
       max: linkedDurations.length > 0 ? Math.max(...linkedDurations) : 0,
@@ -163,8 +182,8 @@ export class TimeCollector {
     // Calculate full clone statistics
     const fullDurations = fullCloneMetrics.map(m => m.duration!);
     const fullStats = {
-      average: fullDurations.length > 0 
-        ? fullDurations.reduce((a, b) => a + b, 0) / fullDurations.length 
+      average: fullDurations.length > 0
+        ? fullDurations.reduce((a, b) => a + b, 0) / fullDurations.length
         : 0,
       min: fullDurations.length > 0 ? Math.min(...fullDurations) : 0,
       max: fullDurations.length > 0 ? Math.max(...fullDurations) : 0,
@@ -178,7 +197,7 @@ export class TimeCollector {
     const percentageDifference = fullStats.average > 0
       ? ((linkedStats.average - fullStats.average) / fullStats.average) * 100
       : 0;
-    
+
     let fasterMethod: 'linked' | 'full' | 'equal' = 'equal';
     if (linkedStats.average < fullStats.average && linkedStats.average > 0) {
       fasterMethod = 'linked';
@@ -217,7 +236,7 @@ export class TimeCollector {
    */
   exportCloneReportToString(): string {
     const report = this.generateCloneReport();
-    
+
     let output = '\n';
     output += '═'.repeat(80) + '\n';
     output += '  CLONE PERFORMANCE TEST REPORT\n';
@@ -251,7 +270,7 @@ export class TimeCollector {
     output += `  Faster Method: ${report.comparison.fasterMethod.toUpperCase()}\n`;
     output += `  Average Difference: ${(report.comparison.averageDifference / 1000).toFixed(2)}s\n`;
     output += `  Percentage Difference: ${report.comparison.percentageDifference.toFixed(2)}%\n`;
-    
+
     if (report.comparison.fasterMethod === 'linked') {
       output += `  → Linked clone is ${Math.abs(report.comparison.percentageDifference).toFixed(2)}% faster\n`;
     } else if (report.comparison.fasterMethod === 'full') {
