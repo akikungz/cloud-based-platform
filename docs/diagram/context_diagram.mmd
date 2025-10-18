@@ -1,0 +1,78 @@
+---
+config:
+  layout: elk
+  theme: neutral
+---
+flowchart TD
+ subgraph subGraph0["External Entities"]
+        A["ผู้ใช้<br>Users<br>Staff &amp; Students"]
+  end
+ subgraph subGraph1["Cloud-Based Platform System"]
+        B["เว็ปแอปพลิเคชันจัดการ<br>เครื่องเสมือนและ<br>กิจกรรมการเรียนการสอน<br>Cloud-Based Platform<br>for Teaching &amp; Academic Activities"]
+  end
+ subgraph subGraph2["User Actions/Functions"]
+        C1["สร้างคำขอเครื่องเสมือน<br>Create VM Instance Request"]
+        C2["จัดการเครื่องเสมือน<br>Manage VM Instances"]
+        C3["อนุมัติคำขอ<br>Approve Requests"]
+        C4["จัดการหลักสูตร<br>Manage Courses"]
+        C5["จัดการภาคการศึกษา<br>Manage Semesters"]
+        C6["จัดการบุคลากร<br>Manage Staff"]
+        C7["ตรวจสอบสถานะ<br>Check Instance Status"]
+        C8["ขยายเวลาใช้งาน<br>Extend Usage Time"]
+        C9["ตั้งค่าบัญชี<br>Account Settings"]
+        C10["ดูรายงาน<br>View Reports"]
+        C11["จัดการการเข้าถึง<br>Manage Access Control"]
+  end
+ subgraph subGraph3["System Outputs"]
+        D1["แสดงรายการเครื่องเสมือน<br>Display VM Instance List"]
+        D2["แสดงสถานะเครื่องเสมือน<br>Display Instance Status"]
+        D3["แสดงรายการคำขอ<br>Display Request List"]
+        D4["แสดงข้อมูลหลักสูตร<br>Display Course Information"]
+        D5["แสดงข้อมูลภาคการศึกษา<br>Display Semester Information"]
+        D6["แสดงรายงานการใช้งาน<br>Display Usage Reports"]
+        D7["แสดงการแจ้งเตือน<br>Display Notifications"]
+  end
+    A -- initiates --> C1 & C2 & C3 & C4 & C5 & C6 & C7 & C8 & C9 & C10 & C11
+    C1 --> B
+    C2 --> B
+    C3 --> B
+    C4 --> B
+    C5 --> B
+    C6 --> B
+    C7 --> B
+    C8 --> B
+    C9 --> B
+    C10 --> B
+    C11 --> B
+    B --> D1 & D2 & D3 & D4 & D5 & D6 & D7
+    D1 -- displays --> A
+    D2 -- displays --> A
+    D3 -- displays --> A
+    D4 -- displays --> A
+    D5 -- displays --> A
+    D6 -- displays --> A
+    D7 -- displays --> A
+     A:::userClass
+     B:::systemClass
+     C1:::actionClass
+     C2:::actionClass
+     C3:::actionClass
+     C4:::actionClass
+     C5:::actionClass
+     C6:::actionClass
+     C7:::actionClass
+     C8:::actionClass
+     C9:::actionClass
+     C10:::actionClass
+     C11:::actionClass
+     D1:::outputClass
+     D2:::outputClass
+     D3:::outputClass
+     D4:::outputClass
+     D5:::outputClass
+     D6:::outputClass
+     D7:::outputClass
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef systemClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef actionClass fill:#fff3e0,stroke:#e65100,stroke-width:1px
+    classDef outputClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:1px

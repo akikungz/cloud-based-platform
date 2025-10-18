@@ -1,0 +1,35 @@
+---
+config:
+  layout: elk
+  theme: neutral
+---
+flowchart LR
+ subgraph subGraph0["Human Actors"]
+        U[/"User<br>(Student/Staff)"/]
+        A[/"System Administrator"/]
+  end
+ subgraph subGraph1["External Systems"]
+        PVE[("Proxmox VE API")]
+        G[("Google OAuth")]
+  end
+ subgraph subGraph2["Monitoring & Observability"]
+        M[("Monitoring Stack<br>Grafana, Prometheus, Loki")]
+  end
+    U -- "1. Manages VMs &amp;<br>Submits Requests (HTTPS)" --> C(("Cloud-Based Platform"))
+    C -- "2. Displays UI &amp;<br>VM Status (HTML/JSON)" --> U
+    C -- "3. Authentication Requests" --> G
+    G -- "4. Auth Tokens &amp;<br>User Profile" --> C
+    C -- "5. VM Operation Commands<br>(Create, Start, Stop)" --> PVE
+    PVE -- "6. VM Status &amp;<br>Operation Results" --> C
+    C -- "7. Emits Metrics, Logs, Traces" --> M
+    A -- "8. Monitors System Health &amp;<br>Views Dashboards" --> M
+     U:::actor
+     A:::actor
+     PVE:::external
+     G:::external
+     C:::system
+     M:::monitoring
+    classDef system fill:#e6f2ff,stroke:#b3d9ff,stroke-width:2px
+    classDef actor fill:#fff2cc,stroke:#ffd966,stroke-width:2px
+    classDef external fill:#e2f0d9,stroke:#c5e0b4,stroke-width:2px
+    classDef monitoring fill:#fbe5d6,stroke:#f8cbad,stroke-width:2px

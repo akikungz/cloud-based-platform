@@ -34,7 +34,7 @@
 \vspace{0.5em}
 
 \begin{mycustomenum2}
-    \item เปิด Terminal หรือ Command Prompt และทำการโคลนโปรเจ็กต์จาก GitHub Repository
+    \item เปิด Terminal หรือ Command Prompt และทำการโคลนโปรเจ็กต์จาก GitHub Repository โดยใช้คำสั่งดังภาพที่ \ref{figC:GitClone}
 
 \begin{figure}[htbp]
 \centering
@@ -50,7 +50,7 @@
 \label{figC:GitClone}
 \end{figure}
 
-    \item ติดตั้ง Dependencies ของโปรเจ็กต์
+    \item ติดตั้ง Dependencies ของโปรเจ็กต์ โดยใช้คำสั่งดังภาพที่ \ref{figC:BunInstall}
 
 \begin{figure}[htbp]
 \centering
@@ -65,15 +65,14 @@
 \label{figC:BunInstall}
 \end{figure}
 
-    \item ตั้งค่า Environment Variables โดยคัดลอกไฟล์ตัวอย่าง
+    \item ตั้งค่า Environment Variables โดยคัดลอกไฟล์ตัวอย่าง โดยใช้คำสั่งดังภาพที่ \ref{figC:EnvSetup}
 
 \begin{figure}[htbp]
 \centering
 \adjustbox{frame, width=0.9\textwidth}{
     \begin{minipage}{0.85\textwidth}
         \texttt{\footnotesize
-        cp .env.example .env\\
-        \# แก้ไขไฟล์ .env ตามการตั้งค่าที่ต้องการ
+        cp .env.example .env
         }
     \end{minipage}
 }
@@ -91,7 +90,7 @@
 \vspace{0.5em}
 
 \begin{mycustomenum2}
-    \item เริ่มต้น Infrastructure Services ด้วย Docker Compose
+    \item เริ่มต้น Infrastructure Services ด้วย Docker Compose โดยใช้คำสั่งดังภาพที่ \ref{figC:DockerUp}
 
 \begin{figure}[htbp]
 \centering
@@ -106,7 +105,7 @@
 \label{figC:DockerUp}
 \end{figure}
 
-    \item เริ่มต้น Midori (Frontend Application)
+    \item เริ่มต้น Midori (Frontend Application) โดยใช้คำสั่งดังภาพที่ \ref{figC:MidoriDev}
 
 \begin{figure}[htbp]
 \centering
@@ -122,7 +121,7 @@
 \label{figC:MidoriDev}
 \end{figure}
 
-    \item เริ่มต้น Momoi (API Service) ใน Terminal ใหม่
+    \item เริ่มต้น Momoi (API Service) ใน Terminal ใหม่ โดยใช้คำสั่งดังภาพที่ \ref{figC:MomoiDev}
 
 \begin{figure}[htbp]
 \centering
@@ -138,7 +137,7 @@
 \label{figC:MomoiDev}
 \end{figure}
 
-    \item เริ่มต้น Yuzu (VM Operations Service) ใน Terminal ใหม่
+    \item เริ่มต้น Yuzu (VM Operations Service) ใน Terminal ใหม่ โดยใช้คำสั่งดังภาพที่ \ref{figC:YuzuDev}
 
 \begin{figure}[htbp]
 \centering
@@ -259,15 +258,15 @@
 \begin{mycustomenum2}
     \item \textbf{Port ถูกใช้งานแล้ว}
     \begin{mycustomenum2}
-        \item ตรวจสอบ Port ที่ใช้งานด้วยคำสั่ง: \texttt{lsof -i :3000} (สำหรับ macOS/Linux)
-        \item หยุดกระบวนการที่ใช้ Port หรือเปลี่ยน Port ในไฟล์ \texttt{.env}
+        \item ตรวจสอบ Port ที่ใช้งานด้วยคำสั่ง: lsof -i :3000 (สำหรับ macOS/Linux)
+        \item หยุดกระบวนการที่ใช้ Port หรือเปลี่ยน Port ในไฟล์ .env
     \end{mycustomenum2}
 
     \item \textbf{Docker Services ไม่สามารถเริ่มได้}
     \begin{mycustomenum2}
-        \item ตรวจสอบสถานะด้วยคำสั่ง: \texttt{docker-compose ps}
-        \item ดู Log ด้วยคำสั่ง: \texttt{docker-compose logs [service\_name]}
-        \item รีสตาร์ท Services ด้วยคำสั่ง: \texttt{docker-compose restart}
+        \item ตรวจสอบสถานะด้วยคำสั่ง: docker-compose ps
+        \item ดู Log ด้วยคำสั่ง: docker-compose logs [service\_name]
+        \item รีสตาร์ท Services ด้วยคำสั่ง: docker-compose restart
     \end{mycustomenum2}
 
     \item \textbf{Database Connection Error}
@@ -290,7 +289,7 @@
 \vspace{0.5em}
 
 \begin{mycustomenum2}
-    \item อ่าน Documentation เพิ่มเติมใน \texttt{README.md} ของแต่ละ Component
+    \item อ่าน Documentation เพิ่มเติมใน README.md ของแต่ละ Component
     \item ตรวจสอบ Log Files สำหรับข้อมูลการ Debug
     \item ใช้ Jaeger UI สำหรับติดตามการทำงานของ API
     \item ใช้ Grafana Dashboard สำหรับติดตามประสิทธิภาพระบบ

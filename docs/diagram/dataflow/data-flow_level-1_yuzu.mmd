@@ -1,0 +1,23 @@
+---
+config:
+  layout: elk
+---
+flowchart TD
+    subgraph "Level 1: Yuzu - Message Consumer"
+        P3["3.0 Message Consumer"]
+    end
+
+    D1[("D1 Application Database<br>PostgreSQL")]
+    D2[("D2 Message Queue<br>RabbitMQ")]
+    P2(["2.0 API Service<br>(Momoi - Elysia)"])
+    P5(["5.0 Monitoring<br>(Observability)"])
+
+    D2 -- "13. Consume Messages" --> P3
+    P3 -- "10. Data Processing (Read/Write)" --> D1
+    D1 -- "10. Data Processing (Read/Write)" --> P3
+    P3 -- "16. Consumer Metrics & Logs" --> P5
+    P3 -- "22. Processing Results (Status Updates)" --> P2
+
+    class P3 process;
+    class P2,P5 entity;
+    class D1,D2 datastore;

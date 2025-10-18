@@ -1,0 +1,53 @@
+---
+config:
+  layout: elk
+---
+flowchart TD
+ subgraph m1["Monitoring"]
+        P5["5.0 Monitoring<br>(Observability)"]
+        D3[("D3 Metrics Store<br>Prometheus")]
+        D4[("D4 Logs Store<br>Loki")]
+        D5[("D5 Traces Store<br>Jaeger")]
+  end
+ subgraph a1["Applicaion"]
+        P1["1.0 Web Interface<br>(Midori - Next.js)"]
+        P2["2.0 API Service<br>(Momoi - Elysia)"]
+        P3["3.0 Message Consumer<br>(Yuzu - Background)"]
+        P4["4.0 Authentication<br>(Better Auth)"]
+        D1[("D1 Application Database<br>PostgreSQL")]
+        D2[("D2 Message Queue<br>RabbitMQ")]
+  end
+    USER["User"] -- "1. Web Requests (HTTP/HTTPS)" --> P1["1.0 Web Interface<br>(Midori - Next.js)"]
+    P1 -- "2. UI Response (HTML/CSS/JS)" --> USER
+    P1 -- "3. API Calls (REST/JSON)" --> P2["2.0 API Service<br>(Momoi - Elysia)"]
+    P2 -- "4. API Responses (JSON)" --> P1
+    P1 -- "5. Auth Requests" --> P4["4.0 Authentication<br>(Better Auth)"]
+    P4 -- "6. Auth Tokens" --> P1
+    P2 -- "7. Token Validation" --> P4
+    P4 -- "8. User Data" --> P2
+    P2 <-- "9. CRUD Operations (Prisma ORM)" --> D1[("D1 Application Database<br>PostgreSQL")]
+    P3["3.0 Message Consumer<br>(Yuzu - Background)"] <-- "10. Data Processing (Read/Write)" --> D1
+    P4 <-- "11. User/Session Data" --> D1
+    P2 -- "12. Queue Messages (VM Operations)" --> D2[("D2 Message Queue<br>RabbitMQ")]
+    D2 -- "13. Consume Messages" --> P3
+    P1 -- "14. Client Metrics" --> P5
+    P2 -- "15. API Metrics & Traces" --> P5
+    P3 -- "16. Consumer Metrics & Logs" --> P5
+    P5 -- "17. Store Metrics" --> D3
+    P5 -- "18. Store Logs" --> D4
+    P5 -- "19. Store Traces" --> D5
+    ADMIN["System Administrator"] -- "20. Monitor Dashboard (Grafana)" --> P5
+    P5 -- "21. System Status & Alerts" --> ADMIN
+    P3 -- "22. Processing Results (Status Updates)" --> P2
+     P5:::process
+     D3:::datastore
+     D4:::datastore
+     D5:::datastore
+     USER:::entity
+     P1:::process
+     P2:::process
+     P4:::process
+     D1:::datastore
+     P3:::process
+     D2:::datastore
+     ADMIN:::entity

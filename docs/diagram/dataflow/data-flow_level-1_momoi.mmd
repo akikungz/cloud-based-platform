@@ -1,0 +1,31 @@
+---
+config:
+  layout: elk
+---
+flowchart TD
+    subgraph "Level 1: Momoi - API Service"
+        P2["2.0 API Service"]
+    end
+
+    P1(["1.0 Web Interface<br>(Midori - Next.js)"])
+    P3(["3.0 Message Consumer<br>(Yuzu - Background)"])
+    P4(["4.0 Authentication<br>(Better Auth)"])
+    D1[("D1 Application Database<br>PostgreSQL")]
+    D2[("D2 Message Queue<br>RabbitMQ")]
+    P5(["5.0 Monitoring<br>(Observability)"])
+
+
+    P1 -- "3. API Calls (REST/JSON)" --> P2
+    P2 -- "4. API Responses (JSON)" --> P1
+    P2 -- "7. Token Validation" --> P4
+    P4 -- "8. User Data" --> P2
+    P2 -- "9. CRUD Operations (Prisma ORM)" --> D1
+    D1 -- "9. CRUD Operations (Prisma ORM)" --> P2
+    P2 -- "12. Queue Messages (VM Operations)" --> D2
+    P2 -- "15. API Metrics & Traces" --> P5
+    P3 -- "22. Processing Results (Status Updates)" --> P2
+
+
+    class P2 process;
+    class P1,P3,P4,P5 entity;
+    class D1,D2 datastore;

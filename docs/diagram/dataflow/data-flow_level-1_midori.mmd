@@ -1,0 +1,24 @@
+---
+config:
+  layout: elk
+---
+flowchart TD
+    subgraph "Level 1: Midori - Web Interface"
+        P1["1.0 Web Interface"]
+    end
+
+    USER([User])
+    P2(["2.0 API Service<br>(Momoi - Elysia)"])
+    P4(["4.0 Authentication<br>(Better Auth)"])
+    P5(["5.0 Monitoring<br>(Observability)"])
+
+    USER -- "1. Web Requests (HTTP/HTTPS)" --> P1
+    P1 -- "2. UI Response (HTML/CSS/JS)" --> USER
+    P1 -- "3. API Calls (REST/JSON)" --> P2
+    P2 -- "4. API Responses (JSON)" --> P1
+    P1 -- "5. Auth Requests" --> P4
+    P4 -- "6. Auth Tokens" --> P1
+    P1 -- "14. Client Metrics" --> P5
+
+    class P1 process;
+    class USER,P2,P4,P5 entity;

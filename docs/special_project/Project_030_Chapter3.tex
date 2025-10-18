@@ -3,133 +3,594 @@
 %*************************************
 \chapterTitle{3}{วิธีการดำเนินงานและการออกแบบระบบ}
 
-% Project Methodology
-\section{ขั้นตอนการดำเนินงาน}
-
-\hspace*{1.5em} %ย่อหน้า
-การพัฒนาแพลตฟอร์มคลัสเตอร์เสมือนสำหรับการศึกษามีขั้นตอนการดำเนินงานที่เป็นระบบ โดยแบ่งออกเป็น 5 ขั้นตอนหลัก ดังนี้
-
-\begin{mycustomenum2}
-    \item \textbf{การศึกษาและวิเคราะห์ความต้องการ} การสำรวจความต้องการของผู้ใช้งาน การศึกษาระบบที่มีอยู่เดิม และการกำหนดข้อกำหนดของระบบ
-    \item \textbf{การออกแบบสถาปัตยกรรมระบบ} การออกแบบโครงสร้างระบบทั้งหมด การเลือกเทคโนโลยีที่เหมาะสม และการออกแบบฐานข้อมูล
-    \item \textbf{การพัฒนาระบบ} การพัฒนาส่วนต่าง ๆ ของระบบตามสถาปัตยกรรมที่ออกแบบไว้
-    \item \textbf{การทดสอบระบบ} การทดสอบการทำงานของระบบ การทดสอบประสิทธิภาพ และการทดสอบความปลอดภัย
-    \item \textbf{การประเมินผลและปรับปรุง} การประเมินผลการใช้งานจริง และการปรับปรุงระบบตามผลการประเมิน
-\end{mycustomenum2}
-
-% Research and Requirements Analysis
-\section{การศึกษาและวิเคราะห์ความต้องการ}
-
-% 3.2.1
-\subsection{การสำรวจความต้องการผู้ใช้งาน}
-
-\hspace*{1.5em} %ย่อหน้า
-ผู้จัดทำได้ดำเนินการสำรวจความต้องการจากกลุ่มผู้ใช้งานในภาควิชาเทคโนโลยีสารสนเทศ ได้แก่
-
-\begin{mycustomitem}
-    \item \textbf{อาจารย์} ต้องการระบบจัดการเครื่องเสมือนที่ใช้งานง่าย สำหรับการสอนและการวิจัย
-    \item \textbf{นักศึกษา} ต้องการเข้าถึงเครื่องเสมือนสำหรับการเรียนและทำโครงงาน
-    \item \textbf{ผู้ดูแลระบบ} ต้องการเครื่องมือติดตามและจัดการระบบที่มีประสิทธิภาพ
-\end{mycustomitem}
-
-% 3.2.2
-\subsection{การวิเคราะห์ระบบเดิม}
-
-\hspace*{1.5em} %ย่อหน้า
-จากการศึกษาระบบที่มีอยู่เดิม พบปัญหาและข้อจำกัดดังนี้
-
-\begin{mycustomitem}
-    \item \textbf{การใช้งานที่ซับซ้อน} ต้องใช้ความรู้ทางเทคนิคสูงในการจัดการเครื่องเสมือน
-    \item \textbf{ขาดระบบจัดการผู้ใช้} ไม่มีการแยกสิทธิ์การใช้งานตามบทบาท
-    \item \textbf{ประสิทธิภาพต่ำ} การสร้างและลบเครื่องเสมือนใช้เวลานาน
-    \item \textbf{ขาดการติดตาม} ไม่มีระบบ Monitoring การใช้ทรัพยากร
-\end{mycustomitem}
-
-% 3.2.3
-\subsection{ข้อกำหนดของระบบ}
-
-\hspace*{1.5em} %ย่อหน้า
-จากการวิเคราะห์ความต้องการ ได้กำหนดข้อกำหนดของระบบดังนี้
-
-\hspace*{1.5em} %ย่อหน้า
-\textbf{ข้อกำหนดเชิงหน้าที่ (Functional Requirements)}
-\begin{mycustomitem}
-    \item ระบบต้องสามารถสร้าง แก้ไข และลบเครื่องเสมือนได้
-    \item ระบบต้องรองรับการจัดการผู้ใช้แบบ Role-Based Access Control
-    \item ระบบต้องมีระบบยืนยันตัวตนผ่าน OAuth 2.0
-    \item ระบบต้องสามารถติดตามการใช้ทรัพยากรแบบ Real-time
-    \item ระบบต้องส่งการแจ้งเตือนเมื่อมีการเปลี่ยนแปลงสถานะ
-\end{mycustomitem}
-
-\hspace*{1.5em} %ย่อหน้า
-\textbf{ข้อกำหนดที่ไม่เกี่ยวกับหน้าที่ (Non-Functional Requirements)}
-\begin{mycustomitem}
-    \item \textbf{ประสิทธิภาพ} การสร้างเครื่องเสมือนต้องใช้เวลาไม่เกิน 3 นาที
-    \item \textbf{ความพร้อมใช้งาน} ระบบต้องพร้อมใช้งานอย่างน้อย 99.5% ของเวลา
-    \item \textbf{ความปลอดภัย} ข้อมูลต้องได้รับการเข้ารหัสและจัดเก็บอย่างปลอดภัย
-    \item \textbf{ความยืดหยุ่น} ระบบต้องรองรับการขยายทรัพยากรได้ในอนาคต
-\end{mycustomitem}
-
-% System Architecture Design
 \section{การออกแบบสถาปัตยกรรมระบบ}
 
-% 3.3.1
 \subsection{สถาปัตยกรรมระบบโดยรวม}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1.0\textwidth]{Image/web/context_diagram.png}
-    \caption{แผนภาพบริบทของระบบแพลตฟอร์มคลัสเตอร์เสมือน}
-    \label{fig:context_diagram}
+    \includegraphics[width=1.0\linewidth]{Image/diagram/overview_diagram.png}
+    \caption{\fontSixTeen{แผนภาพการทํางานและลําดับขั้นตอนโดยรวมของโปรแกรม}}
+    \label{fig3:system_overview_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \rotatebox{90}{\includegraphics[height=0.8\linewidth]{Image/diagram/context_diagram.png}}
+    \caption{\fontSixTeen{แผนภาพบริบทของระบบแพลตฟอร์มคลัสเตอร์เสมือน}}
+    \label{fig3:context_diagram}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/diagram/data-flow_level-0.png}
+    \caption{\fontSixTeen{แผนภาพการไหลของข้อมูลระดับ 0}}
+    \label{fig3:data_flow_level_0}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/diagram/data-flow_level-1_midori.png}
+    \caption{\fontSixTeen{แผนภาพการไหลของข้อมูลระดับที่ 1 (Frontend)}}
+    \label{fig3:data_flow_level_1_frontend}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/diagram/data-flow_level-1_momoi.png}
+    \caption{\fontSixTeen{แผนภาพการไหลของข้อมูลระดับที่ 1 (Backend)}}
+    \label{fig3:data_flow_level_1_backend}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/diagram/data-flow_level-1_yuzu.png}
+    \caption{\fontSixTeen{แผนภาพการไหลของข้อมูลระดับที่ 1 (VM Management)}}
+    \label{fig3:data_flow_level_1_vm}
 \end{figure}
 
 \hspace*{1.5em} %ย่อหน้า
 ระบบแพลตฟอร์มคลัสเตอร์เสมือนได้รับการออกแบบในรูปแบบ Microservices Architecture โดยแบ่งเป็นส่วนประกอบหลัก 3 ส่วน คือ
-
 \begin{mycustomitem}
     \item \textbf{Frontend} เว็บแอปพลิเคชันสำหรับผู้ใช้งาน พัฒนาด้วย Next.js และ React
     \item \textbf{Backend} เซิร์ฟเวอร์ API สำหรับการจัดการข้อมูลและการยืนยันตัวตน พัฒนาด้วย Elysia.js
-    \item \textbf{Instance Management} เซอร์วิสจัดการเครื่องเสมือนและการสื่อสารกับ Proxmox VE
+    \item \textbf{Instance Management (VM Management)} เซอร์วิสจัดการเครื่องเสมือนและการสื่อสารกับ Proxmox VE
 \end{mycustomitem}
 
 \hspace*{1.5em} %ย่อหน้า
-จากภาพที่ \ref{fig:context_diagram} แผนภาพบริบทข้างต้นแสดงให้เห็นถึงการเชื่อมต่อและการสื่อสารระหว่างส่วนประกอบต่าง ๆ ของระบบ โดยผู้ใช้งานสามารถเข้าถึงระบบผ่านเว็บแอปพลิเคชัน ที่จะสื่อสารกับ Backend API และระบบจัดการเครื่องเสมือนเพื่อให้บริการที่สมบูรณ์
+จากภาพที่ \ref{fig3:context_diagram} แสดงการเชื่อมต่อและการสื่อสารระหว่างส่วนประกอบต่าง ๆ ของระบบ โดยผู้ใช้งานเข้าถึงระบบผ่านเว็บแอปพลิเคชันซึ่งจะติดต่อกับ Backend API และระบบจัดการเครื่องเสมือน เพื่อให้บริการที่สมบูรณ์ตามขั้นตอนรวมในภาพที่ \ref{fig3:system_overview_flow} และรายละเอียดการไหลของข้อมูลตามภาพที่ \ref{fig3:data_flow_level_0} – \ref{fig3:data_flow_level_1_vm} 
 
+\newpage
+\subsection{การออกแบบหน้าจอการทำงาน}
+\hspace*{1.5em} %ย่อหน้า
+การออกแบบหน้าจอการทำงานของระบบแพลตฟอร์มคลัสเตอร์เสมือนได้รับการออกแบบให้มีความสะดวกในการใช้งานและการเข้าถึงข้อมูลที่จำเป็น โดยแบ่งออกเป็นหน้าจอหลัก ๆ ดังนี้
+\begin{mycustomitem}
+    \item \textbf{หน้าจอเข้าสู่ระบบ (Login Page)} หน้าจอสำหรับผู้ใช้ในการเข้าสู่ระบบผ่านการยืนยันตัวตน
+    \item \textbf{หน้าจอแดชบอร์ด (Dashboard)} แสดงภาพรวมสถานะเครื่องเสมือน รายการคำร้องขอ และข้อมูลผู้ใช้
+    \item \textbf{หน้าจอจัดการเครื่องเสมือน (Instance Management)} สำหรับผู้ใช้ในการดูรายละเอียดเครื่องเสมือน เช่น สถานะ การเชื่อมต่อ และการจัดการเครื่อง
+    \item \textbf{หน้าจอคำร้องขอเครื่องเสมือน (Instance Request)} สำหรับผู้ใช้ในการส่งคำร้องขอเครื่องเสมือนใหม่หรือขยายสเปกเครื่อง
+    \item \textbf{หน้าจอจัดการคำร้องขอ (Request Management)} สำหรับเจ้าหน้าที่ในการตรวจสอบและอนุมัติคำร้องขอเครื่องเสมือน
+\end{mycustomitem}
+โดยมีการออกแบบหน้าจอหลัก ๆ ดังแสดงในภาพที่ \ref{fig3:login_page} – \ref{fig3:request_management}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/design/image2.png}
+    \caption{\fontSixTeen{หน้าจอเข้าสู่ระบบ (Login Page)}}
+    \label{fig3:login_page}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/design/image3.png}
+    \caption{\fontSixTeen{หน้าจอแดชบอร์ด (Dashboard)}}
+    \label{fig3:dashboard}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/design/image5.png}
+    \caption{\fontSixTeen{หน้าจอจัดการเครื่องเสมือน (Instance Management)}}
+    \label{fig3:instance_management}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/design/image4.png}
+    \caption{\fontSixTeen{หน้าจอคำร้องขอเครื่องเสมือน (Instance Request)}}
+    \label{fig3:instance_request}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Image/design/image7.png}
+    \caption{\fontSixTeen{หน้าจอจัดการคำร้องขอ (Request Management)}}
+    \label{fig3:request_management}
+\end{figure}
+
+\newpage
 % 3.3.2
 \subsection{การออกแบบฐานข้อมูล}
 
 \hspace*{1.5em} %ย่อหน้า
 ระบบใช้ PostgreSQL เป็นฐานข้อมูลหลัก โดยออกแบบตารางหลักดังนี้
-
 \begin{mycustomitem}
-    \item \textbf{User Table} เก็บข้อมูลผู้ใช้งาน บทบาท และสิทธิ์การเข้าถึง
-    \item \textbf{Instance Table} เก็บข้อมูลเครื่องเสมือน การกำหนดค่า และสถานะ
-    \item \textbf{Template Table} เก็บข้อมูล Template สำหรับการสร้างเครื่องเสมือน
-    \item \textbf{Activity Log Table} เก็บประวัติการใช้งานและการเปลี่ยนแปลง
-    \item \textbf{Resource Usage Table} เก็บข้อมูลการใช้ทรัพยากรแบบ Time-series
+    \item \textbf{User} เก็บข้อมูลผู้ใช้งาน การยืนยันตัวตน และความสัมพันธ์กับเซสชัน/บัญชี
+    \item \textbf{Session} เก็บข้อมูลเซสชันการเข้าสู่ระบบของผู้ใช้
+    \item \textbf{Account} เก็บข้อมูลบัญชีผู้ใช้จากผู้ให้บริการภายนอก (เช่น OAuth)
+    \item \textbf{Verification} เก็บข้อมูลสำหรับการยืนยัน (เช่น โทเค็น/อีเมล)
+    \item \textbf{staff\_list} รายชื่อบุคลากร/อาจารย์ที่ได้รับอนุญาต
+    \item \textbf{user\_public\_key} คีย์สาธารณะของผู้ใช้ (เช่น SSH public key)
+    \item \textbf{network} ข้อมูลเครือข่าย ชื่อเครือข่าย และเกตเวย์
+    \item \textbf{ip\_address} รายการที่อยู่ IP และการผูกกับเครื่องเสมือน
+    \item \textbf{semester} ข้อมูลภาคการศึกษา ช่วงเวลา และสถานะการใช้งาน
+    \item \textbf{pve\_node} โหนดของ Proxmox VE และสถานะของโหนด
+    \item \textbf{instance\_template} แม่แบบ VM/LXC และโหนดต้นทางที่ใช้สร้างเครื่อง
+    \item \textbf{instance\_course} ข้อมูลรายวิชาและผู้รับผิดชอบสำหรับการจัดสรรเครื่อง
+    \item \textbf{instance\_request} คำร้องขอเครื่องเสมือนของผู้ใช้ พร้อมสเปกที่ต้องการ
+    \item \textbf{instance} เครื่องเสมือนที่ถูกจัดสรรให้ผู้ใช้ รวมสถานะการทำงานและโหนดที่รัน
+    \item \textbf{instance\_request\_extends} คำร้องขอเพิ่มเติม/ขยายสำหรับเครื่องที่มีอยู่
 \end{mycustomitem}
+
+\begin{figure}[htbp]
+    \centering
+    % ภาพนี้ถูกสร้างจากไฟล์ Mermaid: docs/diagram/database.mmd
+    \includegraphics[width=1.0\textwidth]{Image/diagram/database.png}
+    \caption{\fontSixTeen{แผนภาพโครงสร้างฐานข้อมูลของระบบ (Logical Schema)}}
+    \label{fig3:database_schema}
+\end{figure}
+
+% ตารางสรุปสคีมาฐานข้อมูลจาก Prisma (ตาราง, PK, FK, รายละเอียด)
+\begin{table}[htbp]
+    \caption{\fontSixTeen{สรุปตาราง คีย์หลัก และคีย์ต่างประเทศจาก Prisma Schema}}\label{tab3:db_schema_overview}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+            \textbf{ชื่อตาราง} & \textbf{คีย์หลัก (PK)} & \textbf{คีย์ต่างประเทศ (FK)} & \textbf{รายละเอียด} \\
+        \hline
+        user & id (String) & — & ผู้ใช้และข้อมูลยืนยันตัวตน (อีเมลไม่ซ้ำ) \\
+        session & id (String) & userId -> user(id) & เซสชันผู้ใช้, token ไม่ซ้ำ \\
+        account & id (String) & userId -> user(id) & บัญชีจากผู้ให้บริการภายนอก \\
+        verification & id (String) & — & ข้อมูลการยืนยัน (เช่น โทเค็น) \\
+        staff\_list & id (Int) & — & รายชื่อบุคลากร, email ไม่ซ้ำ \\
+        user\_public\_key & id (Int) & user\_id -> user(id) & คีย์สาธารณะของผู้ใช้ (SSH key) \\
+        network & id (Int) & — & ข้อมูลเครือข่าย / เกตเวย์ \\
+        ip\_address & id (Int) & network\_id -> network(id); instance\_id -> instance(id) (ตัวเลือก) & IP address ผูกกับเครือข่าย/อินสแตนซ์ (1–1 ตัวเลือก) \\
+        semester & id (Int) & — & ภาคการศึกษา, name ไม่ซ้ำ \\
+        pve\_node & id (Int) & — & โหนด Proxmox VE, name ไม่ซ้ำ \\
+        instance\_template & id (Int) & vm\_template\_host -> pve\_node(name) & แม่แบบ VM/LXC สำหรับสร้างเครื่อง \\
+        instance\_course & id (Int) & — & รายวิชา/ผู้รับผิดชอบ \\
+        instance\_request & id (Int) & user\_id -> user(id); course\_id -> instance\_course(id); template\_id -> instance\_template(id) & คำร้องขอเครื่องเสมือน (สเปก/สถานะ) \\
+        instance & id (Int) & user\_id -> user(id); course\_id -> instance\_course(id) (ตัวเลือก); semester\_id -> semester(id) (ตัวเลือก); template\_id -> instance\_template(id); pve\_node -> pve\_node(name) & เครื่องเสมือนที่จัดสรรให้ผู้ใช้ \\
+        instance\_request\_extends & id (Int) & instance\_id -> instance(id); instance\_requestId -> instance\_request(id) (ตัวเลือก) & คำร้องขอเพิ่มเติมสำหรับเครื่อง \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% ตารางค่า enum ที่ใช้ในสคีมา
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายการ Enum และค่าที่อนุญาตในสคีมาฐานข้อมูล}}\label{tab3:db_enums}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.28\textwidth} p{0.62\textwidth}}
+        \hline
+            \textbf{ชื่อ Enum} & \textbf{ค่า} \\
+        \hline
+        instance\_state & active, deleted, archived \\
+        instance\_status & pending, running, stopped \\
+        instance\_request\_type & course, project, personal \\
+        request\_state & pending, approved, rejected, cancelled \\
+        vm\_type & qemu, lxc \\
+        node\_status & online, offline, maintenance, unknown \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% รายละเอียดตารางและฟิลด์ (Field-level) จาก Prisma Schema
+% หมายเหตุ: ฟิลด์ความสัมพันธ์แบบ Array (e.g., Session[]) เป็น virtual relation ไม่ใช่คอลัมน์จริงในฐานข้อมูล
+
+% user
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง user}}\label{tab3:user_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: user}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & String & PK & รหัสผู้ใช้ (ไอดีหลัก) \\
+        name & String & — & ชื่อผู้ใช้ \\
+        email & String & UNIQUE & อีเมล (ไม่ซ้ำ) \\
+        emailVerified & Boolean & DEFAULT false & สถานะยืนยันอีเมล \\
+        image & String? & NULLABLE & URL รูปภาพโปรไฟล์ \\
+        createdAt & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updatedAt & DateTime & DEFAULT now(), UPDATED\_AT & วันที่อัปเดตล่าสุด \\
+        sessions & Session[] & RELATION (virtual) & ความสัมพันธ์ 1–หลาย ไปยัง session \\
+        accounts & Account[] & RELATION (virtual) & ความสัมพันธ์ 1–หลาย ไปยัง account \\
+        user\_public\_key & user\_public\_key[] & RELATION (virtual) & คีย์สาธารณะของผู้ใช้ \\
+        instance\_request & instance\_request[] & RELATION (virtual) & คำร้องขอเครื่องของผู้ใช้ \\
+        instance & instance[] & RELATION (virtual) & เครื่องเสมือนของผู้ใช้ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% session
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง session}}\label{tab3:session_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: session}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & String & PK & ไอดีเซสชัน \\
+        expiresAt & DateTime & — & วันหมดอายุ \\
+        token & String & UNIQUE & โทเค็นเซสชัน \\
+        createdAt & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updatedAt & DateTime & UPDATED\_AT & วันที่อัปเดต \\
+        ipAddress & String? & NULLABLE & ไอพีจากผู้ใช้ \\
+        userAgent & String? & NULLABLE & ข้อมูลเบราว์เซอร์/เอเจนต์ \\
+        userId & String & FK -> user(id), ON DELETE CASCADE & อ้างอิงผู้ใช้ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% account
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง account}}\label{tab3:account_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: account}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & String & PK & ไอดีแอคเคานต์ \\
+        accountId & String & — & ไอดีบัญชีจากผู้ให้บริการ \\
+        providerId & String & — & ผู้ให้บริการ (เช่น github, google) \\
+        userId & String & FK -> user(id), ON DELETE CASCADE & อ้างอิงผู้ใช้ \\
+        accessToken & String? & NULLABLE & โทเค็นการเข้าถึง \\
+        refreshToken & String? & NULLABLE & โทเค็นรีเฟรช \\
+        idToken & String? & NULLABLE & ไอดีโทเค็น (OIDC) \\
+        accessTokenExpiresAt & DateTime? & NULLABLE & วันหมดอายุ access token \\
+        refreshTokenExpiresAt & DateTime? & NULLABLE & วันหมดอายุ refresh token \\
+        scope & String? & NULLABLE & สโคปการเข้าถึง \\
+        password & String? & NULLABLE & รหัสผ่าน (กรณี local) \\
+        createdAt & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updatedAt & DateTime & UPDATED\_AT & วันที่อัปเดต \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% verification
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง verification}}\label{tab3:verification_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: verification}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & String & PK & ไอดีรายการยืนยัน \\
+        identifier & String & — & ตัวระบุ \\
+        value & String & — & ค่า (เช่น โทเค็น) \\
+        expiresAt & DateTime & — & วันหมดอายุ \\
+        createdAt & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updatedAt & DateTime & DEFAULT now(), UPDATED\_AT & วันที่อัปเดต \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% staff_list
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง staff\_list}}\label{tab3:staff_list_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: staff\_list}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีรายการ \\
+        email & String & UNIQUE & อีเมลบุคลากร \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% user_public_key
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง user\_public\_key}}\label{tab3:user_public_key_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: user\_public\_key}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดี \\
+        user\_id & String & FK -> user(id), ON DELETE CASCADE & อ้างอิงผู้ใช้ \\
+        public\_key & String & — & คีย์สาธารณะ \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% network
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง network}}\label{tab3:network_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: network}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีเครือข่าย \\
+        name & String & — & ชื่อเครือข่าย \\
+        network & String & — & ช่วงเครือข่าย (CIDR) \\
+        gateway & String & — & เกตเวย์ \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% ip_address
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง ip\_address}}\label{tab3:ip_address_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: ip\_address}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดี \\
+        network\_id & Int & FK -> network(id), ON DELETE CASCADE & อ้างอิงเครือข่าย \\
+        ip & String & UNIQUE & ที่อยู่ไอพี \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        instance\_id & Int? & UNIQUE, NULLABLE, FK -> instance(id), ON DELETE SET NULL & ผูกกับเครื่อง (1–1 ตัวเลือก) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% semester
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง semester}}\label{tab3:semester_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: semester}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีภาคการศึกษา \\
+        name & String & UNIQUE & ชื่อภาคการศึกษา \\
+        start\_at & DateTime & — & วันเริ่มต้น \\
+        end\_at & DateTime & — & วันสิ้นสุด \\
+        active & Boolean & DEFAULT false & เปิดใช้งาน \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% pve_node
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง pve\_node}}\label{tab3:pve_node_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: pve\_node}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีโหนด \\
+        name & String & UNIQUE & ชื่อโหนด \\
+        status & node\_status & — & สถานะโหนด \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% instance_template
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง instance\_template}}\label{tab3:instance_template_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: instance\_template}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีแม่แบบ \\
+        os\_name & String & — & ชื่อระบบปฏิบัติการ \\
+        vm\_template\_id & String & — & ไอดีแม่แบบใน PVE \\
+        vm\_template\_host & String & FK -> pve\_node(name) & โฮสต์แม่แบบ (อ้างอิงชื่อโหนด) \\
+        vm\_type & vm\_type & — & ประเภท VM/LXC \\
+        based\_size & Int & — & ขนาดดิสก์พื้นฐาน (GB) \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% instance_course
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง instance\_course}}\label{tab3:instance_course_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: instance\_course}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีรายวิชา \\
+        course\_id & String & — & รหัสรายวิชา \\
+        course\_title & String & — & ชื่อรายวิชา \\
+        main\_staff & Int & — & ผู้รับผิดชอบหลัก \\
+        assistant\_staff\_1 & Int? & NULLABLE & ผู้ช่วย 1 \\
+        assistant\_staff\_2 & Int? & NULLABLE & ผู้ช่วย 2 \\
+        assistant\_staff\_3 & Int? & NULLABLE & ผู้ช่วย 3 \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% instance_request
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง instance\_request}}\label{tab3:instance_request_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: instance\_request}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีคำร้อง \\
+        user\_id & String & FK -> user(id), ON DELETE CASCADE & ผู้ร้องขอ \\
+        title & String & — & ชื่อคำร้อง/โครงการ \\
+        hostname & String & — & ชื่อโฮสต์ที่ต้องการ \\
+        description & String & — & รายละเอียด \\
+        type & instance\_request\_type & — & ประเภทคำร้อง (course/project/personal) \\
+        course\_id & Int & FK -> instance\_course(id), ON DELETE CASCADE & รายวิชา \\
+        template\_id & Int & FK -> instance\_template(id), ON DELETE CASCADE & แม่แบบที่จะใช้ \\
+        cpus & Int & — & จำนวนคอร์ CPU \\
+        memory & Int & — & หน่วยความจำ (MB) \\
+        disk & Int & — & ขนาดดิสก์ (GB) \\
+        state & request\_state & DEFAULT pending & สถานะคำร้อง \\
+        reason & String? & NULLABLE & เหตุผลประกอบ \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% instance
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง instance}}\label{tab3:instance_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.25\textwidth} p{0.20\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: instance}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีเครื่องเสมือน \\
+        user\_id & String & FK -> user(id), ON DELETE CASCADE & เจ้าของเครื่อง \\
+        title & String & — & ชื่อเครื่อง \\
+        hostname & String & — & โฮสต์เนม \\
+        description & String & — & รายละเอียด \\
+        type & instance\_request\_type & — & ประเภทการใช้งาน \\
+        course\_id & Int & FK -> instance\_course(id), ON DELETE CASCADE, NULLABLE & รายวิชา (ถ้ามี) \\
+        semester\_id & Int? & FK -> semester(id), ON DELETE CASCADE, NULLABLE & ภาคการศึกษา (ถ้ามี) \\
+        template\_id & Int & FK -> instance\_template(id), ON DELETE CASCADE & แม่แบบ \\
+        cpus & Int & — & คอร์ CPU \\
+        memory & Int & — & หน่วยความจำ (MB) \\
+        disk & Int & — & ขนาดดิสก์ (GB) \\
+        state & instance\_state & DEFAULT active & สถานะทรัพยากร \\
+        status & instance\_status & DEFAULT pending & สถานะการทำงาน \\
+        pve\_node & String & FK -> pve\_node(name), ON DELETE CASCADE & ชื่อโหนด PVE ที่รัน \\
+        vm\_id & Int & — & ไอดี VM ใน PVE \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        deleted\_at & DateTime? & NULLABLE & วันที่ลบ (เชิงตรรกะ) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% instance_request_extends
+\begin{table}[htbp]
+    \caption{\fontSixTeen{รายละเอียดฟิลด์ของตาราง instance\_request\_extends}}\label{tab3:instance_request_extends_fields}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \small
+    \begin{tabular}{p{0.18\textwidth} p{0.15\textwidth} p{0.325\textwidth} p{0.325\textwidth}}
+        \hline
+        \multicolumn{4}{l}{\textbf{ตาราง: instance\_request\_extends}} \\
+        \hline
+            \textbf{ฟิลด์} & \textbf{ประเภทข้อมูล} & \textbf{ข้อจำกัด} & \textbf{รายละเอียด} \\
+        \hline
+        id & Int & PK, AUTO INCREMENT & เลขไอดีรายการ \\
+        instance\_id & Int & FK -> instance(id), ON DELETE CASCADE & เครื่องที่เกี่ยวข้อง \\
+        title & String & — & ชื่อคำร้องเพิ่มเติม \\
+        description & String & — & รายละเอียด \\
+        state & request\_state & DEFAULT pending & สถานะคำร้อง \\
+        reason & String? & NULLABLE & เหตุผลประกอบ \\
+        created\_at & DateTime & DEFAULT now() & วันที่สร้าง \\
+        updated\_at & DateTime & DEFAULT now() & วันที่อัปเดต \\
+        instance\_requestId & Int? & FK -> instance\_request(id), NULLABLE & อ้างอิงคำร้องหลัก (ถ้ามี) \\
+        \hline
+    \end{tabular}
+\end{table}
 
 % 3.3.3
 \subsection{การออกแบบ API และการสื่อสาร}
 
 \hspace*{1.5em} %ย่อหน้า
-ระบบใช้ RESTful API เป็นหลักในการสื่อสารระหว่างส่วนประกอบต่าง ๆ โดยมีการออกแบบดังนี้
-
+ระบบใช้ RESTful API เป็นหลักในการสื่อสารระหว่างส่วนประกอบ โดยมีการออกแบบดังนี้
 \begin{mycustomitem}
-    \item \textbf{Authentication Endpoints} สำหรับการ Login, Logout และ Token Management
+    \item \textbf{Authentication Endpoints} สำหรับ Login, Logout และ Token Management
     \item \textbf{Instance Management Endpoints} สำหรับการจัดการเครื่องเสมือน (CRUD Operations)
-    \item \textbf{Monitoring Endpoints} สำหรับการติดตามการใช้ทรัพยากร
+    % \item \textbf{Monitoring Endpoints} สำหรับการติดตามการใช้ทรัพยากร
 \end{mycustomitem}
 
 % 3.3.4
 \subsection{การออกแบบระบบ Message Queue}
 
 \hspace*{1.5em} %ย่อหน้า
-เพื่อรองรับการประมวลผลแบบ Asynchronous ระบบใช้ RabbitMQ เป็น Message Broker โดยออกแบบ Queue หลักดังนี้
-
+รองรับการประมวลผลแบบ Asynchronous โดยใช้ RabbitMQ เป็น Message Broker ออกแบบคิวหลักดังนี้
 \begin{mycustomitem}
     \item \textbf{Instance Creation Queue} สำหรับงานการสร้างเครื่องเสมือน
     \item \textbf{Instance Deletion Queue} สำหรับงานการลบเครื่องเสมือน
+    \item \textbf{Instance Update Queue} สำหรับงานอัปเดตสถานะของเครื่องเสมือน
 \end{mycustomitem}
 
 % Tools and Technologies Used
@@ -142,8 +603,8 @@
 \textbf{Next.js 14} เป็น React Framework ที่เลือกใช้เนื่องจากคุณสมบัติดังนี้
 \begin{mycustomitem}
     \item \textbf{App Router} สำหรับการจัดการ Routing แบบใหม่
-    \item \textbf{Server Components} ลดปริมาณ JavaScript ที่ส่งไปยัง Client
-    \item \textbf{Static Site Generation} เพิ่มประสิทธิภาพการโหลดหน้าเว็บ
+    % \item \textbf{Server Components} ลดปริมาณ JavaScript ที่ส่งไปยัง Client
+    % \item \textbf{Static Site Generation} เพิ่มประสิทธิภาพการโหลดหน้าเว็บ
     \item \textbf{Built-in TypeScript Support} รองรับ Type Safety
 \end{mycustomitem}
 
@@ -163,7 +624,7 @@
     \item \textbf{High Performance} มีประสิทธิภาพสูงกว่า Node.js Framework ทั่วไป
     \item \textbf{Type Safety} รองรับ TypeScript แบบเต็มรูปแบบ
     \item \textbf{OpenAPI Integration} สร้าง API Documentation อัตโนมัติ
-    \item \textbf{Plugin Ecosystem} มี Plugin หลากหลายสำหรับการพัฒนา
+    % \item \textbf{Plugin Ecosystem} มี Plugin หลากหลายสำหรับการพัฒนา
 \end{mycustomitem}
 
 \hspace*{1.5em} %ย่อหน้า
@@ -209,7 +670,6 @@
 \begin{mycustomitem}
     \item \textbf{ESLint และ Prettier} สำหรับการตรวจสอบและจัดรูปแบบโค้ด
     \item \textbf{TypeScript} สำหรับ Static Type Checking
-    \item \textbf{Jest} สำหรับ Unit Testing
 \end{mycustomitem}
 
 % Planning and Project Management
@@ -219,13 +679,12 @@
 \subsection{วิธีการพัฒนา (Development Methodology)}
 
 \hspace*{1.5em} %ย่อหน้า
-โครงงานนี้ใช้วิธีการพัฒนาแบบ Agile Development โดยแบ่งการพัฒนาเป็น Sprint ขนาด 2 สัปดาห์ แต่ละ Sprint จะมีขั้นตอนดังนี้
-
+โครงงานนี้ใช้วิธีการพัฒนาแบบ Agile Development โดยแบ่งการพัฒนาเป็น Sprint ขนาด 2 สัปดาห์ แต่ละ Sprint ประกอบด้วย
 \begin{mycustomenum2}
-    \item \textbf{Sprint Planning} วางแผนงานที่จะทำใน Sprint นั้น ๆ
-    \item \textbf{Daily Standup} ติดตามความคืบหน้าและปัญหาที่เกิดขึ้น  
-    \item \textbf{Development} การพัฒนาตาม User Stories ที่กำหนด
-    \item \textbf{Testing} การทดสอบฟีเจอร์ที่พัฒนาเสร็จ
+    \item \textbf{Sprint Planning} วางแผนงานของ Sprint
+    \item \textbf{Daily Standup} ติดตามความคืบหน้าและปัญหา  
+    \item \textbf{Development} พัฒนาตาม User Stories
+    \item \textbf{Testing} ทดสอบฟีเจอร์ที่พัฒนาเสร็จ
     \item \textbf{Sprint Review} ทบทวนผลงานและรับ Feedback
     \item \textbf{Sprint Retrospective} หาจุดปรับปรุงสำหรับ Sprint ถัดไป
 \end{mycustomenum2}
@@ -234,10 +693,10 @@
 \subsection{แผนการพัฒนาตามระยะเวลา}
 
 \hspace*{1.5em} %ย่อหน้า
-การพัฒนาแบ่งออกเป็น 4 Phase หลัก ตามลำดับดังนี้
+การพัฒนาแบ่งออกเป็น 4 Phase หลัก ดังนี้
 
 \hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 1: Foundation (สัปดาห์ที่ 1-4)}
+\textbf{Phase 1: Foundation (สัปดาห์ที่ 1–4)}
 \begin{mycustomitem}
     \item ตั้งค่า Development Environment
     \item พัฒนาระบบ Authentication และ User Management
@@ -246,7 +705,7 @@
 \end{mycustomitem}
 
 \hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 2: Core Features (สัปดาห์ที่ 5-8)}
+\textbf{Phase 2: Core Features (สัปดาห์ที่ 5–8)}
 \begin{mycustomitem}
     \item พัฒนาระบบจัดการเครื่องเสมือนพื้นฐาน (Create, Read, Update, Delete)
     \item เชื่อมต่อกับ Proxmox VE API
@@ -255,7 +714,7 @@
 \end{mycustomitem}
 
 \hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 3: Advanced Features (สัปดาห์ที่ 9-12)}
+\textbf{Phase 3: Advanced Features (สัปดาห์ที่ 9–12)}
 \begin{mycustomitem}
     \item พัฒนาระบบ Monitoring และ Resource Tracking
     \item เพิ่มระบบ Notification
@@ -263,8 +722,9 @@
     \item เพิ่มระบบ Template Management
 \end{mycustomitem}
 
+\newpage
 \hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 4: Testing และ Optimization (สัปดาห์ที่ 13-16)}
+\textbf{Phase 4: Testing และ Optimization (สัปดาห์ที่ 13–16)}
 \begin{mycustomitem}
     \item Integration Testing และ Performance Testing
     \item Security Testing และ Load Testing  
