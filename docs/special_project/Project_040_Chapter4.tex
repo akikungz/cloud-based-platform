@@ -83,8 +83,8 @@
 
 \begin{figure}[htbp]
 \centering
-\adjustbox{frame, width=0.9\textwidth}{
-    \includegraphics[width=0.9\textwidth]{Image/web/system_architecture.png}
+\adjustbox{frame, width=1.0\textwidth}{
+    \includegraphics[width=1.0\textwidth]{Image/web/system_architecture.png}
 }
 \caption{\fontSixTeen{สถาปัตยกรรมระบบโดยรวม}}
 \label{fig4:SystemArchitecture}
@@ -150,6 +150,7 @@
 \label{fig4:LandingPage}
 \end{figure}
 
+\newpage
 \subsection{Dashboard และระบบจัดการ}
 \hspace*{1.5em}
 หลังจากที่ผู้ใช้ล็อกอินเข้าสู่ระบบแล้ว ผู้ใช้จะเข้าสู่หน้า Dashboard ที่แสดงข้อมูลสำคัญและฟังก์ชันการทำงานต่าง ๆ ตามบทบาทของผู้ใช้ โดย Dashboard ได้รับการออกแบบให้แสดงข้อมูลอย่างเป็นระบบและเข้าใจง่าย พร้อมทั้งมีการใช้งานที่สะดวกและรวดเร็ว
@@ -159,9 +160,6 @@
 \begin{mycustomitem}
     \item \textbf{Responsive Design} - รองรับการแสดงผลบนหน้าจอขนาดต่าง ๆ
     \item \textbf{Intuitive Navigation} - การนำทางที่เข้าใจง่ายและสอดคล้องกับมาตรฐาน UX
-    \item \textbf{Real-time Updates} - การอัปเดตข้อมูลแบบเรียลไทม์
-    \item \textbf{Accessibility} - การออกแบบที่คำนึงถึงผู้ใช้ที่มีความต้องการพิเศษ
-    \item \textbf{Theme Support} - รองรับการเปลี่ยนธีมสีตามความต้องการ
 \end{mycustomitem}
 
 \hspace*{1.5em}
@@ -193,21 +191,34 @@
 \label{fig4:StudentInstances}
 \end{figure}
 
+\hspace*{1.5em}
+นอกจากนี้ นักศึกษายังสามารถขอสร้างเครื่องเสมือนใหม่ผ่านฟอร์มที่ออกแบบมาอย่างเรียบง่าย ดังแสดงในภาพที่ \ref{fig4:StudentCreateInstance} ซึ่งช่วยให้การขอใช้ทรัพยากรเป็นไปอย่างรวดเร็วและมีประสิทธิภาพ
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \includegraphics[width=0.9\textwidth]{Image/web/dashboard/student/requests.jpeg}
+}
+\caption{\fontSixTeen{หน้าจอขอสร้าง VM Instance ใหม่สำหรับนักศึกษา}}
+\label{fig4:StudentCreateInstance}
+\end{figure}
+
+\newpage
 \subsection{Dashboard สำหรับอาจารย์และเจ้าหน้าที่}
 \hspace*{1.5em}
 สำหรับอาจารย์และเจ้าหน้าที่ ระบบได้จัดเตรียม Dashboard ที่มีฟังก์ชันการจัดการขั้นสูงมากขึ้น รวมถึงการอนุมัติคำขอ การจัดการหลักสูตร และการตรวจสอบการใช้งานของนักศึกษา ภาพที่ \ref{fig4:StaffDashboard} แสดง Dashboard หลักสำหรับเจ้าหน้าที่ที่มีข้อมูลสถิติและการควบคุมระบบ
 
 \begin{figure}[htbp]
 \centering
-\adjustbox{frame, width=0.9\textwidth}{
-    \includegraphics[width=0.9\textwidth]{Image/web/dashboard/staff/dashboard.jpeg}
+\adjustbox{frame, width=0.7\textwidth}{
+    \includegraphics[width=0.7\textwidth]{Image/web/dashboard/staff/dashboard.jpeg}
 }
 \caption{\fontSixTeen{Dashboard หลักสำหรับอาจารย์และเจ้าหน้าที่}}
 \label{fig4:StaffDashboard}
 \end{figure}
 
 \hspace*{1.5em}
-อาจารย์และเจ้าหน้าที่สามารถจัดการหลักสูตรและเทอมการศึกษา ดังแสดงในภาพที่ \ref{fig4:CourseManagement} ซึ่งช่วยให้สามารถกำหนดทรัพยากรและสิทธิ์การเข้าถึงสำหรับแต่ละวิชาได้อย่างเหมาะสม
+อาจารย์และเจ้าหน้าที่สามารถจัดการหลักสูตร เทอมการศึกษา รวมถึงการจัดการรายชื่อของอาจารย์และเจ้าหน้าที่ ดังแสดงในภาพที่ \ref{fig4:CourseManagement} - \ref{fig4:StaffManagement} ซึ่งช่วยให้สามารถกำหนดทรัพยากรและสิทธิ์การเข้าถึงสำหรับแต่ละวิชาได้อย่างเหมาะสม
 
 \begin{figure}[htbp]
 \centering
@@ -216,6 +227,24 @@
 }
 \caption{\fontSixTeen{หน้าจัดการหลักสูตรและรายวิชา}}
 \label{fig4:CourseManagement}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \includegraphics[width=0.9\textwidth]{Image/web/dashboard/staff/semesters.jpeg}
+}
+\caption{\fontSixTeen{หน้าจัดการเทอมการศึกษา}}
+\label{fig4:SemesterManagement}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\adjustbox{frame, width=0.9\textwidth}{
+    \includegraphics[width=0.9\textwidth]{Image/web/dashboard/staff/staff_management.jpeg}
+}
+\caption{\fontSixTeen{หน้าจัดการรายชื่ออาจารย์}}
+\label{fig4:StaffManagement}
 \end{figure}
 
 \hspace*{1.5em}
@@ -230,9 +259,162 @@
 \label{fig4:PendingApproval}
 \end{figure}
 
+\newpage
 \subsection{ระบบจัดการแบบ Role-Based Access Control}
 \hspace*{1.5em}
 ระบบได้นำเอา Role-Based Access Control (RBAC) มาใช้ในการจัดการสิทธิ์การเข้าถึงข้อมูลและฟังก์ชันต่าง ๆ โดยแบ่งผู้ใช้เป็น 3 กลุ่มหลัก คือ นักศึกษา อาจารย์ และผู้ดูแลระบบ ซึ่งแต่ละกลุ่มจะมีสิทธิ์และหน้าที่ที่แตกต่างกันตามความเหมาะสม
 
 \hspace*{1.5em}
 การออกแบบระบบในลักษณะนี้ช่วยให้การจัดการความปลอดภัยของข้อมูลเป็นไปอย่างมีประสิทธิภาพ และผู้ใช้แต่ละกลุ่มจะเห็นเฉพาะข้อมูลและฟังก์ชันที่เกี่ยวข้องกับหน้าที่ของตนเอง ทำให้การใช้งานง่ายขึ้นและลดความเสี่ยงในการเข้าถึงข้อมูลที่ไม่เหมาะสม
+
+\section{ผลการทดสอบประสิทธิภาพระบบ}
+\label{sec:system-perf}
+\hspace*{1.5em}
+ส่วนนี้สรุปผลการทดสอบประสิทธิภาพของบริการหลักในระบบ โดยแบ่งตามบริการย่อย เพื่อให้เห็นภาพรวมและเปรียบเทียบสมรรถนะของแต่ละบริการได้อย่างชัดเจน
+
+\subsection{ผลการทดสอบประสิทธิภาพส่วนติดต่อผู้ใช้ (Midori)}
+\label{sec:midori-perf}
+\hspace*{1.5em}
+ทำการทดสอบสมรรถนะของ \textbf{Midori} (Frontend/Next.js) โดยมีเป้าหมายการทดสอบคือ \url{http://localhost:3000} ระยะเวลารวม 20 วินาที และระดับความขนานต่อเส้นทาง 20
+
+\hspace*{1.5em}
+ภาพรวมของการทดสอบสะท้อนปริมาณคำขอรวม อัตราความสำเร็จ 100\% และอัตราการส่งผ่านโดยเฉลี่ย ดังตารางที่ \ref{tab:midori-summary}
+
+\begin{table}[htbp]
+    \centering
+    \caption{\fontSixTeen{สรุปผลภาพรวมการทดสอบ Midori}}
+    \label{tab:midori-summary}
+    \adjustbox{max width=\textwidth}{
+        \begin{tabular}{@{}lrrrrr@{}}
+            \hline
+            เวลาเริ่ม & ระยะเวลา (s) & Requests & สำเร็จ & ล้มเหลว & Throughput (RPS) \\
+            \hline
+            2025-10-18 18:57:00Z & 20 & 14{,}509 & 14{,}509 & 0 & 719.62 \\
+            \hline
+        \end{tabular}
+    }
+\end{table}
+
+\hspace*{1.5em}
+การทดสอบครอบคลุมเส้นทางหลัก ได้แก่ หน้าแรกและหน้าลงชื่อเข้าใช้ รวมถึง API สาธารณะที่เรียกผ่าน NextJS Rewrite 2 เส้นทาง สถิติหลักสรุปในตารางที่ \ref{tab:midori-paths}
+
+\begin{table}[htbp]
+    \centering
+    \caption{\fontSixTeen{ผลการทดสอบรายเส้นทาง (Midori)}}
+    \label{tab:midori-paths}
+    \adjustbox{max width=\textwidth}{
+        \begin{tabular}{@{}lrrrrrrrr@{}}
+            \hline
+            เส้นทาง & Requests & สำเร็จ & ล้มเหลว & RPS & p50 (ms) & p95 (ms) & p99 (ms) & max (ms) \\
+            \hline
+            / & 4{,}164 & 4{,}164 & 0 & 206.53 & 53.95 & 112.46 & 170.42 & 291.27 \\
+            /sign-in & 4{,}198 & 4{,}198 & 0 & 208.88 & 55.83 & 105.50 & 165.48 & 293.72 \\
+            /api/v1/public/active-semester & 3{,}072 & 3{,}072 & 0 & 152.77 & 112.56 & 210.71 & 280.86 & 461.16 \\
+            /api/v1/public/next-semester & 3{,}075 & 3{,}075 & 0 & 152.96 & 113.56 & 209.27 & 276.64 & 446.33 \\
+            \hline
+        \end{tabular}
+    }
+\end{table}
+
+\newpage
+\hspace*{1.5em}
+\textbf{ข้อสังเกตและข้อเสนอแนะเบื้องต้น}
+\begin{mycustomitem}
+    \item คำขอทั้งหมดสำเร็จ รวม ~720 RPS โดยหน้า UI หลักให้ p50 ราว 54–56 ms ส่วน API ภายใต้พอร์ต 3000 มี p50 สูงกว่าเนื่องจากผ่านเลเยอร์ Next.js/Proxy
+    \item หากต้องการลด latency ของ API ผ่านพอร์ต 3000 ให้พิจารณาใช้การ proxy แบบ edge/streaming, เปิด compression และ cache ที่เหมาะสมสำหรับ resource คงที่
+    \item ตรวจสอบการทำงานร่วมกับ Momoi ผ่านเครือข่ายภายใน เพื่อลด hop และ revalidation ที่ไม่จำเป็นในเส้นทาง API
+\end{mycustomitem}
+
+\subsection{ผลการทดสอบประสิทธิภาพบริการ API (Momoi)}
+\label{sec:momoi-perf}
+\hspace*{1.5em}
+เพื่อประเมินสมรรถนะของบริการ \textbf{Momoi} (API Service) ได้ดำเนินการทดสอบภาระงานด้วยการยิงคำขอพร้อมกันต่อเส้นทาง (per-path concurrency) โดยมีเป้าหมายการทดสอบคือ \url{http://localhost:3001} ที่ระยะเวลารวม 20 วินาที และระดับความขนานต่อเส้นทาง 20
+
+\hspace*{1.5em}
+ภาพรวมของการทดสอบสะท้อนปริมาณคำขอรวม อัตราความสำเร็จ 100\% และอัตราการส่งผ่านโดยเฉลี่ย ดังตารางที่ \ref{tab:momoi-summary}
+
+\begin{table}[htbp]
+    \centering
+    \caption{\fontSixTeen{สรุปผลภาพรวมการทดสอบ Momoi API}}
+    \label{tab:momoi-summary}
+    \begin{tabular}{lrrrrr}
+        \hline
+    เวลาเริ่ม & ระยะเวลา (s) & Requests & สำเร็จ & ล้มเหลว & Throughput (RPS) \\
+        \hline
+    2025-10-18 18:53:49Z & 20 & 45{,}146 & 45{,}146 & 0 & 2{,}255.16 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\hspace*{1.5em}
+จากข้อมูลสรุป ครั้งนี้คำขอทั้งหมดสำเร็จ (ค่า \texttt{ok}=\,45{,}146) สะท้อนว่าเส้นทางสาธารณะทำงานถูกต้องภายใต้เงื่อนไขการทดสอบดังกล่าวตามข้อมูลในตารางที่ \ref{tab:momoi-paths}
+
+\begin{table}[htbp]
+    \centering
+    \caption{\fontSixTeen{ผลการทดสอบรายเส้นทาง (Momoi API)}}
+    \label{tab:momoi-paths}
+    \adjustbox{max width=\textwidth}{
+        \begin{tabular}{@{}lrrrrrrrr@{}}
+            \hline
+            เส้นทาง & Requests & สำเร็จ & ล้มเหลว & RPS & p50 (ms) & p95 (ms) & p99 (ms) & max (ms) \\
+            \hline
+            /api/v1/public/active-semester & 22{,}560 & 22{,}560 & 0 & 1{,}126.95 & 16.01 & 28.58 & 37.05 & 129.53 \\
+            /api/v1/public/next-semester & 22{,}586 & 22{,}586 & 0 & 1{,}131.59 & 15.94 & 28.53 & 37.45 & 129.62 \\
+            \hline
+        \end{tabular}
+    }
+\end{table}
+
+\hspace*{1.5em}
+\textbf{ข้อสังเกตและข้อเสนอแนะเบื้องต้น}
+\begin{mycustomitem}
+    \item คำขอทั้งหมดสำเร็จภายใต้โหลดรวม ~2{,}255 RPS ตลอด 20 วินาที แสดงถึงเสถียรภาพของเส้นทางสาธารณะในสภาวะทดสอบ
+    \item ค่า latency median (p50) อยู่ราว 15.9–16.0 ms และ p95 ประมาณ 28.5 ms ซึ่งเหมาะสมสำหรับ API แบบสาธารณะ
+    \item หากต้องการ throughput สูงขึ้น ควรพิจารณาเพิ่มการทำงานแบบ asynchronous ภายใน handler, ใช้การทำงานแบบ connection reuse ระหว่างบริการปลายทาง, และตรวจสอบการจูนตัวรับส่ง (listener) ของ Bun/Reverse Proxy
+    \item เพิ่มการติดตามตัวชี้วัด (APM/Tracing) เช่น อัตราตอบกลับ, รหัสสถานะ, และ breakdown ของ latency เพื่อระบุคอขวดเมื่อเพิ่มโหลดในอนาคต
+\end{mycustomitem}
+
+\subsection{ผลการทดสอบประสิทธิภาพบริการจัดการเครื่องเสมือน (Yuzu)}
+\label{sec:yuzu-perf}
+\hspace*{1.5em}
+เพื่อประเมินสมรรถนะของบริการ \textbf{Yuzu} ได้ทำการทดสอบการโคลนเครื่องเสมือน (VM Clone) เปรียบเทียบระหว่างวิธี \textit{Linked Clone} และ \textit{Full Clone} โดยใช้แม่แบบ VM เดียวกันและกระจายงานไปยังโหนดปลายทางหลายเครื่อง
+
+\hspace*{1.5em}
+ภาพรวมการทดสอบประกอบด้วยทั้งหมด 20 เคส โดยเป็น Linked Clone 10 เคส และ Full Clone 10 เคส สถานะสำเร็จ/ล้มเหลวและเวลาที่ใช้สรุปได้ดังตารางที่ \ref{tab:yuzu-clone-summary} และข้อสังเกตที่ตามมา
+
+\begin{table}[htbp]
+    \centering
+    \caption{\fontSixTeen{สรุปผลการทดสอบการโคลน VM: Linked vs Full}}
+    \label{tab:yuzu-clone-summary}
+    \begin{tabular}{lrrrrr}
+        \hline
+        วิธีโคลน & จำนวนนับ & สำเร็จ & ล้มเหลว & เวลาเฉลี่ย (ms) & ช่วงเวลา (min/max ms) \\
+        \hline
+        Linked & 10 & 10 & 0 & 5{,}931.49 & 1{,}492.12 / 10{,}423.62 \\
+        Full & 10 & 3 & 7 & 172{,}493.80\,\footnotemark & 167{,}395.68 / 175{,}525.81 \\
+        \hline
+    \end{tabular}
+\end{table}
+\footnotetext{เวลาเฉลี่ยของ Full Clone คำนวณจากเคสที่สำเร็จ (3 เคส) ตามข้อมูลในไฟล์ผลการทดสอบ}
+
+\hspace*{1.5em}
+เมื่อเปรียบเทียบเวลาเฉลี่ย วิธี \textbf{Linked Clone} เร็วกว่าวิธี \textbf{Full Clone} โดยเฉลี่ยประมาณ 166{,}562.31 ms หรือคิดเป็นร้อยละ 96.56 ของเวลาที่ลดลง ซึ่งสอดคล้องกับสถาปัตยกรรมการใช้งาน \textit{copy-on-write} ของ Linked Clone ที่ไม่คัดลอกดิสก์เต็มทั้งลูกในขั้นตอนเริ่มต้น
+
+\hspace*{1.5em}
+\textbf{ข้อสังเกตและการวิเคราะห์}
+\begin{mycustomitem}
+    \item อัตราความสำเร็จ: Linked Clone สําเร็จ 100\% (10/10) ในขณะที่ Full Clone สําเร็จ 30\% (3/10)
+    \item สาเหตุความล้มเหลวของ Full Clone: พบข้อความผิดพลาด เช่น "cfs-lock 'storage-rbd' error: got lock request timeout" และ "failed with exit status: WARNINGS: 1" ซึ่งบ่งชี้ถึงปัญหาการล็อกทรัพยากรของระบบจัดเก็บข้อมูลแบบ RBD/คลัสเตอร์ หรือข้อจํากัดด้านโควตา/นโยบายของสตอเรจ
+    \item ความแปรปรวนของเวลา: เคส Linked Clone มีช่วงเวลาตั้งแต่ ~1.49 วินาที ถึง ~10.42 วินาที ขึ้นอยู่กับโหนดปลายทางและภาระงาน ณ ขณะนั้น ขณะที่ Full Clone ที่สําเร็จใช้เวลาประมาณ 167–175 วินาที (2.8–2.9 นาที) ต่อเคส
+    \item ผลกระทบต่อการออกแบบระบบ: สำหรับงานสอนที่ต้องสร้าง VM จำนวนนักศึกษามากในเวลาจำกัด Linked Clone ให้เวลาโปรวิชันรวดเร็วอย่างมีนัยสําคัญ และลดความเสี่ยงจากคอขวดด้าน IO ของสตอเรจส่วนกลาง
+\end{mycustomitem}
+
+\newpage
+\hspace*{1.5em}
+\textbf{ข้อเสนอแนะเชิงปฏิบัติ}
+\begin{mycustomitem}
+    \item ใช้ Linked Clone เป็นค่าเริ่มต้นในการโปรวิชัน VM จํานวนมาก โดยเฉพาะกรณีแล็บการสอนหรือกิจกรรมที่เน้นความรวดเร็วในการเริ่มใช้งาน
+    \item สําหรับ Full Clone ให้พิจารณาโหมดคิวงาน/การจัดคิวแบบจํากัดพร้อมกัน (throttling) และปรับ \textit{timeout} ของการล็อกสตอเรจ เพื่อหลีกเลี่ยง \textit{cfs-lock} timeout
+    \item ตรวจสอบคอนฟิกสตอเรจ RBD/คลัสเตอร์ (เช่น พารามิเตอร์ Ceph/RBD, คิวงานบน Proxmox VE, และเครือข่ายสตอเรจ) เพื่อบรรเทาข้อความผิดพลาดประเภท WARNINGS และเพิ่มอัตราสำเร็จของ Full Clone
+    \item เฝ้าติดตามตัวชี้วัด IO/ล็อกของสตอเรจระหว่างช่วงพีก และทดสอบซ้ำหลังปรับแต่ง เพื่อยืนยันการปรับปรุง
+\end{mycustomitem}

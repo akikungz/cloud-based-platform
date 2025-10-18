@@ -68,7 +68,7 @@
     \item \textbf{หน้าจอเข้าสู่ระบบ (Login Page)} หน้าจอสำหรับผู้ใช้ในการเข้าสู่ระบบผ่านการยืนยันตัวตน
     \item \textbf{หน้าจอแดชบอร์ด (Dashboard)} แสดงภาพรวมสถานะเครื่องเสมือน รายการคำร้องขอ และข้อมูลผู้ใช้
     \item \textbf{หน้าจอจัดการเครื่องเสมือน (Instance Management)} สำหรับผู้ใช้ในการดูรายละเอียดเครื่องเสมือน เช่น สถานะ การเชื่อมต่อ และการจัดการเครื่อง
-    \item \textbf{หน้าจอคำร้องขอเครื่องเสมือน (Instance Request)} สำหรับผู้ใช้ในการส่งคำร้องขอเครื่องเสมือนใหม่หรือขยายสเปกเครื่อง
+    \item \textbf{หน้าจอคำร้องขอเครื่องเสมือน (Instance Request)} สำหรับผู้ใช้ในการส่งคำร้องขอการใช้งานเครื่องเสมือน
     \item \textbf{หน้าจอจัดการคำร้องขอ (Request Management)} สำหรับเจ้าหน้าที่ในการตรวจสอบและอนุมัติคำร้องขอเครื่องเสมือน
 \end{mycustomitem}
 โดยมีการออกแบบหน้าจอหลัก ๆ ดังแสดงในภาพที่ \ref{fig3:login_page} – \ref{fig3:request_management}
@@ -670,64 +670,4 @@
 \begin{mycustomitem}
     \item \textbf{ESLint และ Prettier} สำหรับการตรวจสอบและจัดรูปแบบโค้ด
     \item \textbf{TypeScript} สำหรับ Static Type Checking
-\end{mycustomitem}
-
-% Planning and Project Management
-\section{การวางแผนการพัฒนาและการจัดการโครงการ}
-
-% 3.5.1
-\subsection{วิธีการพัฒนา (Development Methodology)}
-
-\hspace*{1.5em} %ย่อหน้า
-โครงงานนี้ใช้วิธีการพัฒนาแบบ Agile Development โดยแบ่งการพัฒนาเป็น Sprint ขนาด 2 สัปดาห์ แต่ละ Sprint ประกอบด้วย
-\begin{mycustomenum2}
-    \item \textbf{Sprint Planning} วางแผนงานของ Sprint
-    \item \textbf{Daily Standup} ติดตามความคืบหน้าและปัญหา  
-    \item \textbf{Development} พัฒนาตาม User Stories
-    \item \textbf{Testing} ทดสอบฟีเจอร์ที่พัฒนาเสร็จ
-    \item \textbf{Sprint Review} ทบทวนผลงานและรับ Feedback
-    \item \textbf{Sprint Retrospective} หาจุดปรับปรุงสำหรับ Sprint ถัดไป
-\end{mycustomenum2}
-
-% 3.5.2
-\subsection{แผนการพัฒนาตามระยะเวลา}
-
-\hspace*{1.5em} %ย่อหน้า
-การพัฒนาแบ่งออกเป็น 4 Phase หลัก ดังนี้
-
-\hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 1: Foundation (สัปดาห์ที่ 1–4)}
-\begin{mycustomitem}
-    \item ตั้งค่า Development Environment
-    \item พัฒนาระบบ Authentication และ User Management
-    \item สร้าง Database Schema และ API พื้นฐาน
-    \item พัฒนา UI Components พื้นฐาน
-\end{mycustomitem}
-
-\hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 2: Core Features (สัปดาห์ที่ 5–8)}
-\begin{mycustomitem}
-    \item พัฒนาระบบจัดการเครื่องเสมือนพื้นฐาน (Create, Read, Update, Delete)
-    \item เชื่อมต่อกับ Proxmox VE API
-    \item พัฒนา Message Queue System
-    \item สร้าง Dashboard หลักสำหรับผู้ใช้งาน
-\end{mycustomitem}
-
-\hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 3: Advanced Features (สัปดาห์ที่ 9–12)}
-\begin{mycustomitem}
-    \item พัฒนาระบบ Monitoring และ Resource Tracking
-    \item เพิ่มระบบ Notification
-    \item พัฒนา Advanced VM Management Features
-    \item เพิ่มระบบ Template Management
-\end{mycustomitem}
-
-\newpage
-\hspace*{1.5em} %ย่อหน้า
-\textbf{Phase 4: Testing และ Optimization (สัปดาห์ที่ 13–16)}
-\begin{mycustomitem}
-    \item Integration Testing และ Performance Testing
-    \item Security Testing และ Load Testing  
-    \item UI/UX Improvements
-    \item Documentation และ Deployment Preparation
 \end{mycustomitem}
