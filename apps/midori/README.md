@@ -36,6 +36,22 @@ bun install
 
 Run the development server:
 
+## Performance testing
+
+Test public pages (/, /sign-in) by default against http://localhost:3000:
+
+```
+npm run dev &
+npm run perf -w apps/midori -- --duration 10 --concurrency 10
+```
+
+Override base or target paths:
+
+```
+npm run perf -w apps/midori -- --base http://localhost:3000 --paths /,/sign-in
+```
+
+Add --out perf-report.json to write a JSON report.
 ```bash
 bun dev
 ```
