@@ -8,7 +8,10 @@
   },
   "scripts": {
     "test": "bun test",
-    "dev": "bun --watch --no-watch-external index.ts"
+    "dev": "bun --watch --no-watch-external index.ts",
+    "perf": "node ./perf/performance-test.mjs",
+    "perf:quick": "node ./perf/performance-test.mjs --duration 5 --concurrency 5",
+    "perf:report": "node ./perf/performance-test.mjs --duration 20 --concurrency 20 --out perf-report.json"
   },
   "dependencies": {
     "@akikungz/warpper-ts": "^1.0.3",

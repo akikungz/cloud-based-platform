@@ -41,6 +41,21 @@ Start the development server with hot reload:
 ```bash
 bun run dev
 ```
+## Performance testing
+
+Quick local run against default http://localhost:${PORT or 3001}:
+
+```
+bun run dev &
+npm run perf -w apps/momoi -- --duration 10 --concurrency 10 --paths /public/active-semester,/public/next-semester
+```
+
+Environment overrides:
+
+- MOMOI_BASE_URL=http://localhost:3001
+- MOMOI_PORT=3001
+
+Outputs an optional JSON report with --out perf-report.json.
 
 The API will be available at http://localhost:3001/
 

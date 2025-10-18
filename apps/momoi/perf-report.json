@@ -1,0 +1,47 @@
+{
+  "target": "http://localhost:3001",
+  "startedAt": "2025-10-18T18:53:49.933Z",
+  "durationSec": 20,
+  "concurrencyPerPath": 20,
+  "summary": {
+    "requests": 45146,
+    "ok": 45146,
+    "fail": 0,
+    "throughputRps": 2255.16,
+    "transferredMB": 10.742
+  },
+  "results": [
+    {
+      "path": "/api/v1/public/active-semester",
+      "url": "http://localhost:3001/api/v1/public/active-semester",
+      "total": 22560,
+      "ok": 22560,
+      "fail": 0,
+      "bytes": 5640000,
+      "elapsedSec": 20.019,
+      "rps": 1126.95,
+      "min": 6.274599999998827,
+      "p50": 16.006599999999253,
+      "p90": 25.326439999999963,
+      "p95": 28.577944999999826,
+      "p99": 37.04882199999945,
+      "max": 129.529
+    },
+    {
+      "path": "/api/v1/public/next-semester",
+      "url": "http://localhost:3001/api/v1/public/next-semester",
+      "total": 22586,
+      "ok": 22586,
+      "fail": 0,
+      "bytes": 5623914,
+      "elapsedSec": 19.96,
+      "rps": 1131.59,
+      "min": 6.587000000001353,
+      "p50": 15.943050000000198,
+      "p90": 25.30824999999959,
+      "p95": 28.52567499999992,
+      "p99": 37.44968500000002,
+      "max": 129.6155000000001
+    }
+  ]
+}
