@@ -73,21 +73,9 @@ RUN addgroup --system --gid 1001 bunuser && \
 # Copy the built application
 COPY --from=builder /app/apps/midori/public ./public
 
-# Set up directories with proper permissions
-RUN mkdir -p .next && \
-    mkdir -p public && \
-    mkdir -p packages && \
-    mkdir -p /tmp && \
-    mkdir -p /app/.bun && \
-    mkdir -p /app/.cache && \
-    mkdir -p /app/.local && \
-    chown -R bunuser:bunuser .next && \
-    chown -R bunuser:bunuser public && \
-    chown -R bunuser:bunuser packages && \
-    chown -R bunuser:bunuser /tmp && \
-    chown -R bunuser:bunuser /app/.bun && \
-    chown -R bunuser:bunuser /app/.cache && \
-    chown -R bunuser:bunuser /app/.local
+# Create runtime directories owned by bunuser (faster than chown -R)
+RUN install -d -o bunuser -g bunuser \
+    .next public packages /tmp /app/.bun /app/.cache /app/.local
 
 # Copy the built application
 COPY --from=builder --chown=bunuser:bunuser /app/apps/midori/.next ./.next
@@ -100,8 +88,7 @@ COPY --from=builder --chown=bunuser:bunuser /app/node_modules ./node_modules
 # Copy only necessary workspace packages for runtime
 COPY --from=builder --chown=bunuser:bunuser /app/packages ./packages
 
-# Ensure all files are owned by bunuser before switching
-RUN chown -R bunuser:bunuser /app
+# All subsequent copies already set ownership with --chown, so no blanket chown needed
 
 # Temporarily run as root to debug permission issues
 # TODO: Switch back to non-root user once permissions are fixed

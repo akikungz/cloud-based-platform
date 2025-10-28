@@ -43,21 +43,20 @@ RUN addgroup --system --gid 1001 bunuser && \
     adduser --system --uid 1001 bunuser
 
 # Copy dependencies and workspace packages from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages ./packages
+COPY --from=deps --chown=bunuser:bunuser /app/node_modules ./node_modules
+COPY --from=deps --chown=bunuser:bunuser /app/packages ./packages
 
 # Copy workspace configuration
-COPY package.json tsconfig.json ./
-COPY apps/yuzu/tsconfig.json ./apps/yuzu/
+COPY --chown=bunuser:bunuser package.json tsconfig.json ./
+COPY --chown=bunuser:bunuser apps/yuzu/tsconfig.json ./apps/yuzu/
 
 # Copy yuzu app source
-COPY apps/yuzu/ ./apps/yuzu/
-
-# Set proper ownership
-RUN chown -R bunuser:bunuser /app
+COPY --chown=bunuser:bunuser apps/yuzu/ ./apps/yuzu/
 
 # Switch to non-root user
 USER bunuser
+
+RUN cd packages/database && bunx prisma generate
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

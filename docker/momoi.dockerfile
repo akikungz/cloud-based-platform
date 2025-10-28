@@ -45,24 +45,23 @@ RUN addgroup --system --gid 1001 bunuser && \
     adduser --system --uid 1001 bunuser
 
 # Copy dependencies and workspace packages from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages ./packages
+COPY --from=deps --chown=bunuser:bunuser /app/node_modules ./node_modules
+COPY --from=deps --chown=bunuser:bunuser /app/packages ./packages
 
 # Copy workspace configuration
-COPY package.json tsconfig.json ./
-COPY apps/momoi/tsconfig.json ./apps/momoi/
+COPY --chown=bunuser:bunuser package.json tsconfig.json ./
+COPY --chown=bunuser:bunuser apps/momoi/tsconfig.json ./apps/momoi/
 
 # Copy momoi app source
-COPY apps/momoi/ ./apps/momoi/
-
-# Set proper ownership
-RUN chown -R bunuser:bunuser /app
+COPY --chown=bunuser:bunuser apps/momoi/ ./apps/momoi/
 
 # Switch to non-root user
 USER bunuser
 
 # Expose port
 EXPOSE 3001
+
+RUN cd packages/database && bunx prisma generate
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
