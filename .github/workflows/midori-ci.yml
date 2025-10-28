@@ -2,19 +2,19 @@ name: Midori CI Build and Push Docker Image
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [main, development]
     paths:
-      - 'apps/midori/**'
-      - 'docker/midori.dockerfile'
-      - '.github/**/*.yml'
-      - '.github/**/*.yaml'
+      - "apps/midori/**"
+      - "docker/midori.dockerfile"
+      - ".github/**/midori-*.yml"
+      - ".github/**/midori-*.yaml"
   pull_request:
-    branches: [ main, development ]
+    branches: [main, development]
     paths:
-      - 'apps/midori/**'
-      - 'docker/midori.dockerfile'
-      - '.github/**/*.yml'
-      - '.github/**/*.yaml'
+      - "apps/midori/**"
+      - "docker/midori.dockerfile"
+      - ".github/**/midori-*.yml"
+      - ".github/**/midori-*.yaml"
   workflow_dispatch:
 
 env:

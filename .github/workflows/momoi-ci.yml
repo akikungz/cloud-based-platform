@@ -6,16 +6,16 @@ on:
     paths:
       - "apps/momoi/**"
       - "docker/momoi.dockerfile"
-      - ".github/**/*.yml"
-      - ".github/**/*.yaml"
+      - ".github/**/momoi-*.yml"
+      - ".github/**/momoi-*.yaml"
       - "packages/database/**"
   pull_request:
     branches: [main, development]
     paths:
       - "apps/momoi/**"
       - "docker/momoi.dockerfile"
-      - ".github/**/*.yml"
-      - ".github/**/*.yaml"
+      - ".github/**/momoi-*.yml"
+      - ".github/**/momoi-*.yaml"
       - "packages/database/**"
   workflow_dispatch:
 

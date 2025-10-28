@@ -2,19 +2,19 @@ name: Yuzu CI Build and Push Docker Image
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [main, development]
     paths:
-      - 'apps/yuzu/**'
-      - 'docker/yuzu.dockerfile'
-      - '.github/**/*.yml'
-      - '.github/**/*.yaml'
+      - "apps/yuzu/**"
+      - "docker/yuzu.dockerfile"
+      - ".github/**/yuzu-*.yml"
+      - ".github/**/yuzu-*.yaml"
   pull_request:
-    branches: [ main, development ]
+    branches: [main, development]
     paths:
-      - 'apps/yuzu/**'
-      - 'docker/yuzu.dockerfile'
-      - '.github/**/*.yml'
-      - '.github/**/*.yaml'
+      - "apps/yuzu/**"
+      - "docker/yuzu.dockerfile"
+      - ".github/**/yuzu-*.yml"
+      - ".github/**/yuzu-*.yaml"
   workflow_dispatch:
 
 env:
