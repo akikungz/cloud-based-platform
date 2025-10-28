@@ -2,21 +2,21 @@ name: Momoi CI Build and Push Docker Image
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [main, development]
     paths:
-      - 'apps/momoi/**'
-      - 'docker/momoi.dockerfile'
-      - '.github/**/*.yml'
-      - '.github/**/*.yaml'
-      - 'packages/database/**'
+      - "apps/momoi/**"
+      - "docker/momoi.dockerfile"
+      - ".github/**/*.yml"
+      - ".github/**/*.yaml"
+      - "packages/database/**"
   pull_request:
-    branches: [ main, development ]
+    branches: [main, development]
     paths:
-      - 'apps/momoi/**'
-      - 'docker/momoi.dockerfile'
-      - '.github/**/*.yml'
-      - '.github/**/*.yaml'
-      - 'packages/database/**'
+      - "apps/momoi/**"
+      - "docker/momoi.dockerfile"
+      - ".github/**/*.yml"
+      - ".github/**/*.yaml"
+      - "packages/database/**"
   workflow_dispatch:
 
 env:
@@ -34,7 +34,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.2.23
 
       - name: Cache Bun downloads
         uses: actions/cache@v4
@@ -142,4 +142,3 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.build.outputs.digest }}
-  
