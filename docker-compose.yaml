@@ -78,76 +78,76 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
-  # # Frontend Next.js application
-  # midori:
-  #   build:
-  #     context: .
-  #     dockerfile: docker/midori.dockerfile
-  #   ports:
-  #     - "${MIDORI_PORT:-3000}:3000"
-  #   environment:
-  #     - NODE_ENV=production
-  #     - MOMOI_API_URL=http://momoi:3001
-  #     - NEXT_TELEMETRY_DISABLED=1
-  #     - OTEL_SDK_DISABLED=true
-  #     - TMPDIR=/tmp
-  #     - HOME=/app
-  #     - BUN_INSTALL_CACHE_DIR=/app/.bun
-  #     - BUN_CACHE_DIR=/app/.cache
-  #     - XDG_CACHE_HOME=/app/.cache
-  #     - XDG_DATA_HOME=/app/.local
-  #   depends_on:
-  #     - db
-  #     - momoi
-  #   volumes:
-  #     - ./apps/midori/public:/app/public
-  #   restart: unless-stopped
+  # Frontend Next.js application
+  midori:
+    build:
+      context: .
+      dockerfile: docker/midori.dockerfile
+    ports:
+      - "${MIDORI_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - MOMOI_API_URL=http://momoi:3001
+      - NEXT_TELEMETRY_DISABLED=1
+      - OTEL_SDK_DISABLED=true
+      - TMPDIR=/tmp
+      - HOME=/app
+      - BUN_INSTALL_CACHE_DIR=/app/.bun
+      - BUN_CACHE_DIR=/app/.cache
+      - XDG_CACHE_HOME=/app/.cache
+      - XDG_DATA_HOME=/app/.local
+    depends_on:
+      - db
+      - momoi
+    volumes:
+      - ./apps/midori/public:/app/public
+    restart: unless-stopped
 
-  # # Backend API service
-  # momoi:
-  #   build:
-  #     context: .
-  #     dockerfile: docker/momoi.dockerfile
-  #   ports:
-  #     - "${MOMOI_PORT:-3001}:3001"
-  #   env_file:
-  #     - ./apps/momoi/.env
-  #   environment:
-  #     - NODE_ENV=development
-  #     - DATABASE_URL=postgres://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-postgres}
-  #     - RABBITMQ_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@queue:5672
-  #     - API_URL=http://localhost:3001
-  #     - FRONTEND_BASE_URL=http://localhost:3000
-  #     - TRUSTED_ORIGINS=http://midori:3000,http://momoi:3001,http://localhost:3000
-  #     - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-your-secret-key-change-in-production}
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     queue:
-  #       condition: service_healthy
-  #   volumes:
-  #     - ./packages/database:/app/packages/database:ro
-  #   restart: unless-stopped
+  # Backend API service
+  momoi:
+    build:
+      context: .
+      dockerfile: docker/momoi.dockerfile
+    ports:
+      - "${MOMOI_PORT:-3001}:3001"
+    env_file:
+      - ./apps/momoi/.env
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-postgres}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@queue:5672
+      - API_URL=http://localhost:3001
+      - FRONTEND_BASE_URL=http://localhost:3000
+      - TRUSTED_ORIGINS=http://midori:3000,http://momoi:3001,http://localhost:3000
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-your-secret-key-change-in-production}
+    depends_on:
+      db:
+        condition: service_healthy
+      queue:
+        condition: service_healthy
+    volumes:
+      - ./packages/database:/app/packages/database:ro
+    restart: unless-stopped
 
-  # # Consumer service for message processing
-  # yuzu:
-  #   build:
-  #     context: .
-  #     dockerfile: docker/yuzu.dockerfile
-  #   env_file:
-  #     - ./apps/yuzu/.env
-  #   environment:
-  #     - NODE_ENV=production
-  #     - DATABASE_URL=postgres://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-postgres}
-  #     - RABBITMQ_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@queue:5672
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     queue:
-  #       condition: service_healthy
-  #   volumes:
-  #     - ./packages/database:/app/packages/database:ro
-  #   restart: unless-stopped
+  # Consumer service for message processing
+  yuzu:
+    build:
+      context: .
+      dockerfile: docker/yuzu.dockerfile
+    env_file:
+      - ./apps/yuzu/.env
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-postgres}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@queue:5672
+    depends_on:
+      db:
+        condition: service_healthy
+      queue:
+        condition: service_healthy
+    volumes:
+      - ./packages/database:/app/packages/database:ro
+    restart: unless-stopped
 
 volumes:
   db_data:

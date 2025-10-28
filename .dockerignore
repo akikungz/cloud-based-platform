@@ -317,3 +317,13 @@ scripts/local/
 
 # Prisma
 packages/database/generated
+
+# Avoid copying local deps/build artifacts into the image
+node_modules
+**/node_modules
+apps/*/node_modules
+packages/*/node_modules
+.turbo
+.next
+dist
+build
