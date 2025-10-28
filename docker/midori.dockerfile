@@ -1,5 +1,5 @@
 # Use the official Bun Debian image
-FROM oven/bun:1-debian AS base
+FROM oven/bun:1.2-debian AS base
 
 # Install system dependencies and Node.js
 RUN apt-get update && apt-get install -y \
@@ -119,4 +119,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node --version || exit 1
 
 # Start the application
-CMD ["npx", "next", "start"]
+WORKDIR /app/apps/midori
+CMD [ "bun", "run", "start" ]

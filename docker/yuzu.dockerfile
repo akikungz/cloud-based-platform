@@ -1,5 +1,5 @@
 # Use the official Bun Debian image
-FROM oven/bun:1-debian AS base
+FROM oven/bun:1.2-debian AS base
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -64,4 +64,6 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD bun --version || exit 1
 
 # Start the consumer service
-CMD ["bun", "run", "apps/yuzu/index.ts"]
+# CMD ["bun", "run", "apps/yuzu/index.ts"]
+WORKDIR /app/apps/yuzu
+CMD [ "bun", "run", "index.ts" ]

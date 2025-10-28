@@ -1,5 +1,5 @@
 # Use the official Bun Debian image
-FROM oven/bun:1-debian AS base
+FROM oven/bun:1.2-debian AS base
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -69,4 +69,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD bun --version || exit 1
 
 # Start the application
-CMD ["bun", "run", "apps/momoi/index.ts"]
+WORKDIR /app/apps/momoi
+CMD [ "bun", "run", "index.ts" ]
