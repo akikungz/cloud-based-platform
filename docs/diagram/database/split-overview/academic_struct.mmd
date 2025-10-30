@@ -1,0 +1,35 @@
+---
+config:
+  layout: elk
+  theme: neutral
+---
+erDiagram
+  staff_list {
+    Int id
+    String email
+    DateTime created_at
+    DateTime updated_at
+    DateTime deleted_at
+  }
+  semester {
+    Int id
+    String name
+    DateTime start_at
+    DateTime end_at
+    Boolean active
+    DateTime created_at
+    DateTime updated_at
+    DateTime deleted_at
+  }
+  instance_course {
+    Int id
+    String course_id
+    String course_title
+    Int main_staff
+    Int assistant_staff_1
+    Int assistant_staff_2
+    Int assistant_staff_3
+    DateTime created_at
+    DateTime updated_at
+    DateTime deleted_at
+  }

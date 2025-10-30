@@ -1,0 +1,52 @@
+---
+config:
+  layout: elk
+  theme: neutral
+---
+erDiagram
+  instance_request {
+    Int id
+    String title
+    String hostname
+    String description
+    instance_request_type type
+    Int cpus
+    Int memory
+    Int disk
+    request_state state
+    String reason
+    DateTime created_at
+    DateTime updated_at
+  }
+  instance_request_extends {
+    Int id
+    String title
+    String description
+    request_state state
+    String reason
+    DateTime created_at
+    DateTime updated_at
+  }
+  instance {
+    Int id
+    String title
+    String hostname
+  }
+  User {
+    String id
+    String name
+  }
+  instance_course {
+    Int id
+    String course_id
+  }
+  instance_template {
+    Int id
+    String os_name
+  }
+
+  instance_request o{--|| User : "user"
+  instance_request o{--|| instance_course : "course"
+  instance_request o{--|| instance_template : "template"
+  instance_request_extends o{--|| instance : "instance"
+  instance_request_extends o{--|o instance_request : "instance_request"
