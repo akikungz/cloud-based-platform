@@ -1,4 +1,18 @@
-.env.*
+# Environment Variables
 .env
-
+.env.*.local
+.env.local.*
+.env.production.local
+.env.development.local
+.env.*
 !.env.example
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Config files
+.config/

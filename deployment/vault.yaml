@@ -1,0 +1,214 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-config
+  namespace: fitm-cloud
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+data:
+  vault.hcl: |
+    storage "file" {
+      path = "/vault/data"
+    }
+
+    listener "tcp" {
+      address     = "0.0.0.0:8200"
+      tls_disable = 1
+    }
+    
+    ui = true
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-data
+  namespace: fitm-cloud
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-logs
+  namespace: fitm-cloud
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  namespace: fitm-cloud
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      serviceAccountName: vault-server
+      containers:
+        - name: vault
+          image: hashicorp/vault:1.15
+          env:
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"
+            - name: VAULT_API_ADDR
+              value: "http://vault:8200"
+            - name: VAULT_CLUSTER_ADDR
+              value: "https://vault:8201"
+          command:
+            - "vault"
+            - "server"
+            - "-config=/vault/config/vault.hcl"
+          ports:
+            - name: http
+              containerPort: 8200
+            - name: cluster
+              containerPort: 8201
+          volumeMounts:
+            - name: vault-data
+              mountPath: /vault/data
+            - name: vault-logs
+              mountPath: /vault/logs
+            - name: vault-config
+              mountPath: /vault/config
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
+          livenessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&uninitcode=204&sealedcode=204
+              port: 8200
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&uninitcode=204&sealedcode=204
+              port: 8200
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 5
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 250m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+      volumes:
+        - name: vault-data
+          persistentVolumeClaim:
+            claimName: vault-data
+        - name: vault-logs
+          persistentVolumeClaim:
+            claimName: vault-logs
+        - name: vault-config
+          configMap:
+            name: vault-config
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+  namespace: fitm-cloud
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+spec:
+  type: ClusterIP
+  selector:
+    app: vault
+  ports:
+    - name: http
+      port: 8200
+      targetPort: 8200
+      protocol: TCP
+    - name: cluster
+      port: 8201
+      targetPort: 8201
+      protocol: TCP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-server
+  namespace: fitm-cloud
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vault-token-review
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault-server
+    namespace: fitm-cloud
+---
