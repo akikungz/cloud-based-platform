@@ -1,0 +1,8 @@
+# ceph-csi-values.yaml
+namespace: kube-system
+csiConfig:
+  - clusterID: <YOUR_CEPH_FSID> # From 'ceph fsid'
+    monitors:
+      - "<YOUR_CEPH_MONITOR_IP_1>:6789"
+      - "<YOUR_CEPH_MONITOR_IP_2>:6789"
+      - "<YOUR_CEPH_MONITOR_IP_3>:6789"

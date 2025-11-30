@@ -13,7 +13,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: local-path
+  storageClassName: proxmox-ceph-rbd
   resources:
     requests:
       storage: 1Gi

@@ -13,7 +13,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: local-path
+  storageClassName: proxmox-ceph-rbd
   resources:
     requests:
       storage: 10Gi
@@ -33,7 +33,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: local-path
+  storageClassName: proxmox-ceph-rbd
   resources:
     requests:
       storage: 1Gi
@@ -207,3 +207,4 @@ spec:
       port: 5433
       targetPort: postgres-dev
 ---
+

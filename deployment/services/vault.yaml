@@ -20,7 +20,7 @@ data:
       address     = "0.0.0.0:8200"
       tls_disable = 1
     }
-    
+
     ui = true
 ---
 apiVersion: v1
@@ -38,7 +38,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: local-path
+  storageClassName: proxmox-ceph-rbd
   resources:
     requests:
       storage: 5Gi
@@ -58,7 +58,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: local-path
+  storageClassName: proxmox-ceph-rbd
   resources:
     requests:
       storage: 2Gi
@@ -212,3 +212,4 @@ subjects:
     name: vault-server
     namespace: fitm-cloud
 ---
+

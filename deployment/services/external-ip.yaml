@@ -155,3 +155,30 @@ spec:
       targetPort: 3000
       protocol: TCP
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-external
+  namespace: fitm-cloud
+  labels:
+    app.kubernetes.io/name: fitm-cloud
+    app.kubernetes.io/component: vault
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Prune=false
+spec:
+  type: LoadBalancer
+  selector:
+    app: vault
+  externalIPs:
+    - 10.20.30.21
+  ports:
+    - name: http
+      port: 8200
+      targetPort: 8200
+      protocol: TCP
+    - name: cluster
+      port: 8201
+      targetPort: 8201
+      protocol: TCP
