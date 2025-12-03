@@ -12,3 +12,7 @@
 [submodule "services/yuzu"]
 	path = services/yuzu
 	url = git@github.com:akikungz/yuzu.git
+
+[submodule "yuuka"]
+	path = services/yuuka
+	url = git@github.com:akikungz/yuuka.git

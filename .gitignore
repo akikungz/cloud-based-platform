@@ -16,3 +16,8 @@ logs/
 
 # Config files
 .config/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
