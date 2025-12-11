@@ -1,0 +1,2 @@
+# Ceph CSI Driver for Kubernetes
+This directory contains the necessary configuration files and instructions to deploy the Ceph CSI (Container Storage Interface) driver in a Kubernetes cluster. The Ceph CSI driver allows Kubernetes to interact with Ceph storage systems, enabling dynamic provisioning and management of persistent volumes.
